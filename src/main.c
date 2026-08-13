@@ -16,6 +16,7 @@
 #include "raylib.h"
 #include "raymath.h"
 #include "math.h"
+#include "stdio.h"
 
 //------------------------------------------------------------------------------------
 // Program main entry point
@@ -54,6 +55,57 @@ int checkRectCollision(Vector2 pos, int tileType, int tileSize, int tileMap[]) {
     return 0;
 }
 
+int checkPointCollision(Vector2 pos1, Vector2 pos2, int size2) {
+    if (pos1.x >= pos2.x && pos1.x <= pos2.x + size2 && pos1.y >= pos2.y && pos1.y <= pos2.y + size2) return 1;
+    return 0;
+}
+
+int checkCollision(Vector2 pos1, int size1, Vector2 pos2, int size2) {
+    if (pos1.y + size1 > pos2.y && pos1.x + size1 > pos2.x && pos1.x < pos2.x + size2 && pos1.y < pos2.y + size2) {
+        return 1;
+    }
+    return 0;
+}
+
+int checkCollision2(Vector2 pos1, int size1, Vector2 pos2, int size2) {
+    /*      2
+          _ _ _
+         |     |
+     1   |     |  3
+         |_ _ _|
+          
+            4
+    */
+    Vector2 leftTopCorner = {pos1.x, pos1.y};
+    Vector2 rightTopCorner = {pos1.x + size1, pos1.y};
+    Vector2 leftBottomCorner = {pos1.x, pos1.y + size1};
+    Vector2 rightBottomCorner = {pos1.x + size1, pos1.y + size1};
+
+    float xL = pos2.x + size2 - pos1.x;
+    float xR = pos1.x + size1 - pos2.x;
+    float yT = pos2.y + size2 - pos1.y;
+    float yB = pos1.y + size1 - pos2.y;
+
+    if (checkPointCollision(leftTopCorner, pos2, size2)) {
+        if (xL > yT) return 2;
+        return 1;
+    }
+    if (checkPointCollision(rightTopCorner, pos2, size2)) {
+        if (xR > yT) return 2;
+        return 3;
+    }
+    if (checkPointCollision(rightBottomCorner, pos2, size2)) {
+        if (xR > yB) return 4;
+        return 3;
+    }
+    if (checkPointCollision(leftBottomCorner, pos2, size2)) {
+        if (xL > yB) return 4;
+        return 1;
+    }
+
+    return 0;
+}
+
 int main(void)
 {
     const int scale = 2;
@@ -64,8 +116,25 @@ int main(void)
     Color colorMap[3] = {BLACK, ORANGE, RED};
     int lineColor = 0;
     int tileSize = 64;
+    // int tileMap[WIDTH_TILE_COUNT*HEIGHT_TILE_COUNT] = {
+    //     1,1,1,1,1,1,1,1,1,1,
+    //     1,0,0,1,1,0,0,0,0,1,
+    //     1,0,0,0,0,0,0,0,0,1,
+    //     1,0,0,0,0,0,0,0,0,1,
+    //     1,0,0,1,0,0,0,0,0,1,
+    //     1,0,0,0,0,0,0,1,1,1,
+    //     1,0,0,0,0,0,0,0,0,1,
+    //     1,0,0,0,0,0,0,0,0,1,
+    //     1,0,0,0,0,0,0,0,0,1,
+    //     1,1,1,0,0,0,0,0,0,1,
+    //     1,0,0,0,0,0,0,0,0,1,
+    //     1,0,0,0,0,0,0,0,0,1,
+    //     1,0,0,0,2,0,0,0,0,1,
+    //     1,0,0,0,0,0,0,0,0,1,
+    //     1,1,1,1,1,1,1,1,1,1
+    // };
     int tileMap[WIDTH_TILE_COUNT*HEIGHT_TILE_COUNT] = {
-        1,1,1,1,1,1,1,1,1,1,
+        1,0,0,0,0,0,0,0,0,1,
         1,0,0,1,1,0,0,0,0,1,
         1,0,0,0,0,0,0,0,0,1,
         1,0,0,0,0,0,0,0,0,1,
@@ -75,7 +144,7 @@ int main(void)
         1,0,0,0,0,0,0,0,0,1,
         1,0,0,0,0,0,0,0,0,1,
         1,1,1,0,0,0,0,0,0,1,
-        1,0,0,0,0,0,0,0,0,1,
+        1,0,0,0,0,3,0,0,0,1,
         1,0,0,0,0,0,0,0,0,1,
         1,0,0,0,2,0,0,0,0,1,
         1,0,0,0,0,0,0,0,0,1,
@@ -130,8 +199,10 @@ int main(void)
         if (!IsMouseButtonDown(0)) {
             if (isLeftMouseButtonPressed) {
                 Vector2 oldVelo = velo;
+
                 velo = Vector2Subtract(GetMousePosition(), startLinePos);
                 velo = Vector2Scale(velo, 5.0);
+
                 // velo = Vector2Add(oldVelo, velo);
                 //speed = Vector2Normalize(speed);
                 printf("realsed! (%f, %f) (%f, %f)\n", velo.x, velo.y, oldVelo.x, oldVelo.y);
@@ -167,6 +238,7 @@ int main(void)
         Vector2 oldVelo = velo;
         velo = Vector2Add(velo, accel);
         boxPosition = Vector2Add(boxPosition, Vector2Scale(Vector2Add(velo, Vector2Scale(accel, 0.5)), GetFrameTime())); 
+
         // printf("curr (%f, %f) last (%f, %f)\n\n", boxPosition.x, boxPosition.y, lastBoxPosition.x, lastBoxPosition.y);
         // Vec2Int lastLeftTopCorner = {lastBoxPosition.x/tileSize, lastBoxPosition.y/tileSize};
         // Vec2Int lastRightTopCorner = {(lastBoxPosition.x+tileSize)/tileSize, lastBoxPosition.y/tileSize};
@@ -178,19 +250,16 @@ int main(void)
         // Vec2Int leftBottomCorner = {boxPosition.x/tileSize, (boxPosition.y+tileSize)/tileSize};
         // Vec2Int rightBottomCorner = {(boxPosition.x+tileSize)/tileSize, (boxPosition.y+tileSize)/tileSize};
 
-        // 1. Define a tiny value to prevent the box from bleeding into adjacent tiles
-        float epsilon = 0.001f;
 
-        // 2. Apply epsilon ONLY to the right (x + tileSize) and bottom (y + tileSize) calculations
         Vec2Int lastLeftTopCorner = {lastBoxPosition.x/tileSize, lastBoxPosition.y/tileSize};
-        Vec2Int lastRightTopCorner = {(lastBoxPosition.x+tileSize-epsilon)/tileSize, lastBoxPosition.y/tileSize};
-        Vec2Int lastLeftBottomCorner = {lastBoxPosition.x/tileSize, (lastBoxPosition.y+tileSize-epsilon)/tileSize};
-        Vec2Int lastRightBottomCorner = {(lastBoxPosition.x+tileSize-epsilon)/tileSize, (lastBoxPosition.y+tileSize-epsilon)/tileSize};
+        Vec2Int lastRightTopCorner = {(lastBoxPosition.x+tileSize)/tileSize, lastBoxPosition.y/tileSize};
+        Vec2Int lastLeftBottomCorner = {lastBoxPosition.x/tileSize, (lastBoxPosition.y+tileSize)/tileSize};
+        Vec2Int lastRightBottomCorner = {(lastBoxPosition.x+tileSize)/tileSize, (lastBoxPosition.y+tileSize)/tileSize};
 
         Vec2Int leftTopCorner = {boxPosition.x/tileSize, boxPosition.y/tileSize};
-        Vec2Int rightTopCorner = {(boxPosition.x+tileSize-epsilon)/tileSize, boxPosition.y/tileSize};
-        Vec2Int leftBottomCorner = {boxPosition.x/tileSize, (boxPosition.y+tileSize-epsilon)/tileSize};
-        Vec2Int rightBottomCorner = {(boxPosition.x+tileSize-epsilon)/tileSize, (boxPosition.y+tileSize-epsilon)/tileSize};
+        Vec2Int rightTopCorner = {(boxPosition.x+tileSize)/tileSize, boxPosition.y/tileSize};
+        Vec2Int leftBottomCorner = {boxPosition.x/tileSize, (boxPosition.y+tileSize)/tileSize};
+        Vec2Int rightBottomCorner = {(boxPosition.x+tileSize)/tileSize, (boxPosition.y+tileSize)/tileSize};
 
         // printf("curr (%f, %f)(%f, %f) \n", boxPosition.x, boxPosition.y, lastBoxPosition.x, lastBoxPosition.y);
         // printf("curr (%i, %i)(%i, %i) \n", leftTopCorner.x, leftTopCorner.y, lastLeftTopCorner.x, lastLeftTopCorner.y);
@@ -215,20 +284,58 @@ int main(void)
         int topSideRightCollision = rightBottomCollision && !rightBottomEqualsLast; 
         int rightSideBottomCollision = rightBottomCollision && rightBottomEqualsLast; 
 
-        if (leftTopCollision || leftBottomCollision || rightBottomCollision || rightTopCollision) {
-            Vector2 dir = Vector2Normalize((Vector2){boxPosition.x-lastBoxPosition.x, boxPosition.y - lastBoxPosition.y});
-            Vector2 lastStep = lastBoxPosition;
-            Vector2 newPos = lastStep;
-            while(checkRectCollision(newPos, 1, tileSize, tileMap) == 0) {
-                lastStep = newPos;
-                newPos = Vector2Add(lastStep, Vector2Scale(dir, 0.1));
-                // printf("step\n");
-            }
+        // if (leftTopCollision || leftBottomCollision || rightBottomCollision || rightTopCollision) {
+        //     Vector2 dir = Vector2Normalize((Vector2){boxPosition.x-lastBoxPosition.x, boxPosition.y - lastBoxPosition.y});
+        //     Vector2 lastStep = lastBoxPosition;
+        //     Vector2 newPos = lastStep;
+        //     while(checkRectCollision(newPos, 1, tileSize, tileMap) == 0) {
+        //         lastStep = newPos;
+        //         newPos = Vector2Add(lastStep, Vector2Scale(dir, 0.01));
+        //         // printf("step\n");
+        //     }
 
-            boxPosition = lastStep;
-            printf("(%f, %f) (%f, %f)\n", lastStep.x, lastStep.y, lastBoxPosition.x, lastBoxPosition.y);
-            velo = (Vector2) {0,0};
+        //     boxPosition = lastStep;
+        //     printf("(%f, %f) (%f, %f) (%f, %f)\n", lastStep.x, lastStep.y, lastBoxPosition.x, lastBoxPosition.y, newPos.x, newPos.y);
+        //     velo = (Vector2) {0,0};
+        // }
+        
+        int colType = 0;
+        Color tempColor = YELLOW;
+        for(int i=0; i<HEIGHT_TILE_COUNT; i++) {
+            for(int j=0; j<WIDTH_TILE_COUNT; j++) {
+                int tileIndex = i*WIDTH_TILE_COUNT + j;
+                int xPos = j*tileSize;
+                int yPos = i*tileSize;
+                
+                if (tileMap[tileIndex] == 3 && checkPointCollision(GetMousePosition(), (Vector2){xPos, yPos}, tileSize)) tempColor = ORANGE;
+
+                if (tileMap[tileIndex] == 1) {
+                    int currColType = checkCollision2(boxPosition, tileSize, (Vector2){xPos, yPos}, tileSize);
+                    if (currColType == 0) continue;
+                    colType = currColType;
+
+                    Vector2 dir = Vector2Normalize((Vector2){boxPosition.x-lastBoxPosition.x, boxPosition.y - lastBoxPosition.y});
+                    Vector2 lastStep = lastBoxPosition;
+                    Vector2 newPos = lastStep;
+                    // while(checkRectCollision(newPos, 1, tileSize, tileMap) == 0) {
+                    while(checkCollision2(newPos, tileSize, (Vector2){xPos, yPos}, tileSize) == 0) {
+                        lastStep = newPos;
+                        newPos = Vector2Add(lastStep, Vector2Scale(dir, 0.01));
+                        // printf("step\n");
+                    }
+                    boxPosition = lastStep;
+                    // printf("(%f, %f) (%f, %f) (%f, %f)\n", lastStep.x, lastStep.y, lastBoxPosition.x, lastBoxPosition.y, newPos.x, newPos.y);
+                    // printf("colType: %i\n", colType);
+                    //velo = (Vector2) {0,0};
+                    if (colType == 1) velo = (Vector2) {-0.5*velo.x,velo.y};
+                    if (colType == 2) velo = (Vector2) {0.5*velo.x,-0.5*velo.y};
+                    if (colType == 3) velo = (Vector2) {-0.5*velo.x,velo.y};
+                    if (colType == 4) velo = (Vector2) {0.9*velo.x,0};
+                    
+                }
+            }
         }
+        
         // if (leftSideBottomCollision || leftSideTopCollision) {
         //      printf("LEFT SIDE!\n");
         //     boxPosition.x = rightTopCorner.x*tileSize+1;
@@ -313,19 +420,41 @@ int main(void)
                     Color tileColor = WHITE;
 
                     if (tileMap[tileIndex] == 1) tileColor = BLUE;
+                    if (tileMap[tileIndex] == 3) tileColor= tempColor;
 
                     DrawRectangle(xPos, yPos, tileSize, tileSize, tileColor);
+                    char msg1[64];
+                    snprintf(msg1, sizeof(msg1), "%i, %i", j, i);
+                    char msg2[64];
+                    snprintf(msg2, sizeof(msg2), "%i, %i", xPos, yPos);
+                    // DrawLineEx((Vector2) {xPos, yPos}, (Vector2) {xPos + tileSize, yPos}, 1, GRAY);
+                    // DrawLineEx((Vector2) {xPos, yPos}, (Vector2) {xPos, yPos + tileSize}, 1, GRAY);
+                    // DrawLineEx((Vector2) {xPos+tileSize, yPos}, (Vector2) {xPos + tileSize, yPos + tileSize}, 1, GRAY);
+                    // DrawLineEx((Vector2) {xPos, yPos+tileSize}, (Vector2) {xPos + tileSize, yPos+ tileSize}, 1, GRAY);
+                    // DrawText(msg1, xPos, yPos, 5, BLACK);
+                    // DrawText(msg2, xPos, yPos+10, 5, BLACK);
                 }
             }
 
+            char msg1[64];
+            snprintf(msg1, sizeof(msg1), "%i, %i", (int) boxPosition.x/tileSize, (int) boxPosition.y/tileSize);
+            char msg2[64];
+            snprintf(msg2, sizeof(msg2), "%.2f\n%.2f", boxPosition.x, boxPosition.y);
             DrawRectangle(boxPosition.x, boxPosition.y, tileSize, tileSize, MAROON);
+            // if (colType == 1) DrawLineEx((Vector2) {boxPosition.x, boxPosition.y}, (Vector2) {boxPosition.x, boxPosition.y + tileSize}, 6, ORANGE);
+            // if (colType == 2) DrawLineEx((Vector2) {boxPosition.x, boxPosition.y}, (Vector2) {boxPosition.x+tileSize, boxPosition.y}, 6, ORANGE);
+            // if (colType == 3) DrawLineEx((Vector2) {boxPosition.x+tileSize, boxPosition.y}, (Vector2) {boxPosition.x+tileSize, boxPosition.y+tileSize}, 6, ORANGE);
+            // if (colType == 4) DrawLineEx((Vector2) {boxPosition.x, boxPosition.y+tileSize}, (Vector2) {boxPosition.x+tileSize, boxPosition.y+tileSize}, 6, ORANGE);
+            // printf("HUUUJ %i\n", colType);
+            // DrawText(msg1, boxPosition.x, boxPosition.y, 18, BLACK);
+            // DrawText(msg2, boxPosition.x, boxPosition.y+20, 18, BLACK);
             if (isLeftMouseButtonPressed) {
                 DrawLineEx(startLinePos, GetMousePosition(), 3*(lineColor+1), colorMap[lineColor]);
             }
 
 
             DrawText("Use mouse wheel to move the cube up and down!", 10, 10, 20, GRAY);
-            DrawText(TextFormat("friction: %f", friction), 10, 40, 20, LIGHTGRAY);
+            DrawText(TextFormat("friction: %f.2f", friction), 10, 40, 20, LIGHTGRAY);
 
         EndDrawing();
         //----------------------------------------------------------------------------------
