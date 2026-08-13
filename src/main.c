@@ -29,6 +29,7 @@ struct _Vec2Int {
     int y;
 } typedef Vec2Int;
 
+
 int checkTileCollision(Vec2Int pos, int tileType, int tileMap[] ) {
     if (pos.x >= WIDTH_TILE_COUNT || pos.x < 0 || pos.y >= HEIGHT_TILE_COUNT || pos.y < 0) {
         printf("COLLSION POSITION OUT OF BOUNDS!\n");
@@ -172,6 +173,7 @@ int main(void)
         }
     }
     int scrollSpeed = 4;            // Scrolling speed in pixels
+    int onGround = 0;
 
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
@@ -198,14 +200,11 @@ int main(void)
 
         if (!IsMouseButtonDown(0)) {
             if (isLeftMouseButtonPressed) {
-                Vector2 oldVelo = velo;
-
-                velo = Vector2Subtract(GetMousePosition(), startLinePos);
-                velo = Vector2Scale(velo, 5.0);
-
-                // velo = Vector2Add(oldVelo, velo);
-                //speed = Vector2Normalize(speed);
-                printf("realsed! (%f, %f) (%f, %f)\n", velo.x, velo.y, oldVelo.x, oldVelo.y);
+                if (onGround) {
+                    velo = Vector2Subtract(GetMousePosition(), startLinePos);
+                    velo = Vector2Scale(velo, 5.0);
+                    printf("realsed! (%f, %f)\n", velo.x, velo.y);
+                }
             }
             isLeftMouseButtonPressed = false;
         }
@@ -221,25 +220,60 @@ int main(void)
 
         // boxPosition = GetMousePosition();
 
-        // Vector2 deltaSpeed = {speed.x * GetFrameTime(), speed.y * GetFrameTime()};
+        if (onGround) velo.x = 0.8*velo.x;
+        if (abs(velo.x) < 0.1) velo.x = 0;
 
-        // boxPosition = Vector2Add(boxPosition, deltaSpeed);
-        // boxPosition.y += (gravity/5.0)*GetFrameTime();
-        // if (boxPosition.y > screenHeight - 100) boxPosition.y = screenHeight - 100;
 
-        // float speedLength = Vector2Length(speed);
-        // if (!FloatEquals(speedLength, 0.0)) {
-        //     float newSpeedLength = fmax(speedLength - gravity*GetFrameTime(), 0);
-        //     speed = Vector2Scale(speed, newSpeedLength / speedLength);
-        // }
-        
-        // speed.x -= velo.x * friction;
-
-        Vector2 oldVelo = velo;
         velo = Vector2Add(velo, accel);
-        boxPosition = Vector2Add(boxPosition, Vector2Scale(Vector2Add(velo, Vector2Scale(accel, 0.5)), GetFrameTime())); 
+        Vector2 newBoxPosition = Vector2Add(boxPosition, Vector2Scale(Vector2Add(velo, Vector2Scale(accel, 0.5)), GetFrameTime())); 
 
-        // printf("curr (%f, %f) last (%f, %f)\n\n", boxPosition.x, boxPosition.y, lastBoxPosition.x, lastBoxPosition.y);
+        Vector2 bP = {boxPosition.x/tileSize, boxPosition.y/tileSize};
+        Vector2 nBP = {newBoxPosition.x/tileSize, newBoxPosition.y/tileSize};
+
+        if (velo.x <= 0) { //left
+            if (checkTileCollision((Vec2Int){nBP.x, bP.y}, 1, tileMap) ||
+                checkTileCollision((Vec2Int){nBP.x, bP.y + 0.9}, 1, tileMap)) {
+               nBP.x = (int)nBP.x + 1;
+               newBoxPosition.x = nBP.x * tileSize; 
+            //    velo.x = 0;
+               velo.x = -0.5*velo.x;
+            }
+        }
+        else {  //right
+            if (checkTileCollision((Vec2Int){nBP.x + 1.0, bP.y}, 1, tileMap) ||
+                checkTileCollision((Vec2Int){nBP.x + 1.0, bP.y + 0.9}, 1, tileMap)) {
+               nBP.x = (int)nBP.x;
+               newBoxPosition.x = nBP.x * tileSize; 
+            //    velo.x = 0;
+               velo.x = -0.7*velo.x;
+            }
+        }
+
+        onGround = 0;
+        if (velo.y <= 0) { //up
+            if (checkTileCollision((Vec2Int){nBP.x, nBP.y}, 1, tileMap) ||
+                checkTileCollision((Vec2Int){nBP.x+0.9, nBP.y}, 1, tileMap)) {
+               nBP.y = (int)nBP.y + 1;
+               newBoxPosition.y = nBP.y * tileSize; 
+               velo.y = 0;
+            }
+        }
+        else { //down
+            if (checkTileCollision((Vec2Int){nBP.x, nBP.y + 1.0}, 1, tileMap) ||
+                checkTileCollision((Vec2Int){nBP.x + 0.9, nBP.y + 1.0}, 1, tileMap)) {
+               nBP.y = (int)nBP.y;
+               newBoxPosition.y = nBP.y * tileSize; 
+               velo.y = 0;
+            //    velo.x = 0;
+               onGround = 1;
+            }
+        }
+
+
+
+
+        boxPosition = newBoxPosition;
+
         // Vec2Int lastLeftTopCorner = {lastBoxPosition.x/tileSize, lastBoxPosition.y/tileSize};
         // Vec2Int lastRightTopCorner = {(lastBoxPosition.x+tileSize)/tileSize, lastBoxPosition.y/tileSize};
         // Vec2Int lastLeftBottomCorner = {lastBoxPosition.x/tileSize, (lastBoxPosition.y+tileSize)/tileSize};
@@ -251,160 +285,68 @@ int main(void)
         // Vec2Int rightBottomCorner = {(boxPosition.x+tileSize)/tileSize, (boxPosition.y+tileSize)/tileSize};
 
 
-        Vec2Int lastLeftTopCorner = {lastBoxPosition.x/tileSize, lastBoxPosition.y/tileSize};
-        Vec2Int lastRightTopCorner = {(lastBoxPosition.x+tileSize)/tileSize, lastBoxPosition.y/tileSize};
-        Vec2Int lastLeftBottomCorner = {lastBoxPosition.x/tileSize, (lastBoxPosition.y+tileSize)/tileSize};
-        Vec2Int lastRightBottomCorner = {(lastBoxPosition.x+tileSize)/tileSize, (lastBoxPosition.y+tileSize)/tileSize};
+        // int leftTopCollision = checkTileCollision(leftTopCorner, 1, tileMap);
+        // int leftTopEqualsLast = lastLeftTopCorner.y == leftTopCorner.y;
+        // int bottomSideLeftCollision = leftTopCollision && !leftTopEqualsLast; 
+        // int leftSideTopCollision = leftTopCollision && leftTopEqualsLast;
 
-        Vec2Int leftTopCorner = {boxPosition.x/tileSize, boxPosition.y/tileSize};
-        Vec2Int rightTopCorner = {(boxPosition.x+tileSize)/tileSize, boxPosition.y/tileSize};
-        Vec2Int leftBottomCorner = {boxPosition.x/tileSize, (boxPosition.y+tileSize)/tileSize};
-        Vec2Int rightBottomCorner = {(boxPosition.x+tileSize)/tileSize, (boxPosition.y+tileSize)/tileSize};
+        // int leftBottomCollision = checkTileCollision(leftBottomCorner, 1, tileMap);
+        // int leftBottomEqualsLast = lastLeftBottomCorner.y == leftBottomCorner.y;
+        // int topSideLeftCollision = leftBottomCollision && !leftBottomEqualsLast;
+        // int leftSideBottomCollision = leftBottomCollision && leftBottomEqualsLast;
 
-        // printf("curr (%f, %f)(%f, %f) \n", boxPosition.x, boxPosition.y, lastBoxPosition.x, lastBoxPosition.y);
-        // printf("curr (%i, %i)(%i, %i) \n", leftTopCorner.x, leftTopCorner.y, lastLeftTopCorner.x, lastLeftTopCorner.y);
+        // int rightTopCollision = checkTileCollision(rightTopCorner, 1, tileMap);
+        // int rightTopEqualsLast = lastRightTopCorner.y == rightTopCorner.y;
+        // int bottomSideRightCollision = rightTopCollision && !rightTopEqualsLast;
+        // int rightSideTopCollision = rightTopCollision && rightTopEqualsLast;
 
-        int leftTopCollision = checkTileCollision(leftTopCorner, 1, tileMap);
-        int leftTopEqualsLast = lastLeftTopCorner.y == leftTopCorner.y;
-        int bottomSideLeftCollision = leftTopCollision && !leftTopEqualsLast; 
-        int leftSideTopCollision = leftTopCollision && leftTopEqualsLast;
+        // int rightBottomCollision = checkTileCollision(rightBottomCorner, 1, tileMap);
+        // int rightBottomEqualsLast = lastRightBottomCorner.y == rightBottomCorner.y;
+        // int topSideRightCollision = rightBottomCollision && !rightBottomEqualsLast; 
+        // int rightSideBottomCollision = rightBottomCollision && rightBottomEqualsLast; 
 
-        int leftBottomCollision = checkTileCollision(leftBottomCorner, 1, tileMap);
-        int leftBottomEqualsLast = lastLeftBottomCorner.y == leftBottomCorner.y;
-        int topSideLeftCollision = leftBottomCollision && !leftBottomEqualsLast;
-        int leftSideBottomCollision = leftBottomCollision && leftBottomEqualsLast;
-
-        int rightTopCollision = checkTileCollision(rightTopCorner, 1, tileMap);
-        int rightTopEqualsLast = lastRightTopCorner.y == rightTopCorner.y;
-        int bottomSideRightCollision = rightTopCollision && !rightTopEqualsLast;
-        int rightSideTopCollision = rightTopCollision && rightTopEqualsLast;
-
-        int rightBottomCollision = checkTileCollision(rightBottomCorner, 1, tileMap);
-        int rightBottomEqualsLast = lastRightBottomCorner.y == rightBottomCorner.y;
-        int topSideRightCollision = rightBottomCollision && !rightBottomEqualsLast; 
-        int rightSideBottomCollision = rightBottomCollision && rightBottomEqualsLast; 
-
-        // if (leftTopCollision || leftBottomCollision || rightBottomCollision || rightTopCollision) {
-        //     Vector2 dir = Vector2Normalize((Vector2){boxPosition.x-lastBoxPosition.x, boxPosition.y - lastBoxPosition.y});
-        //     Vector2 lastStep = lastBoxPosition;
-        //     Vector2 newPos = lastStep;
-        //     while(checkRectCollision(newPos, 1, tileSize, tileMap) == 0) {
-        //         lastStep = newPos;
-        //         newPos = Vector2Add(lastStep, Vector2Scale(dir, 0.01));
-        //         // printf("step\n");
-        //     }
-
-        //     boxPosition = lastStep;
-        //     printf("(%f, %f) (%f, %f) (%f, %f)\n", lastStep.x, lastStep.y, lastBoxPosition.x, lastBoxPosition.y, newPos.x, newPos.y);
-        //     velo = (Vector2) {0,0};
-        // }
         
-        int colType = 0;
-        Color tempColor = YELLOW;
-        for(int i=0; i<HEIGHT_TILE_COUNT; i++) {
-            for(int j=0; j<WIDTH_TILE_COUNT; j++) {
-                int tileIndex = i*WIDTH_TILE_COUNT + j;
-                int xPos = j*tileSize;
-                int yPos = i*tileSize;
+        // int colType = 0;
+        // Color tempColor = YELLOW;
+        // for(int i=0; i<HEIGHT_TILE_COUNT; i++) {
+        //     for(int j=0; j<WIDTH_TILE_COUNT; j++) {
+        //         int tileIndex = i*WIDTH_TILE_COUNT + j;
+        //         int xPos = j*tileSize;
+        //         int yPos = i*tileSize;
                 
-                if (tileMap[tileIndex] == 3 && checkPointCollision(GetMousePosition(), (Vector2){xPos, yPos}, tileSize)) tempColor = ORANGE;
+        //         if (tileMap[tileIndex] == 3 && checkPointCollision(GetMousePosition(), (Vector2){xPos, yPos}, tileSize)) tempColor = ORANGE;
 
-                if (tileMap[tileIndex] == 1) {
-                    int currColType = checkCollision2(boxPosition, tileSize, (Vector2){xPos, yPos}, tileSize);
-                    if (currColType == 0) continue;
-                    colType = currColType;
+        //         if (tileMap[tileIndex] == 1) {
+        //             int currColType = checkCollision2(boxPosition, tileSize, (Vector2){xPos, yPos}, tileSize);
+        //             if (currColType == 0) continue;
+        //             colType = currColType;
 
-                    Vector2 dir = Vector2Normalize((Vector2){boxPosition.x-lastBoxPosition.x, boxPosition.y - lastBoxPosition.y});
-                    Vector2 lastStep = lastBoxPosition;
-                    Vector2 newPos = lastStep;
-                    // while(checkRectCollision(newPos, 1, tileSize, tileMap) == 0) {
-                    while(checkCollision2(newPos, tileSize, (Vector2){xPos, yPos}, tileSize) == 0) {
-                        lastStep = newPos;
-                        newPos = Vector2Add(lastStep, Vector2Scale(dir, 0.01));
-                        // printf("step\n");
-                    }
-                    boxPosition = lastStep;
-                    // printf("(%f, %f) (%f, %f) (%f, %f)\n", lastStep.x, lastStep.y, lastBoxPosition.x, lastBoxPosition.y, newPos.x, newPos.y);
-                    // printf("colType: %i\n", colType);
-                    //velo = (Vector2) {0,0};
-                    if (colType == 1) velo = (Vector2) {-0.5*velo.x,velo.y};
-                    if (colType == 2) velo = (Vector2) {0.5*velo.x,-0.5*velo.y};
-                    if (colType == 3) velo = (Vector2) {-0.5*velo.x,velo.y};
-                    if (colType == 4) velo = (Vector2) {0.9*velo.x,0};
+        //             Vector2 dir = Vector2Normalize((Vector2){boxPosition.x-lastBoxPosition.x, boxPosition.y - lastBoxPosition.y});
+        //             Vector2 lastStep = lastBoxPosition;
+        //             Vector2 newPos = lastStep;
+        //             // while(checkRectCollision(newPos, 1, tileSize, tileMap) == 0) {
+        //             while(checkCollision2(newPos, tileSize, (Vector2){xPos, yPos}, tileSize) == 0) {
+        //                 lastStep = newPos;
+        //                 newPos = Vector2Add(lastStep, Vector2Scale(dir, 0.01));
+        //                 // printf("step\n");
+        //             }
+        //             boxPosition = lastStep;
+        //             // printf("(%f, %f) (%f, %f) (%f, %f)\n", lastStep.x, lastStep.y, lastBoxPosition.x, lastBoxPosition.y, newPos.x, newPos.y);
+        //             // printf("colType: %i\n", colType);
+        //             //velo = (Vector2) {0,0};
+        //             if (colType == 1) velo = (Vector2) {-0.5*velo.x,velo.y};
+        //             if (colType == 2) velo = (Vector2) {0.5*velo.x,-0.5*velo.y};
+        //             if (colType == 3) velo = (Vector2) {-0.5*velo.x,velo.y};
+        //             if (colType == 4) velo = (Vector2) {0.9*velo.x,0};
                     
-                }
-            }
-        }
-        
-        // if (leftSideBottomCollision || leftSideTopCollision) {
-        //      printf("LEFT SIDE!\n");
-        //     boxPosition.x = rightTopCorner.x*tileSize+1;
-        // }
-
-        // if (rightSideBottomCollision || rightSideTopCollision) {
-        //     // printf("RIGHT SIDE!\n");
-        //     boxPosition.x = leftTopCorner.x*tileSize-0.001;
-        //     velo = (Vector2) {-0.5*velo.x, velo.y};
-        //     if (abs(0 - velo.y) < 50.0) velo.y = 0;
-        // }
-
-
-        // if (bottomSideLeftCollision || bottomSideRightCollision) {
-        //     boxPosition.y = leftBottomCorner.y*tileSize+0.001;
-        //     // printf("BOTTOM SIDE!\n");
-        //     velo = (Vector2) {velo.x*friction, 0};
-        //     if (abs(0 - velo.x) < 50.0) velo.x = 0;
-        // }
-
-        // if (topSideLeftCollision || topSideRightCollision) {
-        //     boxPosition.y = leftTopCorner.y*tileSize-0.001;
-        //     // printf("TOP SIDE!\n");
-        //     velo = (Vector2) {velo.x*friction, 0};
-        //     if (abs(0 - velo.x) < 50.0) velo.x = 0;
-        // }
-
-
-        // if (checkTileCollision(leftBottomCorner, 1, tileMap) || checkTileCollision(rightBottomCorner, 1, tileMap)){ 
-        //     boxPosition.y = leftTopCorner.y*tileSize;
-        //     velo = (Vector2) {velo.x*friction, 0};
-        //     if (abs(0 - velo.x) < 50.0) velo.x = 0;
-        // }
-
-        // if (checkTileCollision(leftTopCorner, 1, tileMap) || checkTileCollision(rightTopCorner, 1, tileMap)){ 
-        //     boxPosition.y = leftBottomCorner.y*tileSize;
-        //     velo = (Vector2) {velo.x*friction, 0};
-        //     if (abs(0 - velo.x) < 50.0) velo.x = 0;
+        //         }
+        //     }
         // }
         
-        // if (checkTileCollision(leftBottomCorner, 1, tileMap) || checkTileCollision(leftTopCorner, 1, tileMap)){ 
-        //     boxPosition.x = rightTopCorner.x*tileSize;
-        //     velo = (Vector2) {velo.x*friction, 0};
-        //     if (abs(0 - velo.x) < 50.0) velo.x = 0;
-        // }
-
-        // if (checkTileCollision(rightTopCorner, 1, tileMap) || checkTileCollision(rightBottomCorner, 1, tileMap)){ 
-        //     boxPosition.x = leftBottomCorner.x*tileSize;
-        //     velo = (Vector2) {velo.x*friction, 0};
-        //     if (abs(0 - velo.x) < 50.0) velo.x = 0;
-        // }
-        
-        
-        // int offset = 30;
-        // if (boxPosition.y > screenHeight - offset) {
-        //     boxPosition.y = screenHeight - offset;
-        //     velo = (Vector2) {velo.x*friction, -1*(velo.y*0.8)};
-        //     if (abs(0 - velo.x) < 50.0) velo.x = 0;
-        // }
-
-        //printf("%i, %i\n", leftCorner.x, leftCorner.y);
-
 
         lastBoxPosition = boxPosition;
-        // printf("velo: (%f, %f) (%f, %f)\n", velo.x, velo.y, oldVelo.x, oldVelo.y);
-        // printf("mouse: (%f, %f)\n", GetMousePosition().x, GetMousePosition().y);
 
         //----------------------------------------------------------------------------------
-
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
@@ -420,7 +362,7 @@ int main(void)
                     Color tileColor = WHITE;
 
                     if (tileMap[tileIndex] == 1) tileColor = BLUE;
-                    if (tileMap[tileIndex] == 3) tileColor= tempColor;
+                    if (tileMap[tileIndex] == 3) tileColor= ORANGE;
 
                     DrawRectangle(xPos, yPos, tileSize, tileSize, tileColor);
                     char msg1[64];
