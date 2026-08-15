@@ -109,7 +109,7 @@ int checkCollision2(Vector2 pos1, int size1, Vector2 pos2, int size2) {
     return 0;
 }
 
-int main(void)
+int old_main(void)
 {
     const int scale = 2;
     // Initialization

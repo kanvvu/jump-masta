@@ -1,0 +1,62 @@
+#include "tileMap.hpp"
+#include <iostream>
+#include "raylib.h"
+
+TileMap::TileMap(int widthCount, int heightCount)
+: m_widthCount(widthCount),
+  m_heightCount(heightCount)
+{
+
+    std::vector<int> map1 
+    {
+        1,0,0,0,0,0,0,0,0,1,
+        1,0,0,1,1,0,0,0,0,1,
+        1,0,0,0,0,0,0,0,0,1,
+        1,0,0,0,0,0,0,0,0,1,
+        1,0,0,1,0,0,0,0,0,1,
+        1,0,0,0,0,0,0,1,1,1,
+        1,0,0,0,0,0,0,0,0,1,
+        1,0,0,0,0,0,0,0,0,1,
+        1,0,0,0,0,0,0,0,0,1,
+        1,1,1,1,0,0,1,1,1,1,
+        1,0,0,0,0,0,0,0,0,1,
+        1,0,0,0,0,0,0,0,0,1,
+        1,0,0,0,2,0,0,0,0,1,
+        1,0,0,0,0,0,0,0,0,1,
+        1,1,1,1,1,1,1,1,1,1
+    };
+
+    if (map1.size() == widthCount*heightCount)
+        tileMaps.push_back(map1);
+    else
+        std::cout<<"tileMap: invalid map size\n";
+
+}
+
+void TileMap::draw()
+{
+    for(int i=0; i<m_heightCount; i++) {
+        for(int j=0; j<m_widthCount; j++) {
+            int tileIndex = i*m_widthCount+ j;
+            int xPos = j*m_tileSize;
+            int yPos = i*m_tileSize;
+            Color tileColor = WHITE;
+
+            std::vector<int>& tileMap = tileMaps[currentTileMapIndex];
+            if (tileMap[tileIndex] == 1) tileColor = BLUE;
+            if (tileMap[tileIndex] == 3) tileColor= ORANGE;
+
+            DrawRectangle(xPos, yPos, m_tileSize, m_tileSize, tileColor);
+            char msg1[64];
+            snprintf(msg1, sizeof(msg1), "%i, %i", j, i);
+            char msg2[64];
+            snprintf(msg2, sizeof(msg2), "%i, %i", xPos, yPos);
+            // DrawLineEx((Vector2) {xPos, yPos}, (Vector2) {xPos + tileSize, yPos}, 1, GRAY);
+            // DrawLineEx((Vector2) {xPos, yPos}, (Vector2) {xPos, yPos + tileSize}, 1, GRAY);
+            // DrawLineEx((Vector2) {xPos+tileSize, yPos}, (Vector2) {xPos + tileSize, yPos + tileSize}, 1, GRAY);
+            // DrawLineEx((Vector2) {xPos, yPos+tileSize}, (Vector2) {xPos + tileSize, yPos+ tileSize}, 1, GRAY);
+            // DrawText(msg1, xPos, yPos, 5, BLACK);
+            // DrawText(msg2, xPos, yPos+10, 5, BLACK);
+        }
+    }
+}
