@@ -2,10 +2,12 @@
 #include "raymath.h"
 #include <iostream>
 #include <algorithm>
+#include <string>
 
 Player::Player() :
     m_tileSize(32),
     m_position({0, 0}),
+    m_previousPosition({0,0}),
     m_velocity({0, 0}),
     m_direction({0, 0})
 {
@@ -14,6 +16,7 @@ Player::Player() :
 Player::Player(int tileSize, Vector2 position) :
     m_tileSize(tileSize),
     m_position(position),
+    m_previousPosition(position),
     m_velocity({0, 0}),
     m_direction({0, 0})
 {
@@ -22,6 +25,8 @@ Player::Player(int tileSize, Vector2 position) :
 void Player::draw()
 {
     DrawRectangle(m_position.x*m_tileSize, m_position.y*m_tileSize, m_tileSize, m_tileSize, MAROON);
+    std::string msg = "" +  std::to_string(m_velocity.x) + ", " + std::to_string(m_velocity.y);
+    DrawText(msg.c_str(), m_position.x*m_tileSize, m_position.y*m_tileSize-20, 18, BLACK);
 }
 
 void Player::update(float elapsedTime)
@@ -48,11 +53,8 @@ void Player::update(float elapsedTime)
     Vector2 move = Vector2Scale(velocityAndAccel, elapsedTime); 
     Vector2 new_position = Vector2Add(m_position, move); 
 
+    m_previousPosition = m_position;
     m_position = new_position;
 
 }
 
-void Player::move(Vector2 dir)
-{
-    m_direction = Vector2Normalize(dir);
-}

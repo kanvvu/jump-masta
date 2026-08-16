@@ -6,20 +6,19 @@
 class Player : IDraw, IUpdate
 {
 private:
-    Vector2 m_position;
-    Vector2 m_velocity;
-    Vector2 m_direction;
-
     int m_tileSize;
 
 public:
+    Vector2 m_position;
+    Vector2 m_previousPosition;
+    Vector2 m_velocity;
+    Vector2 m_direction;
+
     Player();
     Player(int tileSize, Vector2 position);
     ~Player() = default;
 
     void draw();
     void update(float elapsedTime);
-
-    void move(Vector2 dir);
 };
 

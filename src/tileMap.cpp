@@ -61,7 +61,22 @@ void TileMap::draw()
     }
 }
 
-Vector2 TileMap::getPlayerPosition()
+bool TileMap::isCollision(Vector2 position, int tileType)
+{
+    int posX = position.x;
+    int posY = position.y;
+    if (posX >= m_widthCount|| posX < 0 || posY >= m_heightCount || posY < 0) {
+        // printf("COLLSION POSITION OUT OF BOUNDS!\n");
+        return false;
+    }
+
+    std::vector<int>& tileMap = tileMaps[currentTileMapIndex];
+    if (tileMap[posY*m_widthCount + posX] == tileType) return true;
+    
+    return false;
+}
+
+Vector2 TileMap::getSpawnPosition()
 {
     for(int i=0; i<m_heightCount; i++) {
         for(int j=0; j<m_widthCount; j++) {

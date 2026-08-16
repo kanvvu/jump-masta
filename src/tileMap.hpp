@@ -21,6 +21,7 @@ public:
     void draw();
 
     int getTileSize() {return m_tileSize;}
-    Vector2 getPlayerPosition();
+    bool isCollision(Vector2 position, int tileType);
+    Vector2 getSpawnPosition();
 };
 
