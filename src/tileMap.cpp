@@ -60,3 +60,19 @@ void TileMap::draw()
         }
     }
 }
+
+Vector2 TileMap::getPlayerPosition()
+{
+    for(int i=0; i<m_heightCount; i++) {
+        for(int j=0; j<m_widthCount; j++) {
+            int tileIndex = i*m_widthCount+ j;
+            int xPos = j*m_tileSize;
+            int yPos = i*m_tileSize;
+            Color tileColor = WHITE;
+
+            std::vector<int>& tileMap = tileMaps[currentTileMapIndex];
+            if (tileMap[tileIndex] == 2) return {(float) j,(float) i};
+        }
+    }
+    return {0,0};
+}

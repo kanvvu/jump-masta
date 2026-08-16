@@ -1,6 +1,7 @@
 #pragma once
 #include "raylib.h"
 #include "tileMap.hpp"
+#include "player.hpp"
 
 class Game
 {
@@ -10,6 +11,9 @@ private:
     const char *m_windowTitle;
 
     TileMap m_tileMap;
+
+    Player m_player;
+
 
 public:
     Game(int windowWidth, int windowHeight, const char *windowTitle);

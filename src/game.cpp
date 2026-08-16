@@ -8,6 +8,8 @@ Game::Game(int windowWidth, int windowHeight, const char *windowTitle)
 {
     InitWindow(windowWidth, windowHeight, windowTitle);
     SetTargetFPS(60);
+
+    m_player = Player(m_tileMap.getTileSize(), m_tileMap.getPlayerPosition());
 }
 
 Game::~Game()
@@ -29,12 +31,19 @@ void Game::start()
 
 void Game::proccessInput()
 {
-    //to do
+    Vector2 dir = {0.0, 0.0};
+    if (IsKeyDown(KEY_W)) { dir.y = -1;}
+    if (IsKeyDown(KEY_A)) { dir.x = -1;}
+    if (IsKeyDown(KEY_S)) { dir.y = 1;}
+    if (IsKeyDown(KEY_D)) { dir.x = 1;}
+
+    m_player.move(dir);
+
 }
 
 void Game::update()
 {
-    //to do
+    m_player.update(GetFrameTime());
 }
 
 void Game::draw()
@@ -43,9 +52,7 @@ void Game::draw()
     ClearBackground(DARKGRAY);
 
     m_tileMap.draw();
+    m_player.draw();
 
-
-    
-    DrawText("HELLO!", 0, 0, 20, WHITE);
     EndDrawing();
 }

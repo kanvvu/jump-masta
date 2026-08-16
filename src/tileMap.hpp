@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include "raylib.h"
 
 class TileMap
 {
@@ -18,5 +19,8 @@ public:
 
     void update();
     void draw();
+
+    int getTileSize() {return m_tileSize;}
+    Vector2 getPlayerPosition();
 };
 
