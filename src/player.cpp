@@ -27,6 +27,9 @@ void Player::draw()
     DrawRectangle(m_position.x*m_tileSize, m_position.y*m_tileSize, m_tileSize, m_tileSize, MAROON);
     std::string msg = "" +  std::to_string(m_velocity.x) + ", " + std::to_string(m_velocity.y);
     DrawText(msg.c_str(), m_position.x*m_tileSize, m_position.y*m_tileSize-20, 18, BLACK);
+
+    msg = "" +  std::to_string(m_position.x) + ", " + std::to_string(m_position.y);
+    DrawText(msg.c_str(), m_position.x*m_tileSize, m_position.y*m_tileSize-40, 18, BLACK);
 }
 
 void Player::update(float elapsedTime)
@@ -36,7 +39,7 @@ void Player::update(float elapsedTime)
     m_velocity = Vector2Add(m_velocity, accel);
 
 
-    float velocityThreshold = 10.0;
+    float velocityThreshold = 20.0;
     if (m_velocity.x > velocityThreshold) m_velocity.x = velocityThreshold;
     if (m_velocity.x < -velocityThreshold) m_velocity.x = -velocityThreshold;
 
@@ -58,3 +61,11 @@ void Player::update(float elapsedTime)
 
 }
 
+void Player::reset()
+{
+    m_direction = Vector2Zero();
+    m_position = Vector2Zero();
+    m_previousPosition = Vector2Zero();
+    m_velocity = Vector2Zero();
+
+}

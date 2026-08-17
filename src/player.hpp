@@ -20,5 +20,7 @@ public:
 
     void draw();
     void update(float elapsedTime);
+
+    void reset();
 };
 
