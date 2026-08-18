@@ -14,6 +14,11 @@ private:
 
     Player m_player;
 
+    //line stuff
+    Color lineColor = BLACK;
+    bool isLeftMouseButtonPressed = false;
+    Vector2 startLinePos = {0,0};
+
 
 public:
     Game(int windowWidth, int windowHeight, const char *windowTitle);

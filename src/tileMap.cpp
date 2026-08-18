@@ -66,7 +66,7 @@ void TileMap::draw()
     }
 }
 
-bool TileMap::isCollision(Vector2 position, int tileType)
+bool TileMap::isCollision(Vector2 position, int tileType) const
 {
     int posX = position.x;
     int posY = position.y;
@@ -75,7 +75,7 @@ bool TileMap::isCollision(Vector2 position, int tileType)
         return false;
     }
 
-    std::vector<int>& tileMap = tileMaps[currentTileMapIndex];
+    const std::vector<int>& tileMap = tileMaps[currentTileMapIndex];
     if (tileMap[posY*m_widthCount + posX] == tileType) return true;
     
     return false;

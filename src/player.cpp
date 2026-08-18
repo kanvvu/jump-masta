@@ -34,21 +34,23 @@ void Player::draw()
 
 void Player::update(float elapsedTime)
 {
-    Vector2 accel = m_direction;
+    Vector2 accel = {0,40.0f/64};
 
     m_velocity = Vector2Add(m_velocity, accel);
 
 
-    float velocityThreshold = 20.0;
-    if (m_velocity.x > velocityThreshold) m_velocity.x = velocityThreshold;
-    if (m_velocity.x < -velocityThreshold) m_velocity.x = -velocityThreshold;
+    // float velocityThreshold = 20.0;
+    // if (m_velocity.x > velocityThreshold) m_velocity.x = velocityThreshold;
+    // if (m_velocity.x < -velocityThreshold) m_velocity.x = -velocityThreshold;
 
-    if (m_velocity.y > velocityThreshold) m_velocity.y = velocityThreshold;
-    if (m_velocity.y < -velocityThreshold) m_velocity.y = -velocityThreshold;
+    // if (m_velocity.y > velocityThreshold) m_velocity.y = velocityThreshold;
+    // if (m_velocity.y < -velocityThreshold) m_velocity.y = -velocityThreshold;
 
-    float friction = 0.95;
-    m_velocity = Vector2Scale(m_velocity, friction);
-    if (fabs(Vector2Distance({0,0}, m_velocity)) < 0.1) m_velocity = {0,0};
+    if (onGround) {
+        float friction = 0.90;
+        m_velocity = Vector2Scale(m_velocity, friction);
+        if (fabs(Vector2Distance({0,0}, m_velocity)) < 1.0) m_velocity = {0,0};
+    }
 
 
     Vector2 halfAccel = Vector2Scale(accel, 0.5);

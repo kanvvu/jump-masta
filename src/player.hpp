@@ -13,6 +13,7 @@ public:
     Vector2 m_previousPosition;
     Vector2 m_velocity;
     Vector2 m_direction;
+    bool onGround = false;
 
     Player();
     Player(int tileSize, Vector2 position);
