@@ -47,29 +47,14 @@ void Game::proccessInput()
 
     // m_player.m_direction = Vector2Normalize(dir);
 
-    if (IsMouseButtonDown(0) && !isLeftMouseButtonPressed)
-    {
-        isLeftMouseButtonPressed = true;
-        startLinePos = GetMousePosition();
+    if (IsMouseButtonDown(0)) {
+        m_line.mouseButtonDown();
     }
 
     if (!IsMouseButtonDown(0)) {
-        if (isLeftMouseButtonPressed) {
-            m_player.m_velocity = Vector2Subtract(GetMousePosition(), startLinePos);
-            m_player.m_velocity = Vector2Scale(m_player.m_velocity, 0.07);
-            // printf("realsed! (%f, %f)\n", velo.x, velo.y);
-        }
-        isLeftMouseButtonPressed = false;
+        m_line.mouseButtonUp(m_player.m_velocity);
     }
 
-    if (isLeftMouseButtonPressed){
-        float lineLength = Vector2Length(Vector2Subtract(GetMousePosition(), startLinePos)); 
-        //printf("%f\n", lineLength);
-
-        if (lineLength < 300.0) lineColor = RED;
-        if (lineLength < 200.0) lineColor = ORANGE;
-        if (lineLength < 100.0) lineColor = BLACK;
-    }
 
 }
 
@@ -126,10 +111,11 @@ static void checkAndResolveCollision(Player& player, const TileMap& tileMap) {
 
 void Game::update()
 {
-    m_player.update(GetFrameTime());
+    float deltaTime = GetFrameTime();
+    m_player.update(deltaTime);
+    m_line.update(deltaTime);
 
     checkAndResolveCollision(m_player, m_tileMap);
-
 }
 
 
@@ -140,14 +126,10 @@ void Game::draw()
 
     m_tileMap.draw();
     m_player.draw();
+    m_line.draw();
 
     std::string frameRate = std::to_string(1.0/GetFrameTime());
     DrawText(frameRate.c_str(), 0, 0, 30, BLACK);
-    if (isLeftMouseButtonPressed) {
-        // Vector2 newStartLinePos = Vector2Subtract(Vector2Scale(m_player.m_position, 64), startLinePos);
-        // DrawLineEx(Vector2Scale(m_player.m_position, 64), Vector2Add(GetMousePosition(), newStartLinePos), 3, lineColor);
-        DrawLineEx(startLinePos, GetMousePosition(), 3, lineColor);
-    }
 
     EndDrawing();
 }

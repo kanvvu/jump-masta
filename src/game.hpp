@@ -2,6 +2,7 @@
 #include "raylib.h"
 #include "tileMap.hpp"
 #include "player.hpp"
+#include "line.hpp"
 
 class Game
 {
@@ -14,10 +15,8 @@ private:
 
     Player m_player;
 
+    Line m_line;
     //line stuff
-    Color lineColor = BLACK;
-    bool isLeftMouseButtonPressed = false;
-    Vector2 startLinePos = {0,0};
 
 
 public:
