@@ -18,7 +18,7 @@ public:
     ~TileMap() = default;
 
     void update();
-    void draw();
+    void draw(Vector2 offset);
 
     int getTileSize() {return m_tileSize;}
     bool isCollision(Vector2 position, int tileType) const;

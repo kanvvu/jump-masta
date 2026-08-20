@@ -22,14 +22,14 @@ Player::Player(int tileSize, Vector2 position) :
 {
 }
 
-void Player::draw()
+void Player::draw(Vector2 offset)
 {
-    DrawRectangle(m_position.x*m_tileSize, m_position.y*m_tileSize, m_tileSize, m_tileSize, MAROON);
+    DrawRectangle(m_position.x*m_tileSize + offset.x, m_position.y*m_tileSize + offset.y, m_tileSize, m_tileSize, MAROON);
     std::string msg = "" +  std::to_string(m_velocity.x) + ", " + std::to_string(m_velocity.y);
-    DrawText(msg.c_str(), m_position.x*m_tileSize, m_position.y*m_tileSize-20, 18, BLACK);
+    DrawText(msg.c_str(), m_position.x*m_tileSize + offset.x, m_position.y*m_tileSize-20 + offset.y, 18, BLACK);
 
     msg = "" +  std::to_string(m_position.x) + ", " + std::to_string(m_position.y);
-    DrawText(msg.c_str(), m_position.x*m_tileSize, m_position.y*m_tileSize-40, 18, BLACK);
+    DrawText(msg.c_str(), m_position.x*m_tileSize + offset.x, m_position.y*m_tileSize-40 + offset.y, 18, BLACK);
 }
 
 void Player::update(float elapsedTime)

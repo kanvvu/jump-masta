@@ -14,7 +14,7 @@ void Line::update(float elapsedTime)
     }
 }
 
-void Line::draw()
+void Line::draw(Vector2 offset)
 {
     if (isLeftMouseButtonPressed) {
         // Vector2 newStartLinePos = Vector2Subtract(Vector2Scale(m_player.m_position, 64), startLinePos);

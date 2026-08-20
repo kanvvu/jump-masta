@@ -5,7 +5,7 @@ class IDraw
 public:
     virtual ~IDraw() = default;
 
-    virtual void draw() = 0;
+    virtual void draw(Vector2 offset) = 0;
 };
 
 class IUpdate

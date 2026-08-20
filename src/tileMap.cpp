@@ -33,7 +33,7 @@ TileMap::TileMap(int widthCount, int heightCount)
 
 }
 
-void TileMap::draw()
+void TileMap::draw(Vector2 offset)
 {
     for(int i=0; i<m_heightCount; i++) {
         for(int j=0; j<m_widthCount; j++) {
@@ -46,15 +46,15 @@ void TileMap::draw()
             if (tileMap[tileIndex] == 1) tileColor = BLUE;
             if (tileMap[tileIndex] == 3) tileColor= ORANGE;
 
-            DrawRectangle(xPos, yPos, m_tileSize, m_tileSize, tileColor);
+            DrawRectangle(xPos + offset.x, yPos + offset.y, m_tileSize, m_tileSize, tileColor);
             char msg1[64];
             snprintf(msg1, sizeof(msg1), "%i, %i", j, i);
             char msg2[64];
             snprintf(msg2, sizeof(msg2), "%i, %i", xPos, yPos);
             if (tileMap[tileIndex] == 1) {
-                DrawLineEx({(float) xPos, (float) yPos}, {(float) (xPos + m_tileSize), (float) yPos}, 1, BLACK);
-                DrawLineEx({(float) (xPos + m_tileSize), (float) yPos}, {(float) (xPos + m_tileSize), (float) (yPos + m_tileSize)}, 1, BLACK);
-                DrawText(msg1, xPos, yPos, 5, BLACK);
+                DrawLineEx({(float) xPos + offset.x, (float) yPos + offset.y}, {(float) (xPos + m_tileSize) + offset.x,  (float) yPos + offset.y}, 1, BLACK);
+                DrawLineEx({(float) (xPos + m_tileSize) + offset.x, (float) yPos + offset.y}, {(float) (xPos + m_tileSize) + offset.x, (float) (yPos + m_tileSize) + offset.y}, 1, BLACK);
+                DrawText(msg1, xPos + offset.x, yPos + offset.y, 5, BLACK);
             }
             // DrawLineEx((Vector2) {xPos, yPos}, (Vector2) {xPos + tileSize, yPos}, 1, GRAY);
             // DrawLineEx((Vector2) {xPos, yPos}, (Vector2) {xPos, yPos + tileSize}, 1, GRAY);

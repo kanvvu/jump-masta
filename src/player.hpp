@@ -19,7 +19,7 @@ public:
     Player(int tileSize, Vector2 position);
     ~Player() = default;
 
-    void draw();
+    void draw(Vector2 offset);
     void update(float elapsedTime);
 
     void reset();
