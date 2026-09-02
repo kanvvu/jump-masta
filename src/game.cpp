@@ -12,6 +12,13 @@ Game::Game(int windowWidth, int windowHeight, const char *windowTitle)
     InitWindow(windowWidth, windowHeight, windowTitle);
     SetTargetFPS(60);
 
+    camera.offset.x = windowWidth/2 - (10*64)/2;   // coordinate x origin
+    camera.offset.y = windowHeight/2 - (15*64)/2;   // coordinate y origin
+    camera.target.x = 0;         // rotation and zoom x origin (from offset above)
+    camera.target.y = 0;         // rotation and zoom y origin (from offset above)
+    camera.rotation = 0;        // rotation in deg
+    camera.zoom     = 1.0f;      // magnification, i.e fov or zoom
+
     m_player = Player(m_tileMap.getTileSize(), m_tileMap.getSpawnPosition());
 }
 
@@ -25,15 +32,17 @@ void Game::start()
 
     while (!WindowShouldClose())
     {
-
         proccessInput();
         update();
         draw();
     }
 }
 
-void Game::proccessInput()
-{
+void Game::proccessInputGame() {
+    if (IsKeyPressed(KEY_E)) {
+        currentGameState = LEVEL_EDITOR;
+    }   
+
     Vector2 dir = {0.0, 0.0};
     if (IsKeyDown(KEY_W)) { dir.y = -1;}
     if (IsKeyDown(KEY_A)) { dir.x = -1;}
@@ -54,8 +63,23 @@ void Game::proccessInput()
     if (!IsMouseButtonDown(0)) {
         m_line.mouseButtonUp(m_player.m_velocity);
     }
+}
 
+void Game::proccessInput()
+{
 
+    switch (currentGameState)
+    {
+    case GAME:
+        proccessInputGame();
+        break;
+    case LEVEL_EDITOR:
+        m_levelEditor.proccessInput(currentGameState);
+        break;
+
+    default:
+        break;
+    }
 }
 
 static void checkAndResolveCollision(Player& player, const TileMap& tileMap) {
@@ -109,26 +133,62 @@ static void checkAndResolveCollision(Player& player, const TileMap& tileMap) {
     player.m_position = nBP;
 }
 
-void Game::update()
+void Game::updateGame(float deltaTime) 
 {
-    float deltaTime = GetFrameTime();
     m_player.update(deltaTime);
     m_line.update(deltaTime);
 
     checkAndResolveCollision(m_player, m_tileMap);
 }
 
-
-void Game::draw()
+void Game::update()
 {
-    BeginDrawing();
+    float deltaTime = GetFrameTime();
+
+    switch (currentGameState)
+    {
+    case GAME:
+        updateGame(deltaTime);
+        break;
+    case LEVEL_EDITOR:
+        m_levelEditor.update();
+        break;
+
+    default:
+        break;
+    }
+}
+
+
+void Game::drawGame() {
     ClearBackground(DARKGRAY);
 
     Vector2 offset = {500,64*2};
 
+    BeginMode2D (camera);  // next objects effected by Camera2D
     m_tileMap.draw();
     m_player.draw();
+    EndMode2D (); 
     m_line.draw();
+
+}
+
+void Game::draw()
+{
+    BeginDrawing();
+
+        switch (currentGameState)
+        {
+        case GAME:
+            drawGame();
+            break;
+        case LEVEL_EDITOR:
+            m_levelEditor.draw();
+            break;
+
+        default:
+            break;
+        }
 
     std::string frameRate = std::to_string(1.0/GetFrameTime());
     DrawText(frameRate.c_str(), 0, 0, 30, BLACK);
