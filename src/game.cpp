@@ -126,9 +126,9 @@ void Game::draw()
 
     Vector2 offset = {500,64*2};
 
-    m_tileMap.draw(offset);
-    m_player.draw(offset);
-    m_line.draw(offset);
+    m_tileMap.draw();
+    m_player.draw();
+    m_line.draw();
 
     std::string frameRate = std::to_string(1.0/GetFrameTime());
     DrawText(frameRate.c_str(), 0, 0, 30, BLACK);

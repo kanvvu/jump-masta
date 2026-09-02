@@ -19,7 +19,7 @@ public:
 
 
     void update(float elapsedTime);
-    void draw(Vector2 offset);
+    void draw();
 
     void mouseButtonDown();
     void mouseButtonUp(Vector2& velocity);
