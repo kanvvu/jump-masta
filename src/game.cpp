@@ -151,7 +151,7 @@ void Game::update()
         updateGame(deltaTime);
         break;
     case LEVEL_EDITOR:
-        m_levelEditor.update();
+        m_levelEditor.update(deltaTime);
         break;
 
     default:
