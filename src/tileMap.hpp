@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include "tileLevelManager.hpp"
 #include "raylib.h"
 
 class TileMap
@@ -10,11 +11,12 @@ private:
     const int m_heightCount;
     const int m_tileSize = 64;
 
-    std::vector<std::vector<int>> tileMaps;
+
+    TileLevelManager& tileLevelManager;
     int currentTileMapIndex = 0;
 
 public:
-    TileMap(int widthCount, int heightCount);
+    TileMap(TileLevelManager& tileLevelManager, int widthCount, int heightCount);
     ~TileMap() = default;
 
     void update();

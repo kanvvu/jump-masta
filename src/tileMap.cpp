@@ -2,34 +2,11 @@
 #include <iostream>
 #include "raylib.h"
 
-TileMap::TileMap(int widthCount, int heightCount)
-: m_widthCount(widthCount),
+TileMap::TileMap(TileLevelManager& tileLevelManager, int widthCount, int heightCount)
+: tileLevelManager(tileLevelManager),
+  m_widthCount(widthCount),
   m_heightCount(heightCount)
 {
-
-    std::vector<int> map1 
-    {
-        1,0,0,0,0,0,0,0,0,1,
-        1,0,0,1,1,0,0,0,0,1,
-        1,0,0,0,0,0,0,0,0,1,
-        1,0,0,0,0,0,0,0,0,1,
-        1,0,0,1,0,0,0,0,0,1,
-        1,0,0,0,0,0,0,1,1,1,
-        1,0,0,0,0,0,0,0,0,1,
-        1,0,0,0,0,0,0,0,0,1,
-        1,0,0,0,0,0,0,0,0,1,
-        1,1,1,1,0,0,1,1,1,1,
-        1,0,0,0,0,0,0,0,0,1,
-        1,0,0,0,0,0,0,0,0,1,
-        1,0,0,0,2,0,0,0,0,1,
-        1,0,0,0,0,0,0,0,0,1,
-        1,1,1,1,1,1,1,1,1,1
-    };
-
-    if (map1.size() == widthCount*heightCount)
-        tileMaps.push_back(map1);
-    else
-        std::cout<<"tileMap: invalid map size\n";
 
 }
 
@@ -42,7 +19,7 @@ void TileMap::draw()
             int yPos = i*m_tileSize;
             Color tileColor = WHITE;
 
-            std::vector<int>& tileMap = tileMaps[currentTileMapIndex];
+            std::vector<int>& tileMap = tileLevelManager.getLevel(currentTileMapIndex).level;
             if (tileMap[tileIndex] == 1) tileColor = BLUE;
             if (tileMap[tileIndex] == 3) tileColor= ORANGE;
 
@@ -75,7 +52,7 @@ bool TileMap::isCollision(Vector2 position, int tileType) const
         return false;
     }
 
-    const std::vector<int>& tileMap = tileMaps[currentTileMapIndex];
+    const std::vector<int>& tileMap = tileLevelManager.getLevel(currentTileMapIndex).level;
     if (tileMap[posY*m_widthCount + posX] == tileType) return true;
     
     return false;
@@ -90,9 +67,10 @@ Vector2 TileMap::getSpawnPosition()
             int yPos = i*m_tileSize;
             Color tileColor = WHITE;
 
-            std::vector<int>& tileMap = tileMaps[currentTileMapIndex];
+            std::vector<int>& tileMap = tileLevelManager.getLevel(currentTileMapIndex).level;
             if (tileMap[tileIndex] == 2) return {(float) j,(float) i};
         }
     }
     return {0,0};
 }
+

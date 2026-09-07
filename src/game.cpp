@@ -7,7 +7,8 @@ Game::Game(int windowWidth, int windowHeight, const char *windowTitle)
   : m_windowWidth(windowWidth),
     m_windowHeight(windowHeight),
     m_windowTitle(windowTitle),
-    m_tileMap(10, 15)
+    m_tileMap(tileLevelManager, 10, 15),
+    m_levelEditor(tileLevelManager)
 {
     InitWindow(windowWidth, windowHeight, windowTitle);
     SetTargetFPS(60);

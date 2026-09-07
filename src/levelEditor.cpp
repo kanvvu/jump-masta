@@ -3,8 +3,9 @@
 #include "raylib.h"
 #include "raymath.h"
 #include <iostream>
+#include <string>
 
-LevelEditor::LevelEditor(int tileSize) : m_tileSize(tileSize) 
+LevelEditor::LevelEditor(TileLevelManager& tileLevelManager, int tileSize) : m_tileSize(tileSize), tileLevelManager(tileLevelManager)
 {
     camera.offset.x = screenWidth/2 - (tileCountX*tileSize)/2;   // coordinate x origin
     camera.offset.y = screenHeight/2 - (tileCountY*tileSize)/2;   // coordinate y origin
@@ -16,9 +17,19 @@ LevelEditor::LevelEditor(int tileSize) : m_tileSize(tileSize)
     currMap = std::vector<int>(tileCountX*tileCountY, 0);
 }
 
-LevelEditor::LevelEditor() : LevelEditor(64)
+LevelEditor::LevelEditor(TileLevelManager& tileLevelManager) : LevelEditor(tileLevelManager, 64)
 {
 
+}
+
+void saveLevel(TileLevelManager& tileLevelManager, int width, int height, const std::vector<int>& level, std::string name) {
+    TileMapLevel tileMapLevel;
+    tileMapLevel.width = width;
+    tileMapLevel.height = height;
+    tileMapLevel.level = level;
+    tileMapLevel.name = name + std::to_string(tileLevelManager.getLevelCount());
+
+    tileLevelManager.saveLevel(tileMapLevel);
 }
 
 void LevelEditor::proccessInput(GameState &gameState)
@@ -29,6 +40,10 @@ void LevelEditor::proccessInput(GameState &gameState)
 
     if (IsKeyPressed(KEY_R)) {
         for (int& tile : currMap) tile = 0;
+    }
+
+    if (IsKeyPressed(KEY_S)) {
+        saveLevel(tileLevelManager, tileCountX, tileCountY, currMap, "level");
     }
 
     if (IsMouseButtonDown(1)) {
@@ -58,6 +73,7 @@ void LevelEditor::proccessInput(GameState &gameState)
                 if (currMap.at(tileIndex) == selectedTile) mouseMode = 1;
                 else mouseMode = 0;
             }
+            
             if (mouseMode == 0)
                 currMap.at(tileIndex) = 1; 
             else
@@ -96,7 +112,8 @@ void LevelEditor::draw()
 
     
     Vector2 mousePos = GetMousePosition();
-    DrawRectangle(floor((mousePos.x-camera.offset.x)/tileSize)*tileSize, floor((mousePos.y-camera.offset.y)/tileSize)*tileSize, tileSize, tileSize, WHITE);
+    if (mouseMode == 0) 
+        DrawRectangle(floor((mousePos.x-camera.offset.x)/tileSize)*tileSize, floor((mousePos.y-camera.offset.y)/tileSize)*tileSize, tileSize, tileSize, WHITE);
     // std::cout<<"("<<mousePos.x <<", "<<mousePos.y<<"), ";
     // std::cout<<"("<<camera.offset.x <<", "<<camera.offset.y<<"), ";
     // std::cout<<mousePos.x - camera.offset.x <<", "<<mousePos.y - camera.offset.y<<"\n";

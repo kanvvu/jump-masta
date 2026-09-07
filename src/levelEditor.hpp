@@ -4,6 +4,7 @@
 #include "interfaces.hpp"
 #include "common.hpp"
 #include <vector>
+#include "tileLevelManager.hpp"
 
 
 class LevelEditor
@@ -26,9 +27,11 @@ private:
 
     int selectedTile = 1;
 
+    TileLevelManager& tileLevelManager;
+
 public:
-    LevelEditor();
-    LevelEditor(int tileSize);
+    LevelEditor(TileLevelManager& tileLevelManager);
+    LevelEditor(TileLevelManager& TileLevelManager, int tileSize);
     ~LevelEditor() = default;
 
     void proccessInput(GameState& gameState);
