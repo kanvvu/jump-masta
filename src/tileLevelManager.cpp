@@ -114,6 +114,7 @@ void TileLevelManager::saveLevel(TileMapLevel tileMap)
     std::ofstream file;
     file.open(GetLevelPath(), std::ios_base::app);
 
+    tileMaps.push_back(tileMap);
     file << data.str();
 
     file.close();

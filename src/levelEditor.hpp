@@ -10,6 +10,23 @@
 class LevelEditor
 {
 private:
+    struct EditorGuiState
+    {
+        std::vector<std::string> tileNames;
+        std::vector<char *> tileList;
+
+        int tileListScroll = 0;
+        int tileListSelected = -1;
+        int tileListHovered = -1;
+
+        void rebuildTileList();
+
+        int saveButton = 0;
+        int loadButton = 0;
+    };
+
+    EditorGuiState gui;
+
     int m_tileSize = 64;
 
     Camera2D camera = {0};
@@ -37,5 +54,8 @@ public:
     void proccessInput(GameState& gameState);
     void update(float deltaTime);
     void draw();
+    void drawGUI();
+
+    void temp();
 };
 
