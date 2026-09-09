@@ -10,6 +10,11 @@
 class LevelEditor
 {
 private:
+    struct DropDownState {
+        int dropdownActive = -1;
+        bool dropDownEditMode = false;
+    };
+
     struct EditorGuiState
     {
         std::vector<std::string> tileNames;
@@ -20,6 +25,11 @@ private:
         int tileListHovered = -1;
 
         void rebuildTileList();
+        
+        std::string dropDownOptions;
+        std::vector<DropDownState> dropDowns;
+        
+        void rebuildDropDowns();
 
         int saveButton = 0;
         int loadButton = 0;
@@ -46,6 +56,8 @@ private:
 
     TileLevelManager& tileLevelManager;
 
+    std::vector<Edge> edges;
+
 public:
     LevelEditor(TileLevelManager& tileLevelManager);
     LevelEditor(TileLevelManager& TileLevelManager, int tileSize);
@@ -55,7 +67,14 @@ public:
     void update(float deltaTime);
     void draw();
     void drawGUI();
+    void drawEdges();
 
-    void temp();
+    void createTileNames();
+
+    void saveLevel(std::string name);
+    void loadLevel(int levelID);
+
+    std::vector<Edge> getEdges();
+    void buildEdges();
 };
 

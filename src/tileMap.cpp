@@ -74,3 +74,22 @@ Vector2 TileMap::getSpawnPosition()
     return {0,0};
 }
 
+// void helper(std::vector<Edge>& edges, std::vector<int>& tileMap, int tileSize, int widthCount, int heightCount, bool iterateX, int constValue) {
+
+//     for(int i=0; i<(iterateX ? widthCount : heightCount); i++) {
+//         int x = (iterateX ? i : constValue);
+//         int y = (iterateX ? constValue : i);
+//         int index = y*widthCount + x;
+//         if (tileMap.at(index) == 0) {
+//             Edge edge;
+//             edge.assignedNextLevel = -1;
+//             edge.position = {x*tileSize, y*tileSize};
+
+//             if (edges.empty())
+//                 edges.push_back(edge);
+//             else if ((iterateX ? edges.back().position.y : edges.back().position.x) == constValue) 
+//                 (iterateX ? edges.back().position.x : edges.back().position.y) = i*tileSize;
+//         }
+//     }
+// }
+
