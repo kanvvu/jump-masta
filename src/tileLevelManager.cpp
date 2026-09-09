@@ -85,11 +85,54 @@ void TileLevelManager::loadLevels()
             }
         }
         tileMaps.push_back(tileMap);
+
+        std::streampos originalPosition = file.tellg();
+
+        if (!std::getline(file,s)) {
+            std::cerr << "No assigned levels info!\n";
+            assignedLevels.push_back(std::vector<int>());
+            return;
+        }
+
+        tokens = split(s, " ");
+        if (tokens.size() != 1) {
+            std::cerr << "No assigned levels info! (invalid dimensions, should be 1 is "<<tokens.size()<<" )\n";
+            assignedLevels.push_back(std::vector<int>());
+            file.clear();
+            file.seekg(originalPosition);
+        } else {
+            int edgesCount = stoi(tokens[0]);
+            std::vector<int> assignedLevel;
+            bool isOk = true;
+            for(int i=0; i < edgesCount; i++) {
+                if (!std::getline(file, s)) {
+                    std::cerr << "Invalid level info, info to short! \n";
+                    isOk = false;
+                    break;
+                }
+
+                tokens = split(s, " ");
+                if (tokens.size() != 1) {
+                    std::cerr << "Invalid level info, assigned level should be 1 is "<<tokens.size()<<"\n";
+                    isOk = false;
+                    break;
+                }
+                assignedLevel.push_back(stoi(tokens[0]));
+            }
+            if (isOk) {
+                assignedLevels.push_back(assignedLevel);
+            } else {
+                assignedLevels.push_back(std::vector<int>());
+                file.clear();
+                file.seekg(originalPosition);
+            }
+        }
+
     }
   file.close();
 }
 
-void TileLevelManager::saveLevel(TileMapLevel tileMap)
+void TileLevelManager::saveLevel(TileMapLevel tileMap, std::vector<Edge> edges)
 {
     std::ostringstream data;
 
@@ -107,17 +150,26 @@ void TileLevelManager::saveLevel(TileMapLevel tileMap)
             data << tileMap.level.at(index);
             if (j + 1 != tileMap.width) data << " ";
         }
-        if (i+1 != tileMap.height) data << "\n";
+        data << "\n";
+    }
+    data << edges.size() << "\n";
+    for(int i=0; i<edges.size(); i++) {
+        data << edges[i].assignedNextLevel;
+        if (i+1 != edges.size()) data << "\n";
     }
     
+    tileMaps.push_back(tileMap);
+    std::vector<int> assigned;
+    for(const auto& e : edges) assigned.push_back(e.assignedNextLevel);
+    assignedLevels.push_back(assigned);
 
     std::ofstream file;
     file.open(GetLevelPath(), std::ios_base::app);
 
-    tileMaps.push_back(tileMap);
     file << data.str();
 
     file.close();
+
 }
 
 TileMapLevel TileLevelManager::getLevel(int levelID) const
@@ -140,6 +192,15 @@ TileMapLevel TileLevelManager::getLevel(int levelID) const
 int TileLevelManager::getLevelCount()
 {
     return tileMaps.size();
+}
+
+std::vector<int> TileLevelManager::getAssigned(int levelID) const
+{
+    if (assignedLevels.size() <= levelID) {
+        std::cerr<<"\033[31m"<<"ERROR invalid levelID for assignedLevels! given: "<<levelID<<", max is: "<<assignedLevels.size()-1<<"\n";
+        return std::vector<int>();
+    }
+    return assignedLevels.at(levelID);
 }
 
 std::string GetLevelPath() {

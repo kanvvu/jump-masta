@@ -130,6 +130,7 @@ void LevelEditor::buildEdges()
         gui.dropDowns.push_back(DropDownState());
         gui.dropDowns.back().dropdownActive = edges.at(i).assignedNextLevel;
     }
+
 }
 
 void LevelEditor::saveLevel(std::string name) {
@@ -139,7 +140,7 @@ void LevelEditor::saveLevel(std::string name) {
     tileMapLevel.level = currMap;
     tileMapLevel.name = name + std::to_string(tileLevelManager.getLevelCount());
 
-    tileLevelManager.saveLevel(tileMapLevel);
+    tileLevelManager.saveLevel(tileMapLevel, edges);
 
     createTileNames();
 }
@@ -156,6 +157,21 @@ void LevelEditor::loadLevel(int levelID) {
     }
 
     buildEdges();
+
+    std::vector<int> assigned = tileLevelManager.getAssigned(levelID);
+    if (assigned.size() != edges.size()) {
+        std::cout<<"\033[31m"<<"ERROR assigned not equal edges!\033[0m\n";
+    } else {
+        for(int i=0; i<edges.size(); i++) {
+            edges[i].assignedNextLevel = assigned[i];
+        }
+    }
+
+    gui.dropDowns.clear();
+    for (int i=0; i<edges.size(); i++) {
+        gui.dropDowns.push_back(DropDownState());
+        gui.dropDowns.back().dropdownActive = edges.at(i).assignedNextLevel;
+    }
 }
 
 void LevelEditor::proccessInput(GameState &gameState)
