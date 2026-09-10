@@ -294,7 +294,7 @@ void LevelEditor::EditorGuiState::rebuildTileList()
     }
     
     if (tileListSelected >= static_cast<int>(tileList.size())) {
-        tileListSelected = tileList.empty() ? -1 : 0;
+        tileListSelected = (tileList.empty() ? -1 : tileList.size()-1);
     }
 }
 
@@ -310,8 +310,13 @@ void LevelEditor::EditorGuiState::rebuildDropDowns()
 
 void LevelEditor::drawGUI()
 {
-    if (GuiButton({ 10, 100, 220, 60 }, "Save")) {
+    if (GuiButton({ 10, 100, 220, 60 }, "Add")) {
         saveLevel("level");
+        // std::cout<<"SAVE!"<<std::endl;
+    }
+    if (GuiButton({ 10 + 10 + 220 , 100, 220, 60 }, "Save All")) {
+        // saveLevel("level");
+        tileLevelManager.saveLevels();
         // std::cout<<"SAVE!"<<std::endl;
     }
 
@@ -321,15 +326,40 @@ void LevelEditor::drawGUI()
         if (gui.tileListSelected >=0 && gui.tileListSelected < tileLevelManager.getLevelCount()) {
             loadLevel(gui.tileListSelected);
         } else {
-            std::cout<<"ERROR LOAD!"<<gui.tileListSelected<<std::endl;
+            std::cout<<"ERROR LOAD! "<<gui.tileListSelected<<std::endl;
         }
         // std::cout<<"LOAD!"<<gui.tileListSelected<<std::endl;
+    }
+
+    if (GuiButton({ 10 + 10 + 220, 300 + 210, 220, 60 }, "Delete")){
+        bool isOk = true;
+        if (gui.tileListSelected >=0 && gui.tileListSelected < tileLevelManager.getLevelCount()) {
+            tileLevelManager.deleteLevel(gui.tileListSelected);
+        } else {
+            std::cout<<"ERROR DELETE!"<<gui.tileListSelected<<std::endl;
+            isOk = false;
+        }
+
+        currMap = std::vector<int>(tileCountX*tileCountY, 0);
+        createTileNames();
+        buildEdges();
+    }
+    
+    if (GuiButton({ 10, 300 + 210 + 10 + 60, 220, 60 }, "Save")){
+        if (gui.tileListSelected >=0 && gui.tileListSelected < tileLevelManager.getLevelCount()) {
+            TileMapLevel level = tileLevelManager.getLevel(gui.tileListSelected);
+            level.level = currMap;
+            tileLevelManager.editLevel(gui.tileListSelected, level, edges);
+        } else {
+            std::cout<<"ERROR LOAD! "<<gui.tileListSelected<<std::endl;
+        }
+
     }
 
     for(int i=edges.size(); i>0; i--) {
         Edge& e = edges.at(i-1);
         std::string str = "EDGE " +std::to_string(i) + " (" + std::to_string(e.tilesCount) + ")"; 
-        Vector2 textPos = {10, (i-1)*30 + 600};
+        Vector2 textPos = {10, (i-1)*30 + 300 + 210 + 10 + 60 + 80};
         DrawText(str.c_str(), textPos.x, textPos.y, 20, BLACK);
         int textWidth = MeasureText(str.c_str(), 20);
         if (GuiDropdownBox({ textPos.x + textWidth + 10, textPos.y, 200, 25 }, gui.dropDownOptions.c_str(), &gui.dropDowns[i-1].dropdownActive, gui.dropDowns[i-1].dropDownEditMode)) {
