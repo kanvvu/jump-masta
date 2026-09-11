@@ -158,12 +158,12 @@ void LevelEditor::loadLevel(int levelID) {
 
     buildEdges();
 
-    std::vector<int> assigned = tileLevelManager.getAssigned(levelID);
+    std::vector<Edge> assigned = tileLevelManager.getAssigned(levelID);
     if (assigned.size() != edges.size()) {
         std::cout<<"\033[31m"<<"ERROR assigned not equal edges!\033[0m\n";
     } else {
         for(int i=0; i<edges.size(); i++) {
-            edges[i].assignedNextLevel = assigned[i];
+            edges[i].assignedNextLevel = assigned[i].assignedNextLevel;
         }
     }
 

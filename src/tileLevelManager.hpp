@@ -7,7 +7,7 @@ class TileLevelManager
 {
 private:
     std::vector<TileMapLevel> tileMaps;
-    std::vector<std::vector<int>> assignedLevels;
+    std::vector<std::vector<Edge>> allEdges;
 
     std::ostringstream levelToStream(const TileMapLevel& tileMap, const std::vector<Edge>& edges);
 public:
@@ -25,6 +25,6 @@ public:
     TileMapLevel getLevel(int levelID) const;
     int getLevelCount();
 
-    std::vector<int> getAssigned(int levelID) const;
+    std::vector<Edge> getAssigned(int levelID) const;
 };
 
