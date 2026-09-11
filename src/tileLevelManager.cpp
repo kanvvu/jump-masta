@@ -278,13 +278,106 @@ int TileLevelManager::getLevelCount()
     return tileMaps.size();
 }
 
-std::vector<Edge> TileLevelManager::getAssigned(int levelID) const
+std::vector<Edge> TileLevelManager::getEdges(int levelID) const
 {
     if (allEdges.size() <= levelID) {
         std::cerr<<"\033[31m"<<"ERROR invalid levelID for assignedLevels! given: "<<levelID<<", max is: "<<allEdges.size()-1<<"\n";
         return std::vector<Edge>();
     }
     return allEdges.at(levelID);
+}
+
+
+std::vector<Edge> TileLevelManager::createEdges(const std::vector<int>& tileMap, int tileCountX,int tileCountY) const
+{
+    std::vector<Edge> edges;
+
+
+    int widthCount = tileCountX;
+    int heightCount = tileCountY;
+
+    for(int i=0; i<widthCount; i++) {
+        //top
+        int index = i;
+        if (tileMap.at(index) == 0) {
+            Edge edge;
+            edge.type = TOP;
+            edge.assignedNextLevel = -1;
+            edge.tilesCount = 1;
+            edge.start = {i, 0};
+            edge.end = {(i+1), 0};
+
+            if (i != 0 && !edges.empty() && edges.back().end.y == 0 && edges.back().end.x == edge.start.x) { 
+                edges.back().end.x = (i+1);
+                edges.back().tilesCount++;
+            }
+            else
+                edges.push_back(edge);
+        }
+    }
+
+    for(int i=0; i<widthCount; i++) {
+        //bottom
+        int index = (heightCount-1)*widthCount + i;
+        if (tileMap.at(index) == 0) {
+            Edge edge;
+            edge.type = DOWN;
+            edge.assignedNextLevel = -1;
+            edge.tilesCount = 1;
+            edge.start = {i, (heightCount)};
+            edge.end = {(i+1), (heightCount)};
+
+            if (i != 0 && !edges.empty() && edges.back().end.y == (heightCount) && edges.back().end.x == edge.start.x) {
+                edges.back().end.x = (i+1);
+                edges.back().tilesCount++;
+            }
+            else 
+                edges.push_back(edge);
+        }
+    }
+
+    for(int j=0; j<heightCount; j++) {
+        // left
+        int index = j*widthCount;
+        if (tileMap.at(index) == 0) {
+            Edge edge;
+            edge.type = LEFT;
+            edge.assignedNextLevel = -1;
+            edge.tilesCount = 1;
+            edge.start = {0, j};
+            edge.end = {0, (j+1)};
+
+            if (j != 0 && !edges.empty() && edges.back().end.x == 0 && edges.back().end.y == edge.start.y) {
+                edges.back().end.y = (j+1);
+                edges.back().tilesCount++;
+            }
+            else 
+                edges.push_back(edge);
+        }
+    }
+
+
+    for(int j=0; j<heightCount; j++) {
+        // right
+        int index = j*widthCount + (widthCount-1);
+        if (tileMap.at(index) == 0) {
+            Edge edge;
+            edge.type = RIGHT;
+            edge.assignedNextLevel = -1;
+            edge.tilesCount = 1;
+            edge.start = {widthCount, j};
+            edge.end = {widthCount, (j+1)};
+
+            if (j != 0 && !edges.empty() && edges.back().end.x == widthCount && edges.back().end.y == edge.start.y) {
+                edges.back().end.y = (j+1);
+                edges.back().tilesCount++;
+            }
+            else 
+                edges.push_back(edge);
+        }
+    }
+
+    return edges;
 }
 
 std::string GetLevelPath() {

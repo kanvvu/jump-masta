@@ -25,6 +25,7 @@ public:
     TileMapLevel getLevel(int levelID) const;
     int getLevelCount();
 
-    std::vector<Edge> getAssigned(int levelID) const;
+    std::vector<Edge> getEdges(int levelID) const;
+    std::vector<Edge> createEdges(const std::vector<int>& tileMap, int tileCountX, int tileCountY) const;
 };
 

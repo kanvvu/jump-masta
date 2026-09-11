@@ -27,102 +27,10 @@ LevelEditor::LevelEditor(TileLevelManager& tileLevelManager) : LevelEditor(tileL
 
 }
 
-std::vector<Edge> LevelEditor::getEdges()
-{
-    std::vector<Edge> edges;
-
-
-    std::vector<int>& tileMap = currMap;
-    int widthCount = tileCountX;
-    int heightCount = tileCountY;
-
-    for(int i=0; i<widthCount; i++) {
-        //top
-        int index = i;
-        if (tileMap.at(index) == 0) {
-            Edge edge;
-            edge.type = TOP;
-            edge.assignedNextLevel = -1;
-            edge.tilesCount = 1;
-            edge.start = {i, 0};
-            edge.end = {(i+1), 0};
-
-            if (i != 0 && !edges.empty() && edges.back().end.y == 0 && edges.back().end.x == edge.start.x) { 
-                edges.back().end.x = (i+1);
-                edges.back().tilesCount++;
-            }
-            else
-                edges.push_back(edge);
-        }
-    }
-
-    for(int i=0; i<widthCount; i++) {
-        //bottom
-        int index = (heightCount-1)*widthCount + i;
-        if (tileMap.at(index) == 0) {
-            Edge edge;
-            edge.type = DOWN;
-            edge.assignedNextLevel = -1;
-            edge.tilesCount = 1;
-            edge.start = {i, (heightCount)};
-            edge.end = {(i+1), (heightCount)};
-
-            if (i != 0 && !edges.empty() && edges.back().end.y == (heightCount) && edges.back().end.x == edge.start.x) {
-                edges.back().end.x = (i+1);
-                edges.back().tilesCount++;
-            }
-            else 
-                edges.push_back(edge);
-        }
-    }
-
-    for(int j=0; j<heightCount; j++) {
-        // left
-        int index = j*widthCount;
-        if (tileMap.at(index) == 0) {
-            Edge edge;
-            edge.type = LEFT;
-            edge.assignedNextLevel = -1;
-            edge.tilesCount = 1;
-            edge.start = {0, j};
-            edge.end = {0, (j+1)};
-
-            if (j != 0 && !edges.empty() && edges.back().end.x == 0 && edges.back().end.y == edge.start.y) {
-                edges.back().end.y = (j+1);
-                edges.back().tilesCount++;
-            }
-            else 
-                edges.push_back(edge);
-        }
-    }
-
-
-    for(int j=0; j<heightCount; j++) {
-        // right
-        int index = j*widthCount + (widthCount-1);
-        if (tileMap.at(index) == 0) {
-            Edge edge;
-            edge.type = RIGHT;
-            edge.assignedNextLevel = -1;
-            edge.tilesCount = 1;
-            edge.start = {widthCount, j};
-            edge.end = {widthCount, (j+1)};
-
-            if (j != 0 && !edges.empty() && edges.back().end.x == widthCount && edges.back().end.y == edge.start.y) {
-                edges.back().end.y = (j+1);
-                edges.back().tilesCount++;
-            }
-            else 
-                edges.push_back(edge);
-        }
-    }
-
-    return edges;
-}
-
 void LevelEditor::buildEdges()
 {
-    edges = getEdges();
+    edges = tileLevelManager.createEdges(currMap, tileCountX, tileCountY);
+
     gui.rebuildDropDowns();
 
     gui.dropDowns.clear();
@@ -158,7 +66,7 @@ void LevelEditor::loadLevel(int levelID) {
 
     buildEdges();
 
-    std::vector<Edge> assigned = tileLevelManager.getAssigned(levelID);
+    std::vector<Edge> assigned = tileLevelManager.getEdges(levelID);
     if (assigned.size() != edges.size()) {
         std::cout<<"\033[31m"<<"ERROR assigned not equal edges!\033[0m\n";
     } else {
@@ -358,7 +266,8 @@ void LevelEditor::drawGUI()
 
     for(int i=edges.size(); i>0; i--) {
         Edge& e = edges.at(i-1);
-        std::string str = "EDGE " +std::to_string(i) + " (" + std::to_string(e.tilesCount) + ")"; 
+        std::string str = "EDGE ";
+        str += std::to_string(i) + " (" + std::to_string(e.tilesCount) + ")"; 
         Vector2 textPos = {10, (i-1)*30 + 300 + 210 + 10 + 60 + 80};
         DrawText(str.c_str(), textPos.x, textPos.y, 20, BLACK);
         int textWidth = MeasureText(str.c_str(), 20);
@@ -379,7 +288,12 @@ void LevelEditor::drawEdges()
         Color color = RED;
         if (e.assignedNextLevel != -1) color = GREEN;
         DrawLineEx({(float)e.start.x*tileSize,(float) e.start.y*tileSize}, {(float)e.end.x*tileSize,(float) e.end.y*tileSize},4, color);
-        std::string str = "EDGE " +std::to_string(i) + " (" + std::to_string(e.tilesCount) + ")"; 
+        std::string str = "EDGE ";
+        if (e.type == TOP) str += "TOP ";
+        else if (e.type == DOWN) str += "DOWN ";
+        else if (e.type == LEFT) str += "LEFT";
+        else  str += "RIGHT ";
+        str += std::to_string(i) + " (" + std::to_string(e.tilesCount) + ")"; 
         Vector2 textPos = {e.start.x*tileSize, e.start.y*tileSize};
         int textWidth = MeasureText(str.c_str(), 20);
         if (e.type == TOP) {

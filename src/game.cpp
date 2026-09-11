@@ -52,6 +52,7 @@ void Game::proccessInputGame() {
 
     if (IsKeyPressed(KEY_R)) {
         m_player.reset();
+        m_tileMap.changeLevel(0);
         m_player.m_position = m_tileMap.getSpawnPosition();
     }
 
@@ -134,12 +135,15 @@ static void checkAndResolveCollision(Player& player, const TileMap& tileMap) {
     player.m_position = nBP;
 }
 
+
 void Game::updateGame(float deltaTime) 
 {
     m_player.update(deltaTime);
     m_line.update(deltaTime);
 
     checkAndResolveCollision(m_player, m_tileMap);
+
+    m_tileMap.checkForNextLevel(m_player.m_position);
 }
 
 void Game::update()

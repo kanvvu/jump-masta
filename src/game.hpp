@@ -14,7 +14,7 @@ private:
     int m_windowHeight;
     const char *m_windowTitle;
     Camera2D camera = {0};
-    GameState currentGameState = LEVEL_EDITOR;
+    GameState currentGameState = GAME;
     TileLevelManager tileLevelManager;
 
     LevelEditor m_levelEditor;

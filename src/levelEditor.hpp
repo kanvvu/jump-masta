@@ -74,7 +74,6 @@ public:
     void saveLevel(std::string name);
     void loadLevel(int levelID);
 
-    std::vector<Edge> getEdges();
     void buildEdges();
 };
 

@@ -2,12 +2,25 @@
 #include <iostream>
 #include "raylib.h"
 
-TileMap::TileMap(TileLevelManager& tileLevelManager, int widthCount, int heightCount)
-: tileLevelManager(tileLevelManager),
-  m_widthCount(widthCount),
-  m_heightCount(heightCount)
+
+TileMap::TileMap(TileLevelManager &tileLevelManager, int widthCount, int heightCount)
+    : tileLevelManager(tileLevelManager),
+      m_widthCount(widthCount),
+      m_heightCount(heightCount)
 {
 
+}
+
+void TileMap::changeLevel(int levelID)
+{
+    if (levelID >= tileLevelManager.getLevelCount()) {
+        std::cout<<"ERROR [changeLevel] levelID is "<<levelID<<" where max: "<<tileLevelManager.getLevelCount()<<"\n";
+        return;
+    }
+
+    currentTileMapIndex = levelID;
+    m_widthCount = tileLevelManager.getLevel(levelID).width;
+    m_heightCount = tileLevelManager.getLevel(levelID).height;
 }
 
 void TileMap::draw()
@@ -72,6 +85,55 @@ Vector2 TileMap::getSpawnPosition()
         }
     }
     return {0,0};
+}
+
+void TileMap::checkForNextLevel(Vector2& playerPosition)
+{
+    if (tileLevelManager.getEdges(currentTileMapIndex).size() == 0) return;
+
+    std::vector<Edge>& assignedEdges = tileLevelManager.getEdges(currentTileMapIndex); 
+    std::vector<Edge> edges = tileLevelManager.createEdges(tileLevelManager.getLevel(currentTileMapIndex).level, m_widthCount, m_heightCount);
+
+    if (assignedEdges.size() != edges.size()) {
+        std::cerr<<"ERROR [checkForNextLevel] "<<assignedEdges.size()<<" != "<<edges.size()<<std::endl;
+        return;
+    }
+
+    for(int i=0; i<edges.size(); i++) {
+        const Edge& aEdge = assignedEdges.at(i);
+        const Edge& edge = edges.at(i);
+
+        if (aEdge.assignedNextLevel == -1) continue;
+        // std::cout<<playerPosition.y<<" "<<edge.start.y<<std::endl;
+        switch (edge.type)
+        {
+        case TOP:
+            if (playerPosition.y < edge.start.y) {
+                changeLevel(aEdge.assignedNextLevel);
+                playerPosition.y = m_heightCount -1;
+            }
+            break;
+        case DOWN:
+            if (playerPosition.y + 1.0f> edge.start.y) {
+                changeLevel(aEdge.assignedNextLevel);
+                playerPosition.y = 0.0f;
+            }
+            break;
+        case LEFT:
+            if (playerPosition.x < edge.start.x) {
+                changeLevel(aEdge.assignedNextLevel);
+                playerPosition.x = m_widthCount - 1;
+            }
+            break;
+        case RIGHT:
+            if (playerPosition.x + 1.0f > edge.start.x) {
+                changeLevel(aEdge.assignedNextLevel);
+                playerPosition.x = 0.0f;
+            }
+            break;
+        }
+    }
+
 }
 
 // void helper(std::vector<Edge>& edges, std::vector<int>& tileMap, int tileSize, int widthCount, int heightCount, bool iterateX, int constValue) {
