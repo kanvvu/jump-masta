@@ -105,28 +105,29 @@ void TileMap::checkForNextLevel(Vector2& playerPosition)
 
         if (aEdge.assignedNextLevel == -1) continue;
         // std::cout<<playerPosition.y<<" "<<edge.start.y<<std::endl;
+
         switch (edge.type)
         {
         case TOP:
-            if (playerPosition.y < edge.start.y) {
+            if (playerPosition.y + 0.5f < edge.start.y) {
                 changeLevel(aEdge.assignedNextLevel);
-                playerPosition.y = m_heightCount -1;
+                playerPosition.y = m_heightCount - 1.0f;
             }
             break;
         case DOWN:
-            if (playerPosition.y + 1.0f> edge.start.y) {
+            if (playerPosition.y + 0.5f> edge.start.y) {
                 changeLevel(aEdge.assignedNextLevel);
                 playerPosition.y = 0.0f;
             }
             break;
         case LEFT:
-            if (playerPosition.x < edge.start.x) {
+            if (playerPosition.x + 0.5f < edge.start.x) {
                 changeLevel(aEdge.assignedNextLevel);
                 playerPosition.x = m_widthCount - 1;
             }
             break;
         case RIGHT:
-            if (playerPosition.x + 1.0f > edge.start.x) {
+            if (playerPosition.x + 0.5f > edge.start.x) {
                 changeLevel(aEdge.assignedNextLevel);
                 playerPosition.x = 0.0f;
             }
