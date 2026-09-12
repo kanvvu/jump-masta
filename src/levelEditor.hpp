@@ -24,6 +24,8 @@ private:
         int tileListSelected = -1;
         int tileListHovered = -1;
 
+        void changeSelected(int index, int maxScroll = 6);
+
         void rebuildTileList();
         
         std::string dropDownOptions;

@@ -193,6 +193,46 @@ void LevelEditor::draw()
     drawGUI();
 }
 
+void LevelEditor::EditorGuiState::changeSelected(int index, int maxScroll)
+{
+    if (index >= tileNames.size()) {
+        std::cerr<<"ERROR [changeSelected] invalid index: "<<index<<" >="<<tileNames.size()<<"\n";
+        return;
+    }
+    if (index <  0) {
+        std::cerr<<"ERROR [changeSelected] invalid index: "<<index<<" <="<<" 0\n";
+        return;
+    }
+
+    // int scroll = tileNames.size() - maxScroll;
+    // scroll = scroll < 0 ? 0 : scroll;
+    /*
+    0 -> 0
+    1 -> 0
+    2 -> 0
+    3 -> 0
+    4 -> 0
+    5 
+    6
+    7
+    6
+    
+    0 -> 0 .. 5
+    1 -> 1 .. 6 
+    2 -> 2 .. 7
+    
+    */
+    int scroll = tileList.size() - maxScroll;
+    scroll = scroll < 0 ? 0 : scroll;
+
+    if (tileListScroll > scroll) {
+        tileListScroll = scroll;
+    }
+
+    tileListSelected = index;
+    std::cout<<index<<" "<<scroll<<std::endl;
+}
+
 void LevelEditor::EditorGuiState::rebuildTileList()
 {
     tileList.clear();
@@ -218,25 +258,31 @@ void LevelEditor::EditorGuiState::rebuildDropDowns()
 
 void LevelEditor::drawGUI()
 {
-    if (GuiButton({ 10, 100, 220, 60 }, "Add")) {
+    if (GuiButton({ 10, 100, 220, 60 }, "Add new")) {
+        currMap = std::vector<int>(tileCountX*tileCountY, 0);
+        createTileNames();
+        buildEdges();
+
         saveLevel("level");
-        // std::cout<<"SAVE!"<<std::endl;
+
+        gui.changeSelected(gui.tileList.size() - 1);
     }
+
     if (GuiButton({ 10 + 10 + 220 , 100, 220, 60 }, "Save All")) {
         // saveLevel("level");
         tileLevelManager.saveLevels();
         // std::cout<<"SAVE!"<<std::endl;
     }
 
-    GuiListViewEx({ 10, 300, 300, 200 }, gui.tileList.data(), static_cast<int>(gui.tileList.size()), &gui.tileListScroll, &gui.tileListSelected, &gui.tileListHovered);
-
-    if (GuiButton({ 10, 300 + 210, 220, 60 }, "Load")){
+    if (GuiListViewEx({ 10, 300, 300, 200 }, gui.tileList.data(), static_cast<int>(gui.tileList.size()), &gui.tileListScroll, &gui.tileListSelected, &gui.tileListHovered)) {
+        std::cout<<"LIST: "<<gui.tileListScroll<<std::endl;
         if (gui.tileListSelected >=0 && gui.tileListSelected < tileLevelManager.getLevelCount()) {
             loadLevel(gui.tileListSelected);
         } else {
             std::cout<<"ERROR LOAD! "<<gui.tileListSelected<<std::endl;
         }
         // std::cout<<"LOAD!"<<gui.tileListSelected<<std::endl;
+
     }
 
     if (GuiButton({ 10 + 10 + 220, 300 + 210, 220, 60 }, "Delete")){
@@ -248,12 +294,22 @@ void LevelEditor::drawGUI()
             isOk = false;
         }
 
-        currMap = std::vector<int>(tileCountX*tileCountY, 0);
+        int selected = gui.tileListSelected;
+
         createTileNames();
-        buildEdges();
+
+        if (selected >= gui.tileList.size()) {
+            selected = gui.tileList.size() - 1;
+        } 
+
+        gui.changeSelected(selected);
+        loadLevel(selected);
+
+        loadLevel(selected);
+
     }
     
-    if (GuiButton({ 10, 300 + 210 + 10 + 60, 220, 60 }, "Save")){
+    if (GuiButton({ 10, 300 + 210, 220, 60 }, "Save")){
         if (gui.tileListSelected >=0 && gui.tileListSelected < tileLevelManager.getLevelCount()) {
             TileMapLevel level = tileLevelManager.getLevel(gui.tileListSelected);
             level.level = currMap;
@@ -261,6 +317,12 @@ void LevelEditor::drawGUI()
         } else {
             std::cout<<"ERROR LOAD! "<<gui.tileListSelected<<std::endl;
         }
+
+    }
+
+    if (GuiButton({ 10, 300 + 210 + 10 + 60, 220, 60 }, "Save as new")) {
+        saveLevel("level");
+        // std::cout<<"SAVE!"<<std::endl;
 
     }
 
@@ -273,7 +335,6 @@ void LevelEditor::drawGUI()
         int textWidth = MeasureText(str.c_str(), 20);
         if (GuiDropdownBox({ textPos.x + textWidth + 10, textPos.y, 200, 25 }, gui.dropDownOptions.c_str(), &gui.dropDowns[i-1].dropdownActive, gui.dropDowns[i-1].dropDownEditMode)) {
                 gui.dropDowns[i-1].dropDownEditMode = !gui.dropDowns[i-1].dropDownEditMode; // Toggle open/closed state
-               
                 e.assignedNextLevel = gui.dropDowns[i-1].dropdownActive;
         }
     }

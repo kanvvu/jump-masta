@@ -38,7 +38,7 @@ void TileLevelManager::loadLevels()
 
   if (!file)
     {
-        std::cerr << "Could not open "<<GetLevelPath();
+        std::cerr << "[TileLevelManager::loadLevels] Could not open "<<GetLevelPath();
         return;
     }
 
@@ -52,7 +52,7 @@ void TileLevelManager::loadLevels()
         tokens = split(s, " ");
 
         if (tokens.size() != 2) {
-            std::cerr << "Invalid map dimensions, should be 2, is " + tokens.size() << std::endl;
+            std::cerr <<"[TileLevelManager::loadLevels] " <<"Invalid map dimensions, should be 2, is " + tokens.size() << std::endl;
             return;
         } 
         int width = std::stoi(tokens[0]);
@@ -62,7 +62,7 @@ void TileLevelManager::loadLevels()
         tileMap.height = height;
 
         if (!std::getline(file, s)) {
-            std::cerr << "Invalid map file, file to short! \n";
+            std::cerr <<"[TileLevelManager::loadLevels] " << "Invalid map file, file to short! \n";
             return;
         }
         std::string mapName = s;
@@ -71,13 +71,13 @@ void TileLevelManager::loadLevels()
 
         for (int i = 0; i<height; i++) {
             if (!std::getline(file, s)) {
-                std::cerr << "Invalid map file, file to short! \n";
+                std::cerr <<"[TileLevelManager::loadLevels] " << "Invalid map file, file to short! \n";
                 return;
             }
 
             tokens = split(s, " ");
             if (tokens.size() != width) {
-                std::cerr << "Invalid map file, loaded "<<tokens.size()<<", should be "<<width<<std::endl;
+                std::cerr <<"[TileLevelManager::loadLevels] " << "Invalid map file, loaded "<<tokens.size()<<", should be "<<width<<std::endl;
                 return;
             }
             
@@ -90,14 +90,14 @@ void TileLevelManager::loadLevels()
         std::streampos originalPosition = file.tellg();
 
         if (!std::getline(file,s)) {
-            std::cerr << "No assigned levels info!\n";
+            std::cerr <<"[TileLevelManager::loadLevels] " << "No assigned levels info!\n";
             allEdges.push_back(std::vector<Edge>());
             return;
         }
 
         tokens = split(s, " ");
         if (tokens.size() != 1) {
-            std::cerr << "No assigned levels info! (invalid dimensions, should be 1 is "<<tokens.size()<<" )\n";
+            std::cerr <<"[TileLevelManager::loadLevels] " << "No assigned levels info! (invalid dimensions, should be 1 is "<<tokens.size()<<" )\n";
             allEdges.push_back(std::vector<Edge>());
             file.clear();
             file.seekg(originalPosition);
@@ -107,14 +107,14 @@ void TileLevelManager::loadLevels()
             bool isOk = true;
             for(int i=0; i < edgesCount; i++) {
                 if (!std::getline(file, s)) {
-                    std::cerr << "Invalid level info, info to short! \n";
+                    std::cerr <<"[TileLevelManager::loadLevels] " << "Invalid level info, info to short! \n";
                     isOk = false;
                     break;
                 }
 
                 tokens = split(s, " ");
                 if (tokens.size() != 1) {
-                    std::cerr << "Invalid level info, assigned level should be 1 is "<<tokens.size()<<"\n";
+                    std::cerr <<"[TileLevelManager::loadLevels] " << "Invalid level info, assigned level should be 1 is "<<tokens.size()<<"\n";
                     isOk = false;
                     break;
                 }
@@ -148,7 +148,7 @@ std::ostringstream TileLevelManager::levelToStream(const TileMapLevel& tileMap,c
             int index = i*tileMap.width + j;
             
             if (index >= tileMap.level.size()) {
-                std::cerr << "Invalid index! out of range "<<index<<", should be <= "<< tileMap.level.size();
+                std::cerr <<"[TileLevelManager::loadLevels] " << "Invalid index! out of range "<<index<<", should be <= "<< tileMap.level.size();
                 data.str("");
                 return data;
             }
@@ -187,7 +187,7 @@ void TileLevelManager::saveLevel(const TileMapLevel& tileMap, const std::vector<
 void TileLevelManager::saveLevels()
 {
     if (allEdges.size() != tileMaps.size()) {
-        std::cerr<<"ERROR [saveLevels] "<<allEdges.size()<<" != "<<tileMaps.size()<<"\n";
+        std::cerr<<"ERROR [TileLevelManager::saveLevels] "<<allEdges.size()<<" != "<<tileMaps.size()<<"\n";
         return;
     }
 
@@ -205,12 +205,12 @@ void TileLevelManager::saveLevels()
 void TileLevelManager::deleteLevel(int levelID)
 {
     if (allEdges.size() <= levelID) {
-        std::cerr<<"ERROR [deleteLevel] "<<allEdges.size()<<" <= "<<levelID<<"\n";
+        std::cerr<<"ERROR [TileLevelManager::deleteLevel] "<<allEdges.size()<<" <= "<<levelID<<"\n";
         return;
     }
     
     if (allEdges.size() != tileMaps.size()) {
-        std::cerr<<"ERROR [deleteLevel] "<<allEdges.size()<<" != "<<tileMaps.size()<<"\n";
+        std::cerr<<"ERROR [TileLevelManager::deleteLevel] "<<allEdges.size()<<" != "<<tileMaps.size()<<"\n";
         return;
     }
 
@@ -232,11 +232,11 @@ void TileLevelManager::deleteLevel(int levelID)
 void TileLevelManager::editLevel(int levelID, const TileMapLevel& tileMap,const std::vector<Edge>& edges)
 {
     if (tileMaps.size() <= levelID) {
-        std::cerr<<"ERROR [editLevel] "<<tileMaps.size()<<" <= "<<levelID<<"\n";
+        std::cerr<<"ERROR [TileLevelManager::editLevel] "<<tileMaps.size()<<" <= "<<levelID<<"\n";
         return;
     }
     if (allEdges.size() <= levelID) {
-        std::cerr<<"ERROR [editLevel] "<<allEdges.size()<<" <= "<<levelID<<"\n";
+        std::cerr<<"ERROR [TileLevelManager::editLevel] "<<allEdges.size()<<" <= "<<levelID<<"\n";
         return;
     }
 
@@ -259,7 +259,7 @@ void TileLevelManager::editLevel(int levelID, const TileMapLevel& tileMap,const 
 TileMapLevel TileLevelManager::getLevel(int levelID) const
 {
     if (levelID >= tileMaps.size()) {
-        std::cerr << "Invalid levelID! out of range "<<levelID<<", should be <= "<< tileMaps.size();
+        std::cerr << "[TileMapLevel::getLevel] Invalid levelID! out of range "<<levelID<<", should be <= "<< tileMaps.size()<<"\n";
         TileMapLevel empty = {
             {},
             0,
@@ -281,7 +281,7 @@ int TileLevelManager::getLevelCount()
 std::vector<Edge> TileLevelManager::getEdges(int levelID) const
 {
     if (allEdges.size() <= levelID) {
-        std::cerr<<"\033[31m"<<"ERROR invalid levelID for assignedLevels! given: "<<levelID<<", max is: "<<allEdges.size()-1<<"\n";
+        std::cerr<<"\033[31m"<<"[TileMapLevel::getLevel] "<<"ERROR invalid levelID for assignedLevels! given: "<<levelID<<", should be <= "<<allEdges.size()<<"\033[0m\n";
         return std::vector<Edge>();
     }
     return allEdges.at(levelID);
