@@ -1,0 +1,196 @@
+#include "levelFileLoader.hpp"
+#include <sstream>
+#include <string>
+#include <fstream>
+#include <iostream>
+
+static std::string GetLevelPath() {
+#if defined(DEV_MODE) && !defined(__EMSCRIPTEN__)
+    return std::string(SOURCE_RESOURCE_DIR) + "levels.txt";
+#else
+    return "resources/levels.txt";
+#endif
+
+}
+
+static std::vector<std::string> split(std::string s, const std::string& delimiter) {
+    std::vector<std::string> tokens;
+    size_t pos = 0;
+    std::string token;
+    while ((pos = s.find(delimiter)) != std::string::npos) {
+        token = s.substr(0, pos);
+        tokens.push_back(token);
+        s.erase(0, pos + delimiter.length());
+    }
+    tokens.push_back(s);
+
+    return tokens;
+}
+
+std::ostringstream LevelFileLoader::levelToStream(const LevelData &level) const
+{
+    std::ostringstream data;
+
+    data << level.width << " " << level.height << "\n";
+    data << level.name << "\n";
+
+    for (int i=0; i<level.height; i++) {
+        for (int j=0; j<level.width; j++) {
+            int index = i*level.width + j;
+            
+            if (index >= level.level.size()) {
+                std::cerr <<"[LevelFileLoader::loadLevels] " << "Invalid index! out of range "<<index<<", should be <= "<< level.level.size();
+                data.str("");
+                return data;
+            }
+            data << level.level.at(index);
+            if (j + 1 != level.width) data << " ";
+        }
+        data << "\n";
+    }
+    data << level.edges.size() << "\n";
+    for(int i=0; i<level.edges.size(); i++) {
+        data << level.edges[i].assignedNextLevel;
+        // if (i+1 != edges.size()) data << "\n";
+        data << "\n";
+    }
+    
+    return data; 
+}
+
+void LevelFileLoader::saveLevel(const LevelData &level) const
+{
+    std::ostringstream data = levelToStream(level);
+    
+    std::ofstream file;
+    file.open(GetLevelPath(), std::ios_base::app);
+
+    file << data.str();
+
+    file.close();
+}
+
+std::vector<LevelData> LevelFileLoader::loadLevels() const
+{
+
+    std::vector<LevelData> levels;
+    std::vector<LevelData> empty;
+
+    std::ifstream file(GetLevelPath());
+
+    if (!file)
+        {
+            std::cerr << "[LevelFileLoader::loadLevels] Could not open "<<GetLevelPath();
+            return empty;
+        }
+
+        int lineNumber = 1;
+        std::string s;
+
+        while (std::getline(file, s)) {
+            LevelData levelData;
+
+            std::vector<std::string> tokens;
+            tokens = split(s, " ");
+
+            if (tokens.size() != 2) {
+                std::cerr <<"[LevelFileLoader::loadLevels] " <<"Invalid map dimensions, should be 2, is " + tokens.size() << std::endl;
+                return empty;
+            } 
+            int width = std::stoi(tokens[0]);
+            int height = std::stoi(tokens[1]);
+
+            levelData.width = width;
+            levelData.height = height;
+
+            if (!std::getline(file, s)) {
+                std::cerr <<"[LevelFileLoader::loadLevels] " << "Invalid map file, file to short! \n";
+                return empty;
+            }
+            std::string levelName = s;
+            std::cout<<width<<" "<<height<<" "<<levelName<<std::endl;
+            levelData.name = levelName;
+
+            for (int i = 0; i<height; i++) {
+                if (!std::getline(file, s)) {
+                    std::cerr <<"[LevelFileLoader::loadLevels] " << "Invalid map file, file to short! \n";
+                    return empty;
+                }
+
+                tokens = split(s, " ");
+                if (tokens.size() != width) {
+                    std::cerr <<"[LevelFileLoader::loadLevels] " << "Invalid map file, loaded "<<tokens.size()<<", should be "<<width<<std::endl;
+                    return empty;
+                }
+                
+                for(std::string& token : tokens) {
+                    levelData.level.push_back(stoi(token));
+                }
+            }
+            // levels.push_back(levelData);
+
+            std::streampos originalPosition = file.tellg();
+
+            if (!std::getline(file,s)) {
+                std::cerr <<"[LevelFileLoader::loadLevels] " << "No assigned levels info!\n";
+                // allEdges.push_back(std::vector<Edge>());
+                return empty;
+            }
+
+            tokens = split(s, " ");
+            if (tokens.size() != 1) {
+                std::cerr <<"[LevelFileLoader::loadLevels] " << "No assigned levels info! (invalid dimensions, should be 1 is "<<tokens.size()<<" )\n";
+                // allEdges.push_back(std::vector<Edge>());
+                file.clear();
+                file.seekg(originalPosition);
+            } else {
+                int edgesCount = stoi(tokens[0]);
+                std::vector<Edge> edges;
+                bool isOk = true;
+                for(int i=0; i < edgesCount; i++) {
+                    if (!std::getline(file, s)) {
+                        std::cerr <<"[LevelFileLoader::loadLevels] " << "Invalid level info, info to short! \n";
+                        isOk = false;
+                        break;
+                    }
+
+                    tokens = split(s, " ");
+                    if (tokens.size() != 1) {
+                        std::cerr <<"[LevelFileLoadeLevelFileLoader::loadLevels] " << "Invalid level info, assigned level should be 1 is "<<tokens.size()<<"\n";
+                        isOk = false;
+                        break;
+                    }
+
+                    Edge edge;
+                    edge.assignedNextLevel = stoi(tokens[0]);
+                    edges.push_back(edge);
+                }
+                if (isOk) {
+                    // allEdges.push_back(edges);
+                    levelData.edges = edges;
+                } else {
+                    // allEdges.push_back(std::vector<Edge>());
+                    file.clear();
+                    file.seekg(originalPosition);
+                }
+            }
+
+            levels.push_back(levelData);
+        }
+    file.close();
+
+    return levels;
+}
+
+void LevelFileLoader::saveLevels(const std::vector<LevelData> &levels) const
+{
+    std::ofstream file;
+    file.open(GetLevelPath());
+
+    for(int i=0; i<levels.size(); i++) {
+        std::ostringstream data = levelToStream(levels[i]);
+        file<<data.str();
+    }
+
+    file.close();
+}

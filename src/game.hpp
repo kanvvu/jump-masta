@@ -1,10 +1,11 @@
 #pragma once
 #include "raylib.h"
-#include "tileMap.hpp"
+#include "levelMap.hpp"
 #include "player.hpp"
 #include "line.hpp"
 #include "levelEditor.hpp"
 #include "common.hpp"
+#include "levelFileLoader.hpp"
 
 
 class Game
@@ -15,16 +16,18 @@ private:
     const char *m_windowTitle;
     Camera2D camera = {0};
     GameState currentGameState = LEVEL_EDITOR;
-    TileLevelManager tileLevelManager;
+
+    LevelFileLoader m_levelFileLoader;
+
+    LevelRepository m_levelRepository;
 
     LevelEditor m_levelEditor;
 
-    TileMap m_tileMap;
+    LevelMap m_tileMap;
 
     Player m_player;
 
     Line m_line;
-    //line stuff
 
 
 public:

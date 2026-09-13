@@ -1,22 +1,23 @@
 #pragma once
 
 #include <vector>
-#include "tileLevelManager.hpp"
+#include "levelRepository.hpp"
 #include "raylib.h"
 #include "common.hpp"
+#include "player.hpp"
 
-class TileMap
+class LevelMap
 {
 private:
     
     int m_tileSize = 64;
-    TileLevelManager& tileLevelManager;
+    LevelRepository& levelRepository;
     int currentTileMapIndex = 0;
 
     
     public:
-    TileMap(TileLevelManager& tileLevelManager); 
-    ~TileMap() = default;
+    LevelMap(LevelRepository& levelRepository); 
+    ~LevelMap() = default;
     
     void update();
     void draw();
@@ -28,6 +29,7 @@ private:
     
     std::vector<Edge> getEdges();
     
+    void checkAndResolveCollision(Player& player);
     bool checkForNextLevel(Vector2& playerPosition);
     void changeLevel(int levelID);
 };

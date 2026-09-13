@@ -7,8 +7,9 @@ Game::Game(int windowWidth, int windowHeight, const char *windowTitle)
   : m_windowWidth(windowWidth),
     m_windowHeight(windowHeight),
     m_windowTitle(windowTitle),
-    m_tileMap(tileLevelManager),
-    m_levelEditor(tileLevelManager)
+    m_levelRepository(m_levelFileLoader),
+    m_tileMap(m_levelRepository),
+    m_levelEditor(m_levelRepository)
 {
     InitWindow(windowWidth, windowHeight, windowTitle);
     SetTargetFPS(60);
@@ -44,19 +45,11 @@ void Game::proccessInputGame() {
         currentGameState = LEVEL_EDITOR;
     }   
 
-    Vector2 dir = {0.0, 0.0};
-    if (IsKeyDown(KEY_W)) { dir.y = -1;}
-    if (IsKeyDown(KEY_A)) { dir.x = -1;}
-    if (IsKeyDown(KEY_S)) { dir.y = 1;}
-    if (IsKeyDown(KEY_D)) { dir.x = 1;}
-
     if (IsKeyPressed(KEY_R)) {
         m_player.reset();
         m_tileMap.changeLevel(0);
         m_player.m_position = m_tileMap.getSpawnPosition();
     }
-
-    // m_player.m_direction = Vector2Normalize(dir);
 
     if (IsMouseButtonDown(0)) {
         m_line.mouseButtonDown();
@@ -84,69 +77,22 @@ void Game::proccessInput()
     }
 }
 
-static void checkAndResolveCollision(Player& player, const TileMap& tileMap) {
-    Vector2 bP = player.m_previousPosition; 
-    Vector2 nBP = player.m_position;
-    
-    // velo = Vector2Subtract(nBP, bP);
-    // std::string msg = "";
-    Vector2 movementDirection = Vector2Subtract(nBP, bP);
-    if (movementDirection.x <= 0) { //left
-        if (tileMap.isCollision({nBP.x, bP.y}, 1) ||
-            tileMap.isCollision({nBP.x, bP.y + 0.99f}, 1)) {
-            nBP.x = (int) nBP.x + 1;
-            player.m_velocity.x = -0.5*player.m_velocity.x;
-            // std::cout<<"left\n";
-            // msg += "| left (" + std::to_string(nBP.x) + ", " + std::to_string(nBP.y) + "), " + "(" + std::to_string(m_player.m_velocity.x) + ", " + std::to_string(m_player.m_velocity.y) + ") ";
-            }
-    }
-    else {  //right
-        if (tileMap.isCollision({nBP.x + 1.0f, bP.y}, 1) ||
-            tileMap.isCollision({nBP.x + 1.0f, bP.y + 0.99f}, 1)) {
-            nBP.x = (int) nBP.x;
-            player.m_velocity.x = -0.5*player.m_velocity.x;
-            // std::cout<<"right\n";
-            // msg += "| right ";
-        }
-    }
 
-    player.onGround = false;
-    if (movementDirection.y <= 0) { //up
-        if (tileMap.isCollision({nBP.x, nBP.y}, 1) ||
-            tileMap.isCollision({nBP.x + 0.90f, nBP.y}, 1)) {
-            nBP.y = (int) nBP.y + 1;
-            player.m_velocity.y = -0.5*player.m_velocity.y;
-            // std::cout<<"up " <<"("<<nBP.x << ", " << nBP.y <<"), "<< "("<<m_player.m_velocity.x << ", " << m_player.m_velocity.y <<"), " << "\n";
-            // msg += "| up (" + std::to_string(nBP.x) + ", " + std::to_string(nBP.y) + "), " + "(" + std::to_string(m_player.m_velocity.x) + ", " + std::to_string(m_player.m_velocity.y) + ") ";
-        }
-    }
-    else { //down
-        if (tileMap.isCollision({nBP.x, nBP.y + 1.0f}, 1) ||
-            tileMap.isCollision({nBP.x + 0.90f, nBP.y + 1.0f}, 1)) {
-            nBP.y = (int) nBP.y;
-            player.m_velocity.y = 0;
-            // std::cout<<"down\n";
-            // msg += "| down ";
-            player.onGround = true;
-        }
-    }
-    // if (msg != "") std::cout<<msg<<"\n";
-
-    player.m_position = nBP;
+static void centerCamera(Vector2& cameraOffset, Vector2i windowSize, Vector2i tileMapSize, int tileSize) {
+    cameraOffset.x =windowSize.x/2 - (tileMapSize.x*tileSize)/2;   // coordinate x origin
+    cameraOffset.y = windowSize.y/2 - (tileMapSize.y*tileSize)/2;   // coordinate y origin
 }
-
 
 void Game::updateGame(float deltaTime) 
 {
     m_player.update(deltaTime);
     m_line.update(deltaTime);
 
-    checkAndResolveCollision(m_player, m_tileMap);
+    m_tileMap.checkAndResolveCollision(m_player);
 
-    if (m_tileMap.checkForNextLevel(m_player.m_position)) {
-        camera.offset.x = m_windowWidth/2 - (m_tileMap.getSize().x*m_tileMap.getTileSize())/2;   // coordinate x origin
-        camera.offset.y = m_windowHeight/2 - (m_tileMap.getSize().y*m_tileMap.getTileSize())/2;   // coordinate y origin
-    }
+    if (m_tileMap.checkForNextLevel(m_player.m_position)) 
+        centerCamera(camera.offset, {m_windowWidth, m_windowHeight}, m_tileMap.getSize(), m_tileMap.getTileSize());
+    
 }
 
 void Game::update()
@@ -181,6 +127,11 @@ void Game::drawGame() {
 
 }
 
+static void drawFPS() {
+    std::string frameRate = std::to_string(1.0/GetFrameTime());
+    DrawText(frameRate.c_str(), 0, 0, 30, BLACK);
+}
+
 void Game::draw()
 {
     BeginDrawing();
@@ -198,8 +149,8 @@ void Game::draw()
             break;
         }
 
-    std::string frameRate = std::to_string(1.0/GetFrameTime());
-    DrawText(frameRate.c_str(), 0, 0, 30, BLACK);
+    
+    drawFPS();
 
     EndDrawing();
 }

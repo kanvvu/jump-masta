@@ -4,7 +4,7 @@
 #include "interfaces.hpp"
 #include "common.hpp"
 #include <vector>
-#include "tileLevelManager.hpp"
+#include "levelRepository.hpp"
 
 
 class LevelEditor
@@ -52,27 +52,24 @@ private:
 
     Camera2D camera = {0};
     Vector2 cameraOffset = {0};
-    std::vector<int> currMap;
-    std::string mapName = "level";
+
+    LevelData currLevel;
 
     int screenWidth = 1920;
     int screenHeight = 1080;
 
-    int tileCountX = 10;
-    int tileCountY = 15;
     int tileSize = 64;
     bool isMouseDown = false;
     int mouseMode = 0; // 0 - adding, 1 - removing
 
     int selectedTile = 1;
 
-    TileLevelManager& tileLevelManager;
+    LevelRepository& levelRepository;
 
-    std::vector<Edge> edges;
 
 public:
-    LevelEditor(TileLevelManager& tileLevelManager);
-    LevelEditor(TileLevelManager& TileLevelManager, int tileSize);
+    LevelEditor(LevelRepository& levelRepository);
+    LevelEditor(LevelRepository& levelRepository, int tileSize);
     ~LevelEditor() = default;
 
     void proccessInput(GameState& gameState);

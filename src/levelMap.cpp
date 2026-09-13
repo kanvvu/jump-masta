@@ -1,28 +1,29 @@
-#include "tileMap.hpp"
+#include "levelMap.hpp"
 #include <iostream>
 #include "raylib.h"
+#include "raymath.h"
 
 
-TileMap::TileMap(TileLevelManager &tileLevelManager)
-    : tileLevelManager(tileLevelManager)
+LevelMap::LevelMap(LevelRepository& levelRepository)
+    : levelRepository(levelRepository)
 {
 
 }
 
-void TileMap::changeLevel(int levelID)
+void LevelMap::changeLevel(int levelID)
 {
-    if (levelID >= tileLevelManager.getLevelCount()) {
-        std::cout<<"ERROR [TileMap::changeLevel] levelID is "<<levelID<<" where max: "<<tileLevelManager.getLevelCount()<<"\n";
+    if (levelID >= levelRepository.getLevelCount()) {
+        std::cout<<"ERROR [TileMap::changeLevel] levelID is "<<levelID<<" where max: "<<levelRepository.getLevelCount()<<"\n";
         return;
     }
 
     currentTileMapIndex = levelID;
 }
 
-void TileMap::draw()
+void LevelMap::draw()
 {
-    int m_widthCount = tileLevelManager.getLevel(currentTileMapIndex).width;
-    int m_heightCount = tileLevelManager.getLevel(currentTileMapIndex).height;
+    int m_widthCount = levelRepository.getLevel(currentTileMapIndex).width;
+    int m_heightCount = levelRepository.getLevel(currentTileMapIndex).height;
 
     for(int i=0; i<m_heightCount; i++) {
         for(int j=0; j<m_widthCount; j++) {
@@ -31,7 +32,7 @@ void TileMap::draw()
             int yPos = i*m_tileSize;
             Color tileColor = WHITE;
 
-            std::vector<int>& tileMap = tileLevelManager.getLevel(currentTileMapIndex).level;
+            std::vector<int>& tileMap = levelRepository.getLevel(currentTileMapIndex).level;
             if (tileMap[tileIndex] == 1) tileColor = BLUE;
             if (tileMap[tileIndex] == 3) tileColor= ORANGE;
 
@@ -55,10 +56,10 @@ void TileMap::draw()
     }
 }
 
-bool TileMap::isCollision(Vector2 position, int tileType) const
+bool LevelMap::isCollision(Vector2 position, int tileType) const
 {
-    int m_widthCount = tileLevelManager.getLevel(currentTileMapIndex).width;
-    int m_heightCount = tileLevelManager.getLevel(currentTileMapIndex).height;
+    int m_widthCount = levelRepository.getLevel(currentTileMapIndex).width;
+    int m_heightCount = levelRepository.getLevel(currentTileMapIndex).height;
 
     int posX = position.x;
     int posY = position.y;
@@ -67,16 +68,16 @@ bool TileMap::isCollision(Vector2 position, int tileType) const
         return false;
     }
 
-    const std::vector<int>& tileMap = tileLevelManager.getLevel(currentTileMapIndex).level;
+    const std::vector<int>& tileMap = levelRepository.getLevel(currentTileMapIndex).level;
     if (tileMap[posY*m_widthCount + posX] == tileType) return true;
     
     return false;
 }
 
-Vector2 TileMap::getSpawnPosition()
+Vector2 LevelMap::getSpawnPosition()
 {
-    int m_widthCount = tileLevelManager.getLevel(currentTileMapIndex).width;
-    int m_heightCount = tileLevelManager.getLevel(currentTileMapIndex).height;
+    int m_widthCount = levelRepository.getLevel(currentTileMapIndex).width;
+    int m_heightCount = levelRepository.getLevel(currentTileMapIndex).height;
 
     for(int i=0; i<m_heightCount; i++) {
         for(int j=0; j<m_widthCount; j++) {
@@ -85,30 +86,37 @@ Vector2 TileMap::getSpawnPosition()
             int yPos = i*m_tileSize;
             Color tileColor = WHITE;
 
-            std::vector<int>& tileMap = tileLevelManager.getLevel(currentTileMapIndex).level;
+            std::vector<int>& tileMap = levelRepository.getLevel(currentTileMapIndex).level;
             if (tileMap[tileIndex] == 2) return {(float) j,(float) i};
         }
     }
     return {0,0};
 }
 
-Vector2i TileMap::getSize()
+Vector2i LevelMap::getSize()
 {
-    return {tileLevelManager.getLevel(currentTileMapIndex).width, tileLevelManager.getLevel(currentTileMapIndex).height};
+    return {levelRepository.getLevel(currentTileMapIndex).width, levelRepository.getLevel(currentTileMapIndex).height};
 }
 
-bool TileMap::checkForNextLevel(Vector2& playerPosition)
+bool LevelMap::checkForNextLevel(Vector2& playerPosition)
 {
-    int m_widthCount = tileLevelManager.getLevel(currentTileMapIndex).width;
-    int m_heightCount = tileLevelManager.getLevel(currentTileMapIndex).height;
+    if (currentTileMapIndex >= levelRepository.getLevelCount() || currentTileMapIndex < 0) {
+        std::cerr<<"ERROR [LevelMap::checkForNextLevel] id: "<<currentTileMapIndex<<" >= "<<levelRepository.getLevelCount()<<"\n";
+        return false;
+    }
 
-    if (tileLevelManager.getEdges(currentTileMapIndex).size() == 0) return false;
+    LevelData& levelData = levelRepository.getLevel(currentTileMapIndex);
 
-    std::vector<Edge>& assignedEdges = tileLevelManager.getEdges(currentTileMapIndex); 
-    std::vector<Edge> edges = tileLevelManager.createEdges(tileLevelManager.getLevel(currentTileMapIndex).level, m_widthCount, m_heightCount);
+    int m_widthCount = levelData.width;
+    int m_heightCount = levelData.height;
+
+    if (levelData.edges.size() == 0) return false;
+
+    std::vector<Edge>& assignedEdges = levelData.edges;
+    std::vector<Edge> edges = levelRepository.createEdges(levelData);
 
     if (assignedEdges.size() != edges.size()) {
-        std::cerr<<"ERROR [TileMap::checkForNextLevel] "<<assignedEdges.size()<<" != "<<edges.size()<<std::endl;
+        std::cerr<<"ERROR [LevelMap::checkForNextLevel] "<<assignedEdges.size()<<" != "<<edges.size()<<std::endl;
         return false;
     }
 
@@ -118,8 +126,8 @@ bool TileMap::checkForNextLevel(Vector2& playerPosition)
 
         if (aEdge.assignedNextLevel == -1) continue;
         // std::cout<<playerPosition.y<<" "<<edge.start.y<<std::endl;
-        int m_widthCount = tileLevelManager.getLevel(aEdge.assignedNextLevel).width;
-        int m_heightCount = tileLevelManager.getLevel(aEdge.assignedNextLevel).height;
+        int m_widthCount = levelRepository.getLevel(aEdge.assignedNextLevel).width;
+        int m_heightCount = levelRepository.getLevel(aEdge.assignedNextLevel).height;
 
         switch (edge.type)
         {
@@ -156,6 +164,45 @@ bool TileMap::checkForNextLevel(Vector2& playerPosition)
 
     return false;
 
+}
+
+void LevelMap::checkAndResolveCollision(Player& player) {
+    Vector2 bP = player.m_previousPosition; 
+    Vector2 nBP = player.m_position;
+    
+    Vector2 movementDirection = Vector2Subtract(nBP, bP);
+    if (movementDirection.x <= 0) { //left
+        if (isCollision({nBP.x, bP.y}, 1) ||
+            isCollision({nBP.x, bP.y + 0.99f}, 1)) {
+            nBP.x = (int) nBP.x + 1;
+            player.m_velocity.x = -0.5*player.m_velocity.x;
+            }
+    }
+    else {  //right
+        if (isCollision({nBP.x + 1.0f, bP.y}, 1) ||
+            isCollision({nBP.x + 1.0f, bP.y + 0.99f}, 1)) {
+            nBP.x = (int) nBP.x;
+            player.m_velocity.x = -0.5*player.m_velocity.x;
+        }
+    }
+
+    player.onGround = false;
+    if (movementDirection.y <= 0) { //up
+        if (isCollision({nBP.x, nBP.y}, 1) ||
+            isCollision({nBP.x + 0.90f, nBP.y}, 1)) {
+            nBP.y = (int) nBP.y + 1;
+            player.m_velocity.y = -0.5*player.m_velocity.y;
+        }
+    }
+    else { //down
+        if (isCollision({nBP.x, nBP.y + 1.0f}, 1) ||
+            isCollision({nBP.x + 0.90f, nBP.y + 1.0f}, 1)) {
+            nBP.y = (int) nBP.y;
+            player.m_velocity.y = 0;
+            player.onGround = true;
+        }
+    }
+    player.m_position = nBP;
 }
 
 // void helper(std::vector<Edge>& edges, std::vector<int>& tileMap, int tileSize, int widthCount, int heightCount, bool iterateX, int constValue) {
