@@ -27,5 +27,7 @@ public:
 
     std::vector<Edge> getEdges(int levelID) const;
     std::vector<Edge> createEdges(const std::vector<int>& tileMap, int tileCountX, int tileCountY) const;
+
+    void changeLevelDimensions(int levelID, int width, int height);
 };
 

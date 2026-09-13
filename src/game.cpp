@@ -7,14 +7,14 @@ Game::Game(int windowWidth, int windowHeight, const char *windowTitle)
   : m_windowWidth(windowWidth),
     m_windowHeight(windowHeight),
     m_windowTitle(windowTitle),
-    m_tileMap(tileLevelManager, 10, 15),
+    m_tileMap(tileLevelManager),
     m_levelEditor(tileLevelManager)
 {
     InitWindow(windowWidth, windowHeight, windowTitle);
     SetTargetFPS(60);
 
-    camera.offset.x = windowWidth/2 - (10*64)/2;   // coordinate x origin
-    camera.offset.y = windowHeight/2 - (15*64)/2;   // coordinate y origin
+    camera.offset.x = windowWidth/2 - (m_tileMap.getSize().x*m_tileMap.getTileSize())/2;   // coordinate x origin
+    camera.offset.y = windowHeight/2 - (m_tileMap.getSize().y*m_tileMap.getTileSize())/2;   // coordinate y origin
     camera.target.x = 0;         // rotation and zoom x origin (from offset above)
     camera.target.y = 0;         // rotation and zoom y origin (from offset above)
     camera.rotation = 0;        // rotation in deg
@@ -143,7 +143,10 @@ void Game::updateGame(float deltaTime)
 
     checkAndResolveCollision(m_player, m_tileMap);
 
-    m_tileMap.checkForNextLevel(m_player.m_position);
+    if (m_tileMap.checkForNextLevel(m_player.m_position)) {
+        camera.offset.x = m_windowWidth/2 - (m_tileMap.getSize().x*m_tileMap.getTileSize())/2;   // coordinate x origin
+        camera.offset.y = m_windowHeight/2 - (m_tileMap.getSize().y*m_tileMap.getTileSize())/2;   // coordinate y origin
+    }
 }
 
 void Game::update()

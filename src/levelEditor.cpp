@@ -4,6 +4,7 @@
 #include "raymath.h"
 #include <iostream>
 #include <string>
+#include <cstring>
 
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
@@ -58,6 +59,14 @@ void LevelEditor::loadLevel(int levelID) {
 
     tileCountX = tileMapLevel.width;
     tileCountY = tileMapLevel.height;
+    mapName = tileMapLevel.name;
+
+    snprintf(gui.tbWidth, sizeof(gui.tbWidth), std::to_string(tileCountX).c_str());
+    snprintf(gui.tbHeight, sizeof(gui.tbHeight), std::to_string(tileCountY).c_str());
+    snprintf(gui.tbName, sizeof(gui.tbName), tileMapLevel.name.c_str());
+
+    camera.offset.x = screenWidth/2 - (tileCountX*tileSize)/2;   // coordinate x origin
+    camera.offset.y = screenHeight/2 - (tileCountY*tileSize)/2;   // coordinate y origin
 
     currMap.clear();
     for(int i : tileMapLevel.level) {
@@ -68,7 +77,7 @@ void LevelEditor::loadLevel(int levelID) {
 
     std::vector<Edge> assigned = tileLevelManager.getEdges(levelID);
     if (assigned.size() != edges.size()) {
-        std::cout<<"\033[31m"<<"ERROR assigned not equal edges!\033[0m\n";
+        std::cerr<<"\033[31m"<<"ERROR [LevelEditor::loadLevel] assigned not equal edges!\033[0m\n";
     } else {
         for(int i=0; i<edges.size(); i++) {
             edges[i].assignedNextLevel = assigned[i].assignedNextLevel;
@@ -84,16 +93,18 @@ void LevelEditor::loadLevel(int levelID) {
 
 void LevelEditor::proccessInput(GameState &gameState)
 {
-    if (IsKeyPressed(KEY_E)) {
-        gameState = GAME;
-    }   
+    if (!gui.tbNameEditMode) {
+        if (IsKeyPressed(KEY_E)) {
+            gameState = GAME;
+        }   
 
-    if (IsKeyPressed(KEY_R)) {
-        for (int& tile : currMap) tile = 0;
-    }
+        if (IsKeyPressed(KEY_R)) {
+            for (int& tile : currMap) tile = 0;
+        }
 
-    if (IsKeyPressed(KEY_S)) {
-        saveLevel("level");
+        if (IsKeyPressed(KEY_S)) {
+            saveLevel("level");
+        }
     }
 
     if (IsMouseButtonDown(1)) {
@@ -196,11 +207,11 @@ void LevelEditor::draw()
 void LevelEditor::EditorGuiState::changeSelected(int index, int maxScroll)
 {
     if (index >= tileNames.size()) {
-        std::cerr<<"ERROR [changeSelected] invalid index: "<<index<<" >="<<tileNames.size()<<"\n";
+        std::cerr<<"ERROR [LevelEditor::changeSelected] invalid index: "<<index<<" >="<<tileNames.size()<<"\n";
         return;
     }
     if (index <  0) {
-        std::cerr<<"ERROR [changeSelected] invalid index: "<<index<<" <="<<" 0\n";
+        std::cerr<<"ERROR [LevelEditor::changeSelected] invalid index: "<<index<<" <="<<" 0\n";
         return;
     }
 
@@ -230,7 +241,7 @@ void LevelEditor::EditorGuiState::changeSelected(int index, int maxScroll)
     }
 
     tileListSelected = index;
-    std::cout<<index<<" "<<scroll<<std::endl;
+    // std::cout<<index<<" "<<scroll<<std::endl;
 }
 
 void LevelEditor::EditorGuiState::rebuildTileList()
@@ -256,9 +267,52 @@ void LevelEditor::EditorGuiState::rebuildDropDowns()
     }
 }
 
+
+bool isNumber(const char* str, int size) {
+    for(int i=0; i<size && str[i] != '\0'; i++) {
+        if (!isdigit(str[i])) return false;
+    }
+    return true;
+
+}
+
 void LevelEditor::drawGUI()
 {
-    if (GuiButton({ 10, 100, 220, 60 }, "Add new")) {
+    if (GuiTextBox({ 10, 50, 260, 50 }, gui.tbName, 64, gui.tbNameEditMode)) {
+        if (gui.tbNameEditMode) {
+            // std::cout<<"ENTER\n";
+            mapName = gui.tbName; 
+        } 
+
+        gui.tbNameEditMode = !gui.tbNameEditMode;
+    }
+
+    if (GuiTextBox({ 10, 50 + 30 + 10 + 20, 125, 50 }, gui.tbWidth, 64, gui.tbWidthEditMode)) {
+        if (gui.tbWidthEditMode) {
+            if (isNumber(gui.tbWidth, sizeof(gui.tbWidth))) {
+                tileCountX = std::stoi(gui.tbWidth);
+                tileLevelManager.changeLevelDimensions(gui.tileListSelected, tileCountX, tileCountY);
+                loadLevel(gui.tileListSelected);
+            }
+        }
+
+        gui.tbWidthEditMode = !gui.tbWidthEditMode;
+    }
+
+    if (GuiTextBox({ 10 + 125 + 10, 50 + 30 + 10 + 20, 125, 50 }, gui.tbHeight, 64, gui.tbHeightEditMode)) {
+        if (gui.tbHeightEditMode) {
+            if (isNumber(gui.tbHeight, sizeof(gui.tbHeight))) {
+                tileCountY = std::stoi(gui.tbHeight);
+                tileLevelManager.changeLevelDimensions(gui.tileListSelected, tileCountX, tileCountY);
+                loadLevel(gui.tileListSelected);
+            }
+
+        }
+
+        gui.tbHeightEditMode = !gui.tbHeightEditMode;
+    }
+
+    if (GuiButton({ 10, 200, 220, 60 }, "Add new")) {
         currMap = std::vector<int>(tileCountX*tileCountY, 0);
         createTileNames();
         buildEdges();
@@ -268,18 +322,18 @@ void LevelEditor::drawGUI()
         gui.changeSelected(gui.tileList.size() - 1);
     }
 
-    if (GuiButton({ 10 + 10 + 220 , 100, 220, 60 }, "Save All")) {
+    if (GuiButton({ 10 + 10 + 220 , 200, 220, 60 }, "Save All")) {
         // saveLevel("level");
         tileLevelManager.saveLevels();
         // std::cout<<"SAVE!"<<std::endl;
     }
 
     if (GuiListViewEx({ 10, 300, 300, 200 }, gui.tileList.data(), static_cast<int>(gui.tileList.size()), &gui.tileListScroll, &gui.tileListSelected, &gui.tileListHovered)) {
-        std::cout<<"LIST: "<<gui.tileListScroll<<std::endl;
+        // std::cout<<"LIST: "<<gui.tileListScroll<<std::endl;
         if (gui.tileListSelected >=0 && gui.tileListSelected < tileLevelManager.getLevelCount()) {
             loadLevel(gui.tileListSelected);
         } else {
-            std::cout<<"ERROR LOAD! "<<gui.tileListSelected<<std::endl;
+            std::cerr<<"ERROR [LevelEditor::drawGUI] LOAD! index: "<<gui.tileListSelected<<std::endl;
         }
         // std::cout<<"LOAD!"<<gui.tileListSelected<<std::endl;
 
@@ -290,7 +344,7 @@ void LevelEditor::drawGUI()
         if (gui.tileListSelected >=0 && gui.tileListSelected < tileLevelManager.getLevelCount()) {
             tileLevelManager.deleteLevel(gui.tileListSelected);
         } else {
-            std::cout<<"ERROR DELETE!"<<gui.tileListSelected<<std::endl;
+            std::cerr<<"ERROR [LevelEditor::drawGUI] DELETE! index: "<<gui.tileListSelected<<std::endl;
             isOk = false;
         }
 
@@ -304,20 +358,19 @@ void LevelEditor::drawGUI()
 
         gui.changeSelected(selected);
         loadLevel(selected);
-
-        loadLevel(selected);
-
     }
     
     if (GuiButton({ 10, 300 + 210, 220, 60 }, "Save")){
         if (gui.tileListSelected >=0 && gui.tileListSelected < tileLevelManager.getLevelCount()) {
             TileMapLevel level = tileLevelManager.getLevel(gui.tileListSelected);
             level.level = currMap;
+            level.name = mapName;
             tileLevelManager.editLevel(gui.tileListSelected, level, edges);
         } else {
-            std::cout<<"ERROR LOAD! "<<gui.tileListSelected<<std::endl;
+            std::cout<<"ERROR [LevelEditor::drawGUI] LOAD! index: "<<gui.tileListSelected<<std::endl;
         }
 
+        createTileNames();
     }
 
     if (GuiButton({ 10, 300 + 210 + 10 + 60, 220, 60 }, "Save as new")) {

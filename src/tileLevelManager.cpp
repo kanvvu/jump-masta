@@ -259,7 +259,7 @@ void TileLevelManager::editLevel(int levelID, const TileMapLevel& tileMap,const 
 TileMapLevel TileLevelManager::getLevel(int levelID) const
 {
     if (levelID >= tileMaps.size()) {
-        std::cerr << "[TileMapLevel::getLevel] Invalid levelID! out of range "<<levelID<<", should be <= "<< tileMaps.size()<<"\n";
+        std::cerr << "[TileMapManager::getLevel] Invalid levelID! out of range "<<levelID<<", should be <= "<< tileMaps.size()<<"\n";
         TileMapLevel empty = {
             {},
             0,
@@ -281,7 +281,7 @@ int TileLevelManager::getLevelCount()
 std::vector<Edge> TileLevelManager::getEdges(int levelID) const
 {
     if (allEdges.size() <= levelID) {
-        std::cerr<<"\033[31m"<<"[TileMapLevel::getLevel] "<<"ERROR invalid levelID for assignedLevels! given: "<<levelID<<", should be <= "<<allEdges.size()<<"\033[0m\n";
+        std::cerr<<"\033[31m"<<"[TileMapManager::getLevel] "<<"ERROR invalid levelID for assignedLevels! given: "<<levelID<<", should be <= "<<allEdges.size()<<"\033[0m\n";
         return std::vector<Edge>();
     }
     return allEdges.at(levelID);
@@ -378,6 +378,45 @@ std::vector<Edge> TileLevelManager::createEdges(const std::vector<int>& tileMap,
     }
 
     return edges;
+}
+
+void TileLevelManager::changeLevelDimensions(int levelID, int width, int height)
+{
+    if (levelID >= tileMaps.size()) {
+        std::cerr<<"\033[31m"<<"[TileLevelManager::changeLevelDimensions] "<<"ERROR invalid levelID! given: "<<levelID<<", should be <= "<<tileMaps.size()<<"\033[0m\n";
+        return;
+    }
+    if (levelID < 0){
+        std::cerr<<"\033[31m"<<"[TileLevelManager::changeLevelDimensions] "<<"ERROR invalid levelID! given: "<<levelID<<", should be >= "<<"0\033[0m\n";
+        return;
+    }
+
+    TileMapLevel& levelToEdit = tileMaps.at(levelID);
+
+    std::vector<int> newLevel = std::vector<int>(width*height, 0);
+
+    int minWidth = width > levelToEdit.width ? levelToEdit.width : width;
+    int minHeight = height > levelToEdit.height ? levelToEdit.height : height;
+
+    for(int i=0; i<minHeight; i++) {
+        for(int j=0; j<minWidth; j++) {
+            int index = i*width + j;
+            if (index >= newLevel.size()) {
+                std::cerr<<"[TileLevelManager::changeLevelDimensions] wrong index: "<<index<<", should be "<<newLevel.size()<<"\n";
+                return;
+            }
+            int index2 = i*levelToEdit.width + j;
+            if (index2 >= levelToEdit.level.size()) {
+                std::cerr<<"[TileLevelManager::changeLevelDimensions] wrong index: "<<index2<<", should be "<<levelToEdit.level.size()<<"\n";
+                return;
+            }
+            newLevel[index] = levelToEdit.level[index2];
+        }
+    }
+
+    levelToEdit.level = newLevel;
+    levelToEdit.width = width;
+    levelToEdit.height = height;
 }
 
 std::string GetLevelPath() {

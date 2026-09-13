@@ -35,6 +35,15 @@ private:
 
         int saveButton = 0;
         int loadButton = 0;
+
+        char tbName[64] = "level";
+        bool tbNameEditMode = 0;
+
+        char tbWidth[64] = "10";
+        bool tbWidthEditMode = 0;
+
+        char tbHeight[64] = "15";
+        bool tbHeightEditMode = 0;
     };
 
     EditorGuiState gui;
@@ -44,6 +53,7 @@ private:
     Camera2D camera = {0};
     Vector2 cameraOffset = {0};
     std::vector<int> currMap;
+    std::string mapName = "level";
 
     int screenWidth = 1920;
     int screenHeight = 1080;
