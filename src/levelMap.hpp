@@ -27,8 +27,6 @@ private:
     Vector2 getSpawnPosition();
     Vector2i getSize();
     
-    std::vector<Edge> getEdges();
-    
     void checkAndResolveCollision(Player& player);
     bool checkForNextLevel(Vector2& playerPosition);
     void changeLevel(int levelID);

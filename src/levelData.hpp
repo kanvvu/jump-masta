@@ -16,6 +16,8 @@ private:
     std::string name;
 
     void createEdges();
+    void rebuildEdges();
+
 public:
     LevelData(int width, int height, std::string name = "level", int tileSize = 64);
     LevelData& operator=(const LevelData& other);

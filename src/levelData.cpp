@@ -95,6 +95,9 @@ void LevelData::set(int x, int y, int value)
         return;
     }
     level[index] = value;
+
+    if(x == 0 || y == 0 || x == width - 1 || y == height - 1)
+        createEdges();
 }
 
 void LevelData::set(int index, int value)
@@ -104,6 +107,16 @@ void LevelData::set(int index, int value)
         return;
     }
     level[index] = value;
+    int x = index % width;
+    int y = index/width;
+
+    if (y*width + x != index) {
+        std::cerr<<"ERROR [LevelData::set(int)]  ("<<x<<", "<<y<<") "<<index<<" != "<<y*width + x<<"\n";
+        return;
+    }
+
+    if(x == 0 || y == 0 || x == width - 1 || y == height - 1)
+        createEdges();
 }
 Edge LevelData::getEdge(int index) const
 {
@@ -138,7 +151,8 @@ void LevelData::setEdges(std::vector<Edge> edges)
 
 void LevelData::createEdges()
 {
-    edges.clear();
+    // edges.clear();
+    std::vector<Edge> newEdges;
 
     int widthCount = width;
     int heightCount = height;
@@ -154,12 +168,12 @@ void LevelData::createEdges()
             edge.start = {i, 0};
             edge.end = {(i+1), 0};
 
-            if (i != 0 && !edges.empty() && edges.back().end.y == 0 && edges.back().end.x == edge.start.x) { 
-                edges.back().end.x = (i+1);
-                edges.back().tilesCount++;
+            if (i != 0 && !newEdges.empty() && newEdges.back().end.y == 0 && newEdges.back().end.x == edge.start.x) { 
+                newEdges.back().end.x = (i+1);
+                newEdges.back().tilesCount++;
             }
             else
-                edges.push_back(edge);
+                newEdges.push_back(edge);
         }
     }
 
@@ -174,12 +188,12 @@ void LevelData::createEdges()
             edge.start = {i, (heightCount)};
             edge.end = {(i+1), (heightCount)};
 
-            if (i != 0 && !edges.empty() && edges.back().end.y == (heightCount) && edges.back().end.x == edge.start.x) {
-                edges.back().end.x = (i+1);
-                edges.back().tilesCount++;
+            if (i != 0 && !newEdges.empty() && newEdges.back().end.y == (heightCount) && newEdges.back().end.x == edge.start.x) {
+                newEdges.back().end.x = (i+1);
+                newEdges.back().tilesCount++;
             }
             else 
-                edges.push_back(edge);
+                newEdges.push_back(edge);
         }
     }
 
@@ -194,12 +208,12 @@ void LevelData::createEdges()
             edge.start = {0, j};
             edge.end = {0, (j+1)};
 
-            if (j != 0 && !edges.empty() && edges.back().end.x == 0 && edges.back().end.y == edge.start.y) {
-                edges.back().end.y = (j+1);
-                edges.back().tilesCount++;
+            if (j != 0 && !newEdges.empty() && newEdges.back().end.x == 0 && newEdges.back().end.y == edge.start.y) {
+                newEdges.back().end.y = (j+1);
+                newEdges.back().tilesCount++;
             }
             else 
-                edges.push_back(edge);
+                newEdges.push_back(edge);
         }
     }
 
@@ -215,14 +229,19 @@ void LevelData::createEdges()
             edge.start = {widthCount, j};
             edge.end = {widthCount, (j+1)};
 
-            if (j != 0 && !edges.empty() && edges.back().end.x == widthCount && edges.back().end.y == edge.start.y) {
-                edges.back().end.y = (j+1);
-                edges.back().tilesCount++;
+            if (j != 0 && !newEdges.empty() && newEdges.back().end.x == widthCount && newEdges.back().end.y == edge.start.y) {
+                newEdges.back().end.y = (j+1);
+                newEdges.back().tilesCount++;
             }
             else 
-                edges.push_back(edge);
+                newEdges.push_back(edge);
         }
     }
+
+    for(int i=0; i<edges.size() && i<newEdges.size(); i++) 
+        newEdges[i].assignedNextLevel = edges[i].assignedNextLevel;
+    
+    edges = newEdges;
 }
 
 void LevelData::changeLevelDimensions(int width, int height)

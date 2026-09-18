@@ -372,7 +372,7 @@ void LevelEditor::drawEdges()
         std::string str = "EDGE ";
         if (e.type == TOP) str += "TOP ";
         else if (e.type == DOWN) str += "DOWN ";
-        else if (e.type == LEFT) str += "LEFT";
+        else if (e.type == LEFT) str += "LEFT ";
         else  str += "RIGHT ";
         str += std::to_string(i) + " (" + std::to_string(e.tilesCount) + ")"; 
         Vector2 textPos = {e.start.x*tileSize, e.start.y*tileSize};
