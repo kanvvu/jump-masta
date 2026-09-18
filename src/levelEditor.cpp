@@ -9,21 +9,19 @@
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
 
-LevelEditor::LevelEditor(LevelRepository& levelRepository, int tileSize) : m_tileSize(tileSize), levelRepository(levelRepository)
+LevelEditor::LevelEditor(LevelRepository& levelRepository, int tileSize) : m_tileSize(tileSize), levelRepository(levelRepository), currLevel(10, 15)
 {
-    currLevel.name = "level";
-    currLevel.width = 10;
-    currLevel.height = 15;
-    currLevel.tileSize = tileSize;
-
-    camera.offset.x = screenWidth/2 - (currLevel.width*tileSize)/2;   // coordinate x origin
-    camera.offset.y = screenHeight/2 - (currLevel.height*tileSize)/2;   // coordinate y origin
+    camera.offset.x = screenWidth/2 - (currLevel.getWidth()*tileSize)/2;   // coordinate x origin
+    camera.offset.y = screenHeight/2 - (currLevel.getHeight()*tileSize)/2;   // coordinate y origin
     camera.target.x = 0;         // rotation and zoom x origin (from offset above)
     camera.target.y = 0;         // rotation and zoom y origin (from offset above)
     camera.rotation = 0;        // rotation in deg
     camera.zoom     = 1.0f;      // magnification, i.e fov or zoom
 
-    currLevel.level = std::vector<int>(currLevel.width*currLevel.height, 0);
+    snprintf(gui.tbWidth, sizeof(gui.tbWidth), std::to_string(currLevel.getWidth()).c_str());
+    snprintf(gui.tbHeight, sizeof(gui.tbHeight), std::to_string(currLevel.getHeight()).c_str());
+    snprintf(gui.tbName, sizeof(gui.tbName), currLevel.getName().c_str());
+
     createTileNames();
     buildEdges();
 }
@@ -35,20 +33,20 @@ LevelEditor::LevelEditor(LevelRepository& tileLevelManager) : LevelEditor(tileLe
 
 void LevelEditor::buildEdges()
 {
-    currLevel.edges = levelRepository.createEdges(currLevel);
+    // currLevel.edges = levelRepository.createEdges(currLevel);
 
     gui.rebuildDropDowns();
 
     gui.dropDowns.clear();
-    for (int i=0; i<currLevel.edges.size(); i++) {
+    for (int i=0; i<currLevel.getEdgesSize(); i++) {
         gui.dropDowns.push_back(DropDownState());
-        gui.dropDowns.back().dropdownActive = currLevel.edges.at(i).assignedNextLevel;
+        gui.dropDowns.back().dropdownActive = currLevel.getEdge(i).assignedNextLevel;
     }
 
 }
 
 void LevelEditor::saveLevel(std::string name) {
-    currLevel.name = name + std::to_string(levelRepository.getLevelCount());
+    currLevel.setName(name + std::to_string(levelRepository.getLevelCount()));
 
     levelRepository.saveLevel(currLevel);
 
@@ -58,34 +56,32 @@ void LevelEditor::saveLevel(std::string name) {
 void LevelEditor::loadLevel(int levelID) {
     LevelData levelData = levelRepository.getLevel(levelID);
 
-    snprintf(gui.tbWidth, sizeof(gui.tbWidth), std::to_string(levelData.width).c_str());
-    snprintf(gui.tbHeight, sizeof(gui.tbHeight), std::to_string(levelData.height).c_str());
-    snprintf(gui.tbName, sizeof(gui.tbName), levelData.name.c_str());
+    snprintf(gui.tbWidth, sizeof(gui.tbWidth), std::to_string(levelData.getWidth()).c_str());
+    snprintf(gui.tbHeight, sizeof(gui.tbHeight), std::to_string(levelData.getHeight()).c_str());
+    snprintf(gui.tbName, sizeof(gui.tbName), levelData.getName().c_str());
 
-    camera.offset.x = screenWidth/2 - (levelData.width*tileSize)/2;   // coordinate x origin
-    camera.offset.y = screenHeight/2 - (levelData.height*tileSize)/2;   // coordinate y origin
+    camera.offset.x = screenWidth/2 - (levelData.getWidth()*tileSize)/2;   // coordinate x origin
+    camera.offset.y = screenHeight/2 - (levelData.getHeight()*tileSize)/2;   // coordinate y origin
 
-    currLevel.width = levelData.width;
-    currLevel.height = levelData.height;
-    currLevel.level = levelData.level;
-    currLevel.name = levelData.name;
-    currLevel.tileSize = levelData.tileSize;
+
+    currLevel = levelData;
+    std::cout<<"LEVELS: "<<currLevel.getLevelSize()<<", EDGES: "<<currLevel.getEdgesSize()<<std::endl;
 
     buildEdges();
 
-    std::vector<Edge> assigned = levelData.edges; 
-    if (assigned.size() != currLevel.edges.size()) {
-        std::cerr<<"\033[31m"<<"ERROR [LevelEditor::loadLevel] assigned not equal edges!\033[0m\n";
-    } else {
-        for(int i=0; i<currLevel.edges.size(); i++) {
-            currLevel.edges[i].assignedNextLevel = assigned[i].assignedNextLevel;
-        }
-    }
+    // std::vector<Edge> assigned = levelData.edges; 
+    // if (assigned.size() != currLevel.edges.size()) {
+    //     std::cerr<<"\033[31m"<<"ERROR [LevelEditor::loadLevel] assigned not equal edges!\033[0m\n";
+    // } else {
+    //     for(int i=0; i<currLevel.edges.size(); i++) {
+    //         currLevel.edges[i].assignedNextLevel = assigned[i].assignedNextLevel;
+    //     }
+    // }
 
     gui.dropDowns.clear();
-    for (int i=0; i<currLevel.edges.size(); i++) {
+    for (int i=0; i<currLevel.getEdgesSize(); i++) {
         gui.dropDowns.push_back(DropDownState());
-        gui.dropDowns.back().dropdownActive = currLevel.edges.at(i).assignedNextLevel;
+        gui.dropDowns.back().dropdownActive = currLevel.getEdge(i).assignedNextLevel;
     }
 }
 
@@ -97,7 +93,8 @@ void LevelEditor::proccessInput(GameState &gameState)
         }   
 
         if (IsKeyPressed(KEY_R)) {
-            for (int& tile : currLevel.level) tile = 0;
+            // for (int& tile : currLevel.level) tile = 0;
+            for(int i=0; i<currLevel.getLevelSize(); i++) {currLevel.set(i, 0);};
         }
 
         if (IsKeyPressed(KEY_S)) {
@@ -123,21 +120,22 @@ void LevelEditor::proccessInput(GameState &gameState)
         int xPos = (mousePos.x - camera.offset.x)/tileSize;
         int yPos = (mousePos.y - camera.offset.y)/tileSize;
 
-        if (xPos >= 0 && xPos < currLevel.width && yPos >=0 && yPos < currLevel.height) {
-            int tileIndex = yPos*currLevel.width+ xPos;
+        if (xPos >= 0 && xPos < currLevel.getWidth() && yPos >=0 && yPos < currLevel.getHeight()) {
+            int tileIndex = yPos*currLevel.getWidth() + xPos;
             // std::cout<<"TILE INDEX: "<<tileIndex <<"\n";
             // std::cout<<"firstTime: "<<firstTime<<", "<<"mouseMode: "<<mouseMode <<"\n";
 
             if (firstTime) {
-                if (currLevel.level.at(tileIndex) == selectedTile) mouseMode = 1;
+                if (currLevel.get(tileIndex) == selectedTile) mouseMode = 1;
                 else mouseMode = 0;
             }
             
             if (mouseMode == 0)
-                currLevel.level.at(tileIndex) = 1; 
+                currLevel.set(tileIndex,1);
             else
-                currLevel.level.at(tileIndex) = 0; 
+                currLevel.set(tileIndex, 0);
 
+            // currLevel.createEdges();
             buildEdges();
         } 
         // std::cout<<xPos<<", "<<yPos<<"\n";
@@ -157,40 +155,27 @@ void LevelEditor::draw()
     GuiSetStyle(DEFAULT, TEXT_SIZE, GuiGetFont().baseSize*3);
     BeginMode2D(camera);
 
-    for(int i=0; i<currLevel.height; i++) {
-        for(int j=0; j<currLevel.width; j++) {
-            int tileIndex = i*currLevel.width+ j;
-            int xPos = j*m_tileSize;
-            int yPos = i*m_tileSize;
-            Color tileColor = WHITE;
 
-            // std::vector<int>& tileMap = tileMaps[currentTileMapIndex];
-            if (currLevel.level.at(tileIndex) == 1) tileColor = BLUE;
-            if (currLevel.level[tileIndex] == 3) tileColor= ORANGE;
-
-
-            DrawRectangle(xPos, yPos, m_tileSize, m_tileSize, tileColor);
-        }
-    }
+    currLevel.draw();
 
     
     Vector2 mousePos = GetMousePosition();
-    if (mouseMode == 0 && mousePos.x - camera.offset.x >= 0 && mousePos.x - camera.offset.x < currLevel.width*tileSize && mousePos.y - camera.offset.y >= 0 && mousePos.y - camera.offset.y < currLevel.height*tileSize) 
+    if (mouseMode == 0 && mousePos.x - camera.offset.x >= 0 && mousePos.x - camera.offset.x < currLevel.getWidth()*tileSize && mousePos.y - camera.offset.y >= 0 && mousePos.y - camera.offset.y < currLevel.getHeight()*tileSize) 
         DrawRectangle(floor((mousePos.x-camera.offset.x)/tileSize)*tileSize, floor((mousePos.y-camera.offset.y)/tileSize)*tileSize, tileSize, tileSize, LIGHTGRAY);
     // std::cout<<"("<<mousePos.x <<", "<<mousePos.y<<"), ";
     // std::cout<<"("<<camera.offset.x <<", "<<camera.offset.y<<"), ";
     // std::cout<<mousePos.x - camera.offset.x <<", "<<mousePos.y - camera.offset.y<<"\n";
 
     
-    for(int j=0; j<currLevel.width+1; j++) {
+    for(int j=0; j<currLevel.getWidth()+1; j++) {
         Vector2 start = {static_cast<float>(j*64), 0.0f};
-        Vector2 end = {static_cast<float>(j*64), currLevel.height*64.0f};
+        Vector2 end = {static_cast<float>(j*64), currLevel.getHeight()*64.0f};
         DrawLineEx(start, end, 1, BLACK);
     }
 
-    for(int i=0; i<currLevel.height+1; i++) {
+    for(int i=0; i<currLevel.getHeight()+1; i++) {
         Vector2 start = {0.0f, static_cast<float>(i*64)};
-        Vector2 end = {currLevel.width*64.0f, static_cast<float>(i*64)};
+        Vector2 end = {currLevel.getWidth()*64.0f, static_cast<float>(i*64)};
         DrawLineEx(start, end, 1, BLACK);
     }
 
@@ -261,7 +246,7 @@ void LevelEditor::drawGUI()
     if (GuiTextBox({ 10, 50, 260, 50 }, gui.tbName, 64, gui.tbNameEditMode)) {
         if (gui.tbNameEditMode) {
             // std::cout<<"ENTER\n";
-            currLevel.name = gui.tbName; 
+            currLevel.setName(gui.tbName); 
         } 
 
         gui.tbNameEditMode = !gui.tbNameEditMode;
@@ -270,9 +255,11 @@ void LevelEditor::drawGUI()
     if (GuiTextBox({ 10, 50 + 30 + 10 + 20, 125, 50 }, gui.tbWidth, 64, gui.tbWidthEditMode)) {
         if (gui.tbWidthEditMode) {
             if (isNumber(gui.tbWidth, sizeof(gui.tbWidth))) {
-                currLevel.width = std::stoi(gui.tbWidth);
-                levelRepository.changeLevelDimensions(gui.tileListSelected, currLevel.width, currLevel.height);
-                loadLevel(gui.tileListSelected);
+                // currLevel.setWidth(std::stoi(gui.tbWidth));
+                currLevel.changeLevelDimensions(std::stoi(gui.tbWidth), currLevel.getHeight());
+                // levelRepository.changeLevelDimensions(gui.tileListSelected, currLevel.getWidth(), currLevel.getHeight());
+                // levelRepository.getLevel(gui.tileListSelected).changeLevelDimensions(currLevel.getWidth(), currLevel.getHeight());
+                // loadLevel(gui.tileListSelected);
             }
         }
 
@@ -282,9 +269,11 @@ void LevelEditor::drawGUI()
     if (GuiTextBox({ 10 + 125 + 10, 50 + 30 + 10 + 20, 125, 50 }, gui.tbHeight, 64, gui.tbHeightEditMode)) {
         if (gui.tbHeightEditMode) {
             if (isNumber(gui.tbHeight, sizeof(gui.tbHeight))) {
-                currLevel.height = std::stoi(gui.tbHeight);
-                levelRepository.changeLevelDimensions(gui.tileListSelected, currLevel.width, currLevel.height);
-                loadLevel(gui.tileListSelected);
+                // currLevel.setHeight(std::stoi(gui.tbHeight));
+                currLevel.changeLevelDimensions(currLevel.getWidth(), std::stoi(gui.tbHeight));
+                // levelRepository.changeLevelDimensions(gui.tileListSelected, currLevel.getWidth(), currLevel.getHeight());
+                // levelRepository.getLevel(gui.tileListSelected).changeLevelDimensions(currLevel.getWidth(), currLevel.getHeight());
+                // loadLevel(gui.tileListSelected);
             }
 
         }
@@ -293,7 +282,7 @@ void LevelEditor::drawGUI()
     }
 
     if (GuiButton({ 10, 200, 220, 60 }, "Add new")) {
-        currLevel.level = std::vector<int>(currLevel.width*currLevel.height, 0);
+        for(int i=0; i<currLevel.getLevelSize(); i++) {currLevel.set(i, 0);};
         createTileNames();
         buildEdges();
 
@@ -342,7 +331,7 @@ void LevelEditor::drawGUI()
     
     if (GuiButton({ 10, 300 + 210, 220, 60 }, "Save")){
         if (gui.tileListSelected >=0 && gui.tileListSelected < levelRepository.getLevelCount()) {
-            levelRepository.editLevel(gui.tileListSelected, currLevel, currLevel.edges);
+            levelRepository.editLevel(gui.tileListSelected, currLevel);
         } else {
             std::cout<<"ERROR [LevelEditor::drawGUI] LOAD! index: "<<gui.tileListSelected<<std::endl;
         }
@@ -356,8 +345,8 @@ void LevelEditor::drawGUI()
 
     }
 
-    for(int i=currLevel.edges.size(); i>0; i--) {
-        Edge& e = currLevel.edges.at(i-1);
+    for(int i=currLevel.getEdgesSize(); i>0; i--) {
+        Edge& e = currLevel.getEdge(i-1);
         std::string str = "EDGE ";
         str += std::to_string(i) + " (" + std::to_string(e.tilesCount) + ")"; 
         Vector2 textPos = {10, (i-1)*30 + 300 + 210 + 10 + 60 + 80};
@@ -375,7 +364,8 @@ void LevelEditor::drawEdges()
     
     // std::cout<<"EDGES: "<<edges.size()<<std::endl;
     int i=1;
-    for(Edge& e : currLevel.edges) {
+    for(int j=0; j<currLevel.getEdgesSize(); j++) {
+        Edge& e = currLevel.getEdge(j);
         Color color = RED;
         if (e.assignedNextLevel != -1) color = GREEN;
         DrawLineEx({(float)e.start.x*tileSize,(float) e.start.y*tileSize}, {(float)e.end.x*tileSize,(float) e.end.y*tileSize},4, color);
@@ -403,7 +393,7 @@ void LevelEditor::createTileNames()
 
     int levelCount = levelRepository.getLevelCount();
     for (int i=0; i<levelCount; i++) {
-        gui.tileNames.push_back(std::to_string(i+1) + ". " + levelRepository.getLevel(i).name);
+        gui.tileNames.push_back(std::to_string(i+1) + ". " + levelRepository.getLevel(i).getName());
     }
 
     gui.rebuildTileList();

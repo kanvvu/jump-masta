@@ -27,14 +27,3 @@ struct Edge {
     int tilesCount;
     EdgeType type;
 };
-
-struct LevelData {
-    std::vector<int> level;
-    std::vector<Edge> edges;
-
-    int width;
-    int height;
-    int tileSize;
-    
-    std::string name;
-};

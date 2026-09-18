@@ -31,26 +31,26 @@ std::ostringstream LevelFileLoader::levelToStream(const LevelData &level) const
 {
     std::ostringstream data;
 
-    data << level.width << " " << level.height << "\n";
-    data << level.name << "\n";
+    data << level.getWidth() << " " << level.getHeight() << "\n";
+    data << level.getName() << "\n";
 
-    for (int i=0; i<level.height; i++) {
-        for (int j=0; j<level.width; j++) {
-            int index = i*level.width + j;
+    for (int i=0; i<level.getHeight(); i++) {
+        for (int j=0; j<level.getWidth(); j++) {
+            int index = i*level.getWidth() + j;
             
-            if (index >= level.level.size()) {
-                std::cerr <<"[LevelFileLoader::loadLevels] " << "Invalid index! out of range "<<index<<", should be <= "<< level.level.size();
+            if (index >= level.getLevelSize()) {
+                std::cerr <<"[LevelFileLoader::loadLevels] " << "Invalid index! out of range "<<index<<", should be <= "<< level.getLevelSize();
                 data.str("");
                 return data;
             }
-            data << level.level.at(index);
-            if (j + 1 != level.width) data << " ";
+            data << level.get(index);
+            if (j + 1 != level.getWidth()) data << " ";
         }
         data << "\n";
     }
-    data << level.edges.size() << "\n";
-    for(int i=0; i<level.edges.size(); i++) {
-        data << level.edges[i].assignedNextLevel;
+    data << level.getEdgesSize() << "\n";
+    for(int i=0; i<level.getEdgesSize(); i++) {
+        data << level.getEdge(i).assignedNextLevel;
         // if (i+1 != edges.size()) data << "\n";
         data << "\n";
     }
@@ -88,7 +88,6 @@ std::vector<LevelData> LevelFileLoader::loadLevels() const
         std::string s;
 
         while (std::getline(file, s)) {
-            LevelData levelData;
 
             std::vector<std::string> tokens;
             tokens = split(s, " ");
@@ -100,8 +99,7 @@ std::vector<LevelData> LevelFileLoader::loadLevels() const
             int width = std::stoi(tokens[0]);
             int height = std::stoi(tokens[1]);
 
-            levelData.width = width;
-            levelData.height = height;
+            LevelData levelData(width, height);
 
             if (!std::getline(file, s)) {
                 std::cerr <<"[LevelFileLoader::loadLevels] " << "Invalid map file, file to short! \n";
@@ -109,7 +107,7 @@ std::vector<LevelData> LevelFileLoader::loadLevels() const
             }
             std::string levelName = s;
             std::cout<<width<<" "<<height<<" "<<levelName<<std::endl;
-            levelData.name = levelName;
+            levelData.setName(levelName);
 
             for (int i = 0; i<height; i++) {
                 if (!std::getline(file, s)) {
@@ -123,8 +121,9 @@ std::vector<LevelData> LevelFileLoader::loadLevels() const
                     return empty;
                 }
                 
-                for(std::string& token : tokens) {
-                    levelData.level.push_back(stoi(token));
+                for(int t=0; t<tokens.size(); t++) {
+                    std::string& token = tokens[t];
+                    levelData.set(t, i, stoi(token));
                 }
             }
             // levels.push_back(levelData);
@@ -167,7 +166,7 @@ std::vector<LevelData> LevelFileLoader::loadLevels() const
                 }
                 if (isOk) {
                     // allEdges.push_back(edges);
-                    levelData.edges = edges;
+                    levelData.setEdges(edges);
                 } else {
                     // allEdges.push_back(std::vector<Edge>());
                     file.clear();

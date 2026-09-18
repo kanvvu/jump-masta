@@ -16,16 +16,15 @@ public:
     ~LevelRepository() = default;
 
     void saveAll() {levelFileLoader.saveLevels(levels);};
-    void loadAll() {levels = levelFileLoader.loadLevels();};
-    void saveLevel(const LevelData& levelData) {levelFileLoader.saveLevel(levelData);};
+    void loadAll();
+    void saveLevel(const LevelData& levelData);
 
     void deleteLevel(int levelID);
-    void editLevel(int levelID, const LevelData& tileMap,const std::vector<Edge>& edges);
+    void editLevel(int levelID, const LevelData& levelData);
 
     LevelData getLevel(int levelID) const;
     int getLevelCount();
 
     std::vector<Edge> createEdges(const LevelData& levelData) const;
-    void changeLevelDimensions(int levelID, int width, int height);
 };
 

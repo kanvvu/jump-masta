@@ -14,7 +14,42 @@ LevelRepository::LevelRepository(const LevelFileLoader& levelFileLoader) : level
     #if defined(DEV_MODE) 
     std::cout<<"\t\tDEV_MODE!\n";
     #endif
+    // levels = levelFileLoader.loadLevels();
+    loadAll();
+    // std::cout<<"LEVEL: "<<0<<std::endl;
+    // LevelData& l = levels[0];
+    // for(int i=0; i<l.height; i++) {
+    //     for(int j=0; j<l.width; j++) {
+    //         std::cout<<l.level[i*l.width+j]<<", ";
+    //     }
+    //     std::cout<<"\n";
+    // }
+    // std::cout<<std::endl;
+}
+
+void LevelRepository::loadAll()
+{
     levels = levelFileLoader.loadLevels();
+
+    // int i=0;
+
+    // for(auto& level : levels) {
+    //     std::vector<Edge> assignedEdges = level.edges;
+    //     level.edges = createEdges(level);
+    //     std::cout<<"LEVEL: "<<i<<", assigned: "<<assignedEdges.size()<<", created: "<<level.edges.size()<<"\n";
+
+    //     for(int i=0; i<level.edges.size(); i++) {
+    //         if (i >= assignedEdges.size()) continue;
+    //         level.edges[i].assignedNextLevel = assignedEdges[i].assignedNextLevel;
+    //     }
+    // }
+}
+
+void LevelRepository::saveLevel(const LevelData &levelData)
+{
+    //assume that edges are provided
+    levels.push_back(levelData);
+    levelFileLoader.saveLevel(levelData);
 }
 
 void LevelRepository::deleteLevel(int levelID)
@@ -27,10 +62,11 @@ void LevelRepository::deleteLevel(int levelID)
     for (int i=0; i<levels.size(); i++) {
         if (i == levelID) continue;
 
-        std::vector<Edge>& edges = levels[i].edges;
-        for(int j=0; j<edges.size(); j++) {
-            if (edges[j].assignedNextLevel == levelID) edges[j].assignedNextLevel = -1;
-            else if (edges[j].assignedNextLevel > levelID && edges[j].assignedNextLevel != -1) edges[j].assignedNextLevel--;
+        // std::vector<Edge>& edges = levels[i].edges;
+        LevelData& level = levels[i];
+        for(int j=0; j<level.getEdgesSize(); j++) {
+            if (level.getEdge(j).assignedNextLevel == levelID) level.getEdge(j).assignedNextLevel = -1;
+            else if (level.getEdge(j).assignedNextLevel > levelID && level.getEdge(j).assignedNextLevel != -1) level.getEdge(j).assignedNextLevel--;
         }
         
     }
@@ -38,26 +74,14 @@ void LevelRepository::deleteLevel(int levelID)
     levels.erase(levels.begin() + levelID);
 }
 
-void LevelRepository::editLevel(int levelID, const LevelData& tileMap,const std::vector<Edge>& edges)
+void LevelRepository::editLevel(int levelID, const LevelData& levelData)
 {
     if (levelID >= levels.size() || levelID < 0) {
         std::cerr<<"ERROR [LevelRepository::editLevel] id : "<<levelID<<" >= "<<levels.size()<<"\n";
         return;
     }
 
-    LevelData& toEdit = levels.at(levelID);
-    toEdit.level.clear();
-
-    toEdit.width = tileMap.width;
-    toEdit.height = tileMap.height;
-    toEdit.name = tileMap.name;
-
-    for(const auto& i : tileMap.level) toEdit.level.push_back(i);
-
-    std::vector<Edge>& assignedToEdit = levels.at(levelID).edges;
-    assignedToEdit.clear();
-    assignedToEdit = edges;
-
+    levels.at(levelID) = levelData;
 }
 
 
@@ -65,8 +89,17 @@ LevelData LevelRepository::getLevel(int levelID) const
 {
     if (levelID >= levels.size() || levelID < 0) {
         std::cerr<<"ERROR [LevelRepository::getLevel] id : "<<levelID<<" >= "<<levels.size()<<"\n";
-        return LevelData();
+        return LevelData(0,0);
     }
+
+    // std::cout<<"LEVEL: "<<levelID<<std::endl;
+    // for(int i=0; i<levels[levelID].height; i++) {
+    //     for(int j=0; j<levels[levelID].width; j++) {
+    //         std::cout<<levels[levelID].level[i*levels[levelID].width+j]<<", ";
+    //     }
+    //     std::cout<<"\n";
+    // }
+    // std::cout<<std::endl;
 
     return levels.at(levelID);
 }
@@ -81,13 +114,13 @@ std::vector<Edge> LevelRepository::createEdges(const LevelData& levelData) const
     std::vector<Edge> edges;
 
 
-    int widthCount = levelData.width;
-    int heightCount = levelData.height;
+    int widthCount = levelData.getWidth();
+    int heightCount = levelData.getHeight();
 
     for(int i=0; i<widthCount; i++) {
         //top
         int index = i;
-        if (levelData.level.at(index) == 0) {
+        if (levelData.get(index) == 0) {
             Edge edge;
             edge.type = TOP;
             edge.assignedNextLevel = -1;
@@ -107,7 +140,7 @@ std::vector<Edge> LevelRepository::createEdges(const LevelData& levelData) const
     for(int i=0; i<widthCount; i++) {
         //bottom
         int index = (heightCount-1)*widthCount + i;
-        if (levelData.level.at(index) == 0) {
+        if (levelData.get(index) == 0) {
             Edge edge;
             edge.type = DOWN;
             edge.assignedNextLevel = -1;
@@ -127,7 +160,7 @@ std::vector<Edge> LevelRepository::createEdges(const LevelData& levelData) const
     for(int j=0; j<heightCount; j++) {
         // left
         int index = j*widthCount;
-        if (levelData.level.at(index) == 0) {
+        if (levelData.get(index) == 0) {
             Edge edge;
             edge.type = LEFT;
             edge.assignedNextLevel = -1;
@@ -148,7 +181,7 @@ std::vector<Edge> LevelRepository::createEdges(const LevelData& levelData) const
     for(int j=0; j<heightCount; j++) {
         // right
         int index = j*widthCount + (widthCount-1);
-        if (levelData.level.at(index) == 0) {
+        if (levelData.get(index) == 0) {
             Edge edge;
             edge.type = RIGHT;
             edge.assignedNextLevel = -1;
@@ -166,39 +199,4 @@ std::vector<Edge> LevelRepository::createEdges(const LevelData& levelData) const
     }
 
     return edges;
-}
-
-void LevelRepository::changeLevelDimensions(int levelID, int width, int height)
-{
-    if (levelID >= levels.size() || levelID < 0) {
-        std::cerr<<"ERROR [LevelRepository::changeLevelDimensions] id : "<<levelID<<" >= "<<levels.size()<<"\n";
-        return; 
-    }
-
-    LevelData& levelToEdit = levels.at(levelID);
-
-    std::vector<int> newLevel = std::vector<int>(width*height, 0);
-
-    int minWidth = width > levelToEdit.width ? levelToEdit.width : width;
-    int minHeight = height > levelToEdit.height ? levelToEdit.height : height;
-
-    for(int i=0; i<minHeight; i++) {
-        for(int j=0; j<minWidth; j++) {
-            int index = i*width + j;
-            if (index >= newLevel.size()) {
-                std::cerr<<"[TileLevelManager::changeLevelDimensions] wrong index: "<<index<<", should be "<<newLevel.size()<<"\n";
-                return;
-            }
-            int index2 = i*levelToEdit.width + j;
-            if (index2 >= levelToEdit.level.size()) {
-                std::cerr<<"[TileLevelManager::changeLevelDimensions] wrong index: "<<index2<<", should be "<<levelToEdit.level.size()<<"\n";
-                return;
-            }
-            newLevel[index] = levelToEdit.level[index2];
-        }
-    }
-
-    levelToEdit.level = newLevel;
-    levelToEdit.width = width;
-    levelToEdit.height = height;
 }

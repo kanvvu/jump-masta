@@ -5,6 +5,7 @@
 #include "common.hpp"
 #include <vector>
 #include "levelRepository.hpp"
+#include "levelData.hpp"
 
 
 class LevelEditor
