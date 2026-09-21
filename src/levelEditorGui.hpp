@@ -7,6 +7,7 @@
 struct LevelEditorGui
 {
     std::vector<std::string> tileNames;
+    std::vector<std::string> tileListStorage;
     std::vector<char *> tileList;
 
     int tileListScroll = 0;

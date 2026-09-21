@@ -80,6 +80,7 @@ public:
     void drawEdges();
 
     void syncCurrentLevelUi();
+    void refreshLevelUiState();
     void createTileNames();
 
     void saveLevel(std::string name);

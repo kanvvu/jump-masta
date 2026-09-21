@@ -27,12 +27,15 @@ void LevelEditorGui::changeSelected(int index, int maxScroll)
 
 void LevelEditorGui::rebuildTileList()
 {
+    tileListStorage.clear();
     tileList.clear();
 
-    for (std::string& tileName : tileNames) {
-        tileList.push_back(const_cast<char*>(tileName.c_str()));
+    tileListStorage.reserve(tileNames.size());
+    for (const std::string& tileName : tileNames) {
+        tileListStorage.push_back(tileName);
+        tileList.push_back(const_cast<char*>(tileListStorage.back().c_str()));
     }
-    
+
     if (tileListSelected >= static_cast<int>(tileList.size())) {
         tileListSelected = (tileList.empty() ? -1 : tileList.size()-1);
     }

@@ -22,8 +22,7 @@ LevelEditor::LevelEditor(LevelRepository& levelRepository, int tileSize) : level
     state.camera.zoom     = 1.0f;      // magnification, i.e fov or zoom
 
     syncCurrentLevelUi();
-    createTileNames();
-    buildEdges();
+    refreshLevelUiState();
 }
 
 LevelEditor::LevelEditor(LevelRepository& tileLevelManager) : LevelEditor(tileLevelManager, LevelEditorState::DefaultTileSize)
@@ -36,22 +35,23 @@ void LevelEditor::syncCurrentLevelUi()
     snprintf(gui.tbWidth, sizeof(gui.tbWidth), std::to_string(state.currentLevel.getWidth()).c_str());
     snprintf(gui.tbHeight, sizeof(gui.tbHeight), std::to_string(state.currentLevel.getHeight()).c_str());
     snprintf(gui.tbName, sizeof(gui.tbName), state.currentLevel.getName().c_str());
+}
 
+void LevelEditor::refreshLevelUiState()
+{
+    syncCurrentLevelUi();
+    createTileNames();
+    gui.rebuildDropDowns();
     buildEdges();
 }
 
 void LevelEditor::buildEdges()
 {
-    // state.currentLevel.edges = levelRepository.createEdges(state.currentLevel);
+    gui.dropDowns.resize(static_cast<size_t>(state.currentLevel.getEdgesSize()));
 
-    gui.rebuildDropDowns();
-
-    gui.dropDowns.clear();
-    for (int i=0; i<state.currentLevel.getEdgesSize(); i++) {
-        gui.dropDowns.push_back(DropDownState());
-        gui.dropDowns.back().dropdownActive = state.currentLevel.getEdge(i).assignedNextLevel;
+    for (int i = 0; i < state.currentLevel.getEdgesSize(); ++i) {
+        gui.dropDowns[i].dropdownActive = state.currentLevel.getEdge(i).assignedNextLevel;
     }
-
 }
 
 void LevelEditor::saveLevel(std::string name) {
@@ -59,7 +59,7 @@ void LevelEditor::saveLevel(std::string name) {
 
     levelRepository.saveLevel(state.currentLevel);
 
-    createTileNames();
+    refreshLevelUiState();
 }
 
 void LevelEditor::loadLevel(int levelID) {
@@ -72,6 +72,7 @@ void LevelEditor::loadLevel(int levelID) {
     std::cout<<"LEVELS: "<<state.currentLevel.getLevelSize()<<", EDGES: "<<state.currentLevel.getEdgesSize()<<std::endl;
 
     syncCurrentLevelUi();
+    refreshLevelUiState();
 
     // std::vector<Edge> assigned = levelData.edges; 
     // if (assigned.size() != state.currentLevel.edges.size()) {
@@ -133,8 +134,7 @@ void LevelEditor::proccessInput(GameState &gameState)
             else
                 state.currentLevel.set(tileIndex, 0);
 
-            // state.currentLevel.createEdges();
-            buildEdges();
+            refreshLevelUiState();
         } 
         // std::cout<<xPos<<", "<<yPos<<"\n";
     }
@@ -240,7 +240,7 @@ void LevelEditor::saveCurrentLevel()
         std::cout<<"ERROR [LevelEditor::drawGUI] LOAD! index: "<<gui.tileListSelected<<std::endl;
     }
 
-    createTileNames();
+    refreshLevelUiState();
 }
 
 void LevelEditor::loadSelectedLevel()
@@ -264,7 +264,7 @@ void LevelEditor::deleteSelectedLevel()
 
     int selected = gui.tileListSelected;
 
-    createTileNames();
+    refreshLevelUiState();
 
     if (selected >= gui.tileList.size()) {
         selected = gui.tileList.size() - 1;
@@ -279,8 +279,7 @@ void LevelEditor::deleteSelectedLevel()
 void LevelEditor::createNewLevel()
 {
     for(int i=0; i<state.currentLevel.getLevelSize(); i++) {state.currentLevel.set(i, 0);};
-    createTileNames();
-    buildEdges();
+refreshLevelUiState();
 
     saveLevel("level");
 
