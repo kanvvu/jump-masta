@@ -27,3 +27,8 @@ struct Edge {
     int tilesCount;
     EdgeType type;
 };
+
+struct DropDownState {
+    int dropdownActive = -1;
+    bool dropDownEditMode = false;
+};
