@@ -120,18 +120,3 @@ class TextLabelAndDropDownBoxList : public IDraw {
     void draw();
 
 };
-
-
-
-// struct LevelEditorGui
-// {
-//     std::string dropDownOptions;
-//     std::vector<DropDownState> dropDowns;
-    
-//     void rebuildDropDowns(std::vector<std::string> tileNames);
-
-//     int saveButton = 0;
-//     int loadButton = 0;
-
-
-// };

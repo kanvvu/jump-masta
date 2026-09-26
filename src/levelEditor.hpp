@@ -45,8 +45,6 @@ class LevelEditor
 {
 private:
 
-    // LevelEditorGui gui;
-
     SmallTextBox nameTextBox;
     SmallTextBox widthTextBox;
     SmallTextBox heightTextBox;
@@ -56,8 +54,6 @@ private:
     Button deleteButton;
     Button saveButton;
     Button saveAsNewButton;
-    // std::vector<TextLabel> textLabels;
-    // std::vector<DropDownBox> edgeDropDownBoxes;
     TextLabelAndDropDownBoxList edgeAssignmentDropDown;
 
     std::vector<IDraw*> guiItems;
@@ -65,8 +61,6 @@ private:
     LevelEditorState state;
 
     LevelRepository& levelRepository;
-
-    // void createEdgeDropDownBoxes();
 
     void saveCurrentLevel();
     void loadSelectedLevel();
