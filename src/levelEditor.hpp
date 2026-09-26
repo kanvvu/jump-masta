@@ -45,12 +45,29 @@ class LevelEditor
 {
 private:
 
-    LevelEditorGui gui;
+    // LevelEditorGui gui;
+
+    SmallTextBox nameTextBox;
+    SmallTextBox widthTextBox;
+    SmallTextBox heightTextBox;
+    Button addNewButton;
+    Button saveAllButton;
+    ListView levelListSelection;
+    Button deleteButton;
+    Button saveButton;
+    Button saveAsNewButton;
+    // std::vector<TextLabel> textLabels;
+    // std::vector<DropDownBox> edgeDropDownBoxes;
+    TextLabelAndDropDownBoxList edgeAssignmentDropDown;
+
+    std::vector<IDraw*> guiItems;
+
     LevelEditorState state;
 
     LevelRepository& levelRepository;
 
-    void executeCommand(EditorCommand command);
+    // void createEdgeDropDownBoxes();
+
     void saveCurrentLevel();
     void loadSelectedLevel();
     void deleteSelectedLevel();
@@ -76,16 +93,13 @@ public:
     void handleLevelDelete();
     void handleLevelSave();
     void handleSaveAsNew();
-    void drawEdgeDropdowns();
     void drawEdges();
 
     void syncCurrentLevelUi();
-    void refreshLevelUiState();
-    void createTileNames();
+    std::vector<std::string> getLevelNames();
 
     void saveLevel(std::string name);
     void loadLevel(int levelID);
 
-    void buildEdges();
 };
 

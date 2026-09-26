@@ -21,8 +21,42 @@ LevelEditor::LevelEditor(LevelRepository& levelRepository, int tileSize) : level
     state.camera.rotation = 0;        // rotation in deg
     state.camera.zoom     = 1.0f;      // magnification, i.e fov or zoom
 
+    nameTextBox = SmallTextBox({10, 50, 260, 50}, [this]() {handleLevelNameInput();}, state.currentLevel.getName());
+    guiItems.push_back(&nameTextBox);
+    
+    widthTextBox = SmallTextBox({10, 50 + 30 + 10 + 20, 125, 50}, [this]() {handleLevelDimensionsInput();} , std::to_string(state.currentLevel.getWidth()));
+    guiItems.push_back(&widthTextBox);
+
+    heightTextBox = SmallTextBox({10 + 125 + 10, 50 + 30 + 10 + 20, 125, 50}, [this]() {handleLevelDimensionsInput();}, std::to_string(state.currentLevel.getHeight()));
+    guiItems.push_back(&heightTextBox);
+
+    addNewButton = Button({10, 200,220, 60}, "Add new", [this]() {handleAddNewLevel(); });
+    guiItems.push_back(&addNewButton);
+    
+    saveAllButton = Button({10 + 10 + 220, 200, 220, 60}, "Save all", [this]() {handleSaveAll(); });
+    guiItems.push_back(&saveAllButton);
+
+    levelListSelection = ListView({10, 300, 300, 200}, getLevelNames(), [this]() { handleLevelListSelection(); });
+    guiItems.push_back(&levelListSelection);
+
+    deleteButton = Button({10 + 10 + 220, 300 + 210, 220, 60}, "Delete", [this]() {handleLevelDelete(); });
+    guiItems.push_back(&deleteButton);
+
+    saveButton = Button({10, 300 + 210, 220, 60}, "Edit", [this]() {handleLevelSave(); });
+    guiItems.push_back(&saveButton);
+
+    saveAsNewButton = Button({10, 300 + 210 + 10 + 60, 220, 60}, "Save as new", [this]() {handleSaveAsNew(); });
+    guiItems.push_back(&saveAsNewButton);
+
+    // Vector2 textPos = {10, (i-1)*30 + 300 + 210 + 10 + 60 + 80};
+    edgeAssignmentDropDown = TextLabelAndDropDownBoxList( {10, 300 + 210 + 10 + 60 + 80}, state.currentLevel, getLevelNames());
+    guiItems.push_back(&edgeAssignmentDropDown);
+    
+
     syncCurrentLevelUi();
-    refreshLevelUiState();
+    // refreshLevelUiState();
+
+    // createEdgeDropDownBoxes();
 }
 
 LevelEditor::LevelEditor(LevelRepository& tileLevelManager) : LevelEditor(tileLevelManager, LevelEditorState::DefaultTileSize)
@@ -32,26 +66,18 @@ LevelEditor::LevelEditor(LevelRepository& tileLevelManager) : LevelEditor(tileLe
 
 void LevelEditor::syncCurrentLevelUi()
 {
-    snprintf(gui.tbWidth, sizeof(gui.tbWidth), std::to_string(state.currentLevel.getWidth()).c_str());
-    snprintf(gui.tbHeight, sizeof(gui.tbHeight), std::to_string(state.currentLevel.getHeight()).c_str());
-    snprintf(gui.tbName, sizeof(gui.tbName), state.currentLevel.getName().c_str());
-}
+    //Sooo what shoudl be updated when
+    //when added/deleted level (repository change)
+    //levelListSelection ,edgeAssigmentDropDowns
+    //when level loaded
+    //TextBoxes..
 
-void LevelEditor::refreshLevelUiState()
-{
-    syncCurrentLevelUi();
-    createTileNames();
-    gui.rebuildDropDowns();
-    buildEdges();
-}
+    snprintf(widthTextBox.value, sizeof(widthTextBox.value), std::to_string(state.currentLevel.getWidth()).c_str());
+    snprintf(heightTextBox.value, sizeof(heightTextBox.value), std::to_string(state.currentLevel.getHeight()).c_str());
+    snprintf(nameTextBox.value, sizeof(nameTextBox.value), state.currentLevel.getName().c_str());
 
-void LevelEditor::buildEdges()
-{
-    gui.dropDowns.resize(static_cast<size_t>(state.currentLevel.getEdgesSize()));
-
-    for (int i = 0; i < state.currentLevel.getEdgesSize(); ++i) {
-        gui.dropDowns[i].dropdownActive = state.currentLevel.getEdge(i).assignedNextLevel;
-    }
+    edgeAssignmentDropDown.update(state.currentLevel, getLevelNames());
+    levelListSelection.setTiles(getLevelNames());
 }
 
 void LevelEditor::saveLevel(std::string name) {
@@ -59,7 +85,8 @@ void LevelEditor::saveLevel(std::string name) {
 
     levelRepository.saveLevel(state.currentLevel);
 
-    refreshLevelUiState();
+    syncCurrentLevelUi();
+    // refreshLevelUiState();
 }
 
 void LevelEditor::loadLevel(int levelID) {
@@ -72,7 +99,8 @@ void LevelEditor::loadLevel(int levelID) {
     std::cout<<"LEVELS: "<<state.currentLevel.getLevelSize()<<", EDGES: "<<state.currentLevel.getEdgesSize()<<std::endl;
 
     syncCurrentLevelUi();
-    refreshLevelUiState();
+    // refreshLevelUiState();
+    // createEdgeDropDownBoxes();
 
     // std::vector<Edge> assigned = levelData.edges; 
     // if (assigned.size() != state.currentLevel.edges.size()) {
@@ -86,7 +114,7 @@ void LevelEditor::loadLevel(int levelID) {
 
 void LevelEditor::proccessInput(GameState &gameState)
 {
-    if (!gui.tbNameEditMode) {
+    if (!nameTextBox.getEditMode()) {
         if (IsKeyPressed(KEY_E)) {
             gameState = GAME;
         }   
@@ -134,7 +162,9 @@ void LevelEditor::proccessInput(GameState &gameState)
             else
                 state.currentLevel.set(tileIndex, 0);
 
-            refreshLevelUiState();
+            edgeAssignmentDropDown.update(state.currentLevel, getLevelNames());
+            // refreshLevelUiState();
+
         } 
         // std::cout<<xPos<<", "<<yPos<<"\n";
     }
@@ -195,95 +225,107 @@ bool isNumber(const char* str, int size) {
 
 }
 
-void LevelEditor::drawGUI()
-{
-    handleLevelNameInput();
-    handleLevelDimensionsInput();
-    handleAddNewLevel();
-    handleSaveAll();
-    handleLevelListSelection();
-    handleLevelDelete();
-    handleLevelSave();
-    handleSaveAsNew();
-    drawEdgeDropdowns();
+bool isNumber(std::string str) {
+    for(int i=0; i<str.size() && str[i] != '\0'; i++) {
+        if (!isdigit(str[i])) return false;
+    }
+    return true;
+
 }
 
-void LevelEditor::executeCommand(EditorCommand command)
+void LevelEditor::drawGUI()
 {
-    switch (command) {
-        case EditorCommand::SaveCurrentLevel:
-            saveCurrentLevel();
-            break;
-        case EditorCommand::SaveAllLevels:
-            saveAllLevels();
-            break;
-        case EditorCommand::LoadSelectedLevel:
-            loadSelectedLevel();
-            break;
-        case EditorCommand::DeleteSelectedLevel:
-            deleteSelectedLevel();
-            break;
-        case EditorCommand::CreateNewLevel:
-            createNewLevel();
-            break;
-        case EditorCommand::ApplyLevelDimensions:
-            applyLevelDimensionsFromUi();
-            break;
-    }
+
+    // drawEdgeDropdowns();
+
+    for(auto& item : guiItems) item->draw();
+    // for(auto& item : textLabels) item.draw();
+    // for(auto& item : edgeDropDownBoxes) item.draw();
 }
+
+// void LevelEditor::createEdgeDropDownBoxes()
+// {
+//     textLabels.clear();
+//     textLabels.reserve(state.currentLevel.getEdgesSize());
+//     edgeDropDownBoxes.clear();
+//     edgeDropDownBoxes.reserve(state.currentLevel.getEdgesSize());
+//     for(int i=state.currentLevel.getEdgesSize(); i>0; i--) {
+//         Edge& e = state.currentLevel.getEdge(i-1);
+//         std::string str = "EDGE ";
+//         str += std::to_string(i) + " (" + std::to_string(e.tilesCount) + ")";
+//         Vector2 textPos = {10, (i-1)*30 + 300 + 210 + 10 + 60 + 80};
+//         DrawText(str.c_str(), textPos.x, textPos.y, 20, BLACK);
+//         int textWidth = MeasureText(str.c_str(), 20);
+        
+//         textLabels.push_back(TextLabel(textPos, str, 20, BLACK));
+//         edgeDropDownBoxes.push_back(DropDownBox({ textPos.x + textWidth + 10, textPos.y, 200, 25 }, getLevelNames()));
+//         DropDownBox& dropDownBox = edgeDropDownBoxes.back();
+//         dropDownBox.selectedIndex = e.assignedNextLevel;
+//         edgeDropDownBoxes.back().setOnChange([this, &e, &dropDownBox]() {e.assignedNextLevel = dropDownBox.selectedIndex;});
+//     }
+// }
 
 void LevelEditor::saveCurrentLevel()
 {
-    if (gui.tileListSelected >=0 && gui.tileListSelected < levelRepository.getLevelCount()) {
-        levelRepository.editLevel(gui.tileListSelected, state.currentLevel);
+    if (levelListSelection.selectedIndex >=0 && levelListSelection.selectedIndex < levelRepository.getLevelCount()) {
+        levelRepository.editLevel(levelListSelection.selectedIndex, state.currentLevel);
     } else {
-        std::cout<<"ERROR [LevelEditor::drawGUI] LOAD! index: "<<gui.tileListSelected<<std::endl;
+        std::cout<<"ERROR [LevelEditor::saveCurrentLevel] LOAD! index: "<<levelListSelection.selectedIndex<<std::endl;
     }
 
-    refreshLevelUiState();
+    syncCurrentLevelUi();
+    // refreshLevelUiState();
+    // edgeAssignmentDropDown.update(state.currentLevel, getLevelNames());
+    // levelListSelection.setTiles(getLevelNames());
 }
 
 void LevelEditor::loadSelectedLevel()
 {
-    if (gui.tileListSelected >=0 && gui.tileListSelected < levelRepository.getLevelCount()) {
-        loadLevel(gui.tileListSelected);
+    if (levelListSelection.selectedIndex >=0 && levelListSelection.selectedIndex < levelRepository.getLevelCount()) {
+        loadLevel(levelListSelection.selectedIndex);
     } else {
-        std::cerr<<"ERROR [LevelEditor::drawGUI] LOAD! index: "<<gui.tileListSelected<<std::endl;
+        std::cerr<<"ERROR [LevelEditor::loadSelectedLevel] LOAD! index: "<<levelListSelection.selectedIndex<<std::endl;
     }
 }
 
 void LevelEditor::deleteSelectedLevel()
 {
     bool isOk = true;
-    if (gui.tileListSelected >=0 && gui.tileListSelected < levelRepository.getLevelCount()) {
-        levelRepository.deleteLevel(gui.tileListSelected);
+    int levelCountBefore = levelRepository.getLevelCount();
+    if (levelListSelection.selectedIndex >=0 && levelListSelection.selectedIndex < levelRepository.getLevelCount()) {
+        levelRepository.deleteLevel(levelListSelection.selectedIndex);
+        // levelListSelection.setTiles(getLevelNames());
     } else {
-        std::cerr<<"ERROR [LevelEditor::drawGUI] DELETE! index: "<<gui.tileListSelected<<std::endl;
+        std::cerr<<"ERROR [LevelEditor::deleteSelectedLevel] DELETE! index: "<<levelListSelection.selectedIndex<<std::endl;
         isOk = false;
     }
+    
+    syncCurrentLevelUi();
 
-    int selected = gui.tileListSelected;
+    int selected = levelListSelection.selectedIndex;
 
-    refreshLevelUiState();
-
-    if (selected >= gui.tileList.size()) {
-        selected = gui.tileList.size() - 1;
+    // std::cout<<"[delete] selected: "<<selected<<", levels size before: "<<levelCountBefore<<", after"<<levelRepository.getLevelCount()<<std::endl;
+    
+    if (selected >= levelListSelection.getTilesSize()) {
+        selected = levelListSelection.getTilesSize() - 1;
     }
+    
+    levelListSelection.changeSelected(selected);
 
-    gui.changeSelected(selected);
     if (isOk) {
-        loadLevel(selected);
+        loadLevel(levelListSelection.selectedIndex);
     }
+
+    // refreshLevelUiState();
 }
 
 void LevelEditor::createNewLevel()
 {
     for(int i=0; i<state.currentLevel.getLevelSize(); i++) {state.currentLevel.set(i, 0);};
-refreshLevelUiState();
 
     saveLevel("level");
 
-    gui.changeSelected(gui.tileList.size() - 1);
+    levelListSelection.changeSelected(levelListSelection.getTilesSize() - 1);
 }
 
 void LevelEditor::saveAllLevels()
@@ -293,106 +335,74 @@ void LevelEditor::saveAllLevels()
 
 void LevelEditor::applyLevelDimensionsFromUi()
 {
-    if (isNumber(gui.tbWidth, sizeof(gui.tbWidth))) {
-        state.currentLevel.changeLevelDimensions(std::stoi(gui.tbWidth), state.currentLevel.getHeight());
+    if (isNumber(widthTextBox.value, sizeof(widthTextBox.value))) {
+        state.currentLevel.changeLevelDimensions(std::stoi(widthTextBox.value), state.currentLevel.getHeight());
     }
 
-    if (isNumber(gui.tbHeight, sizeof(gui.tbHeight))) {
-        state.currentLevel.changeLevelDimensions(state.currentLevel.getWidth(), std::stoi(gui.tbHeight));
+    if (isNumber(heightTextBox.value, sizeof(heightTextBox.value))) {
+        state.currentLevel.changeLevelDimensions(state.currentLevel.getWidth(), std::stoi(heightTextBox.value));
     }
 }
 
 void LevelEditor::handleLevelNameInput()
 {
-    if (GuiTextBox({ 10, 50, 260, 50 }, gui.tbName, 64, gui.tbNameEditMode)) {
-        if (gui.tbNameEditMode) {
-            state.currentLevel.setName(gui.tbName);
-        }
-
-        gui.tbNameEditMode = !gui.tbNameEditMode;
-    }
+    state.currentLevel.setName(nameTextBox.value);
 }
 
 void LevelEditor::handleLevelDimensionsInput()
 {
-    if (GuiTextBox({ 10, 50 + 30 + 10 + 20, 125, 50 }, gui.tbWidth, 64, gui.tbWidthEditMode)) {
-        if (gui.tbWidthEditMode) {
-            executeCommand(EditorCommand::ApplyLevelDimensions);
-        }
-
-        gui.tbWidthEditMode = !gui.tbWidthEditMode;
-    }
-
-    if (GuiTextBox({ 10 + 125 + 10, 50 + 30 + 10 + 20, 125, 50 }, gui.tbHeight, 64, gui.tbHeightEditMode)) {
-        if (gui.tbHeightEditMode) {
-            executeCommand(EditorCommand::ApplyLevelDimensions);
-        }
-
-        gui.tbHeightEditMode = !gui.tbHeightEditMode;
-    }
+    applyLevelDimensionsFromUi();
 }
 
 void LevelEditor::handleAddNewLevel()
 {
-    if (GuiButton({ 10, 200, 220, 60 }, "Add new")) {
-        executeCommand(EditorCommand::CreateNewLevel);
-    }
+    createNewLevel();
 }
 
 void LevelEditor::handleSaveAll()
 {
-    if (GuiButton({ 10 + 10 + 220 , 200, 220, 60 }, "Save All")) {
-        executeCommand(EditorCommand::SaveAllLevels);
-    }
+    saveAllLevels();
 }
 
 void LevelEditor::handleLevelListSelection()
 {
-    if (GuiListViewEx({ 10, 300, 300, 200 }, gui.tileList.data(), static_cast<int>(gui.tileList.size()), &gui.tileListScroll, &gui.tileListSelected, &gui.tileListHovered)) {
-        executeCommand(EditorCommand::LoadSelectedLevel);
-    }
+    loadSelectedLevel();
 }
 
 void LevelEditor::handleLevelDelete()
 {
-    if (GuiButton({ 10 + 10 + 220, 300 + 210, 220, 60 }, "Delete")){
-        executeCommand(EditorCommand::DeleteSelectedLevel);
-    }
+    deleteSelectedLevel();
 }
 
 void LevelEditor::handleLevelSave()
 {
-    if (GuiButton({ 10, 300 + 210, 220, 60 }, "Save")){
-        executeCommand(EditorCommand::SaveCurrentLevel);
-    }
+    saveCurrentLevel();
 }
 
 void LevelEditor::handleSaveAsNew()
 {
-    if (GuiButton({ 10, 300 + 210 + 10 + 60, 220, 60 }, "Save as new")) {
-        saveLevel("level");
-    }
+    saveLevel("level");
 }
 
-void LevelEditor::drawEdgeDropdowns()
-{
-    for(int i=state.currentLevel.getEdgesSize(); i>0; i--) {
-        Edge& e = state.currentLevel.getEdge(i-1);
-        std::string str = "EDGE ";
-        str += std::to_string(i) + " (" + std::to_string(e.tilesCount) + ")";
-        Vector2 textPos = {10, (i-1)*30 + 300 + 210 + 10 + 60 + 80};
-        DrawText(str.c_str(), textPos.x, textPos.y, 20, BLACK);
-        int textWidth = MeasureText(str.c_str(), 20);
-        if (GuiDropdownBox({ textPos.x + textWidth + 10, textPos.y, 200, 25 }, gui.dropDownOptions.c_str(), &gui.dropDowns[i-1].dropdownActive, gui.dropDowns[i-1].dropDownEditMode)) {
-            gui.dropDowns[i-1].dropDownEditMode = !gui.dropDowns[i-1].dropDownEditMode;
-            e.assignedNextLevel = gui.dropDowns[i-1].dropdownActive;
-        }
-    }
-}
+// void LevelEditor::drawEdgeDropdowns()
+// {
+//     for(int i=state.currentLevel.getEdgesSize(); i>0; i--) {
+//         Edge& e = state.currentLevel.getEdge(i-1);
+//         std::string str = "EDGE ";
+//         str += std::to_string(i) + " (" + std::to_string(e.tilesCount) + ")";
+//         Vector2 textPos = {10, (i-1)*30 + 300 + 210 + 10 + 60 + 80};
+//         DrawText(str.c_str(), textPos.x, textPos.y, 20, BLACK);
+//         int textWidth = MeasureText(str.c_str(), 20);
+//         if (GuiDropdownBox({ textPos.x + textWidth + 10, textPos.y, 200, 25 }, gui.dropDownOptions.c_str(), &gui.dropDowns[i-1].dropdownActive, gui.dropDowns[i-1].dropDownEditMode)) {
+//             gui.dropDowns[i-1].dropDownEditMode = !gui.dropDowns[i-1].dropDownEditMode;
+//             e.assignedNextLevel = gui.dropDowns[i-1].dropdownActive;
+//         }
+//     }
+    
+// }
 
 void LevelEditor::drawEdges()
 {
-    
     // std::cout<<"EDGES: "<<edges.size()<<std::endl;
     int i=1;
     for(int j=0; j<state.currentLevel.getEdgesSize(); j++) {
@@ -418,14 +428,14 @@ void LevelEditor::drawEdges()
     }
 }
 
-void LevelEditor::createTileNames()
+std::vector<std::string> LevelEditor::getLevelNames()
 {
-    gui.tileNames.clear();
+    std::vector<std::string> levelNames;
 
     int levelCount = levelRepository.getLevelCount();
     for (int i=0; i<levelCount; i++) {
-        gui.tileNames.push_back(std::to_string(i+1) + ". " + levelRepository.getLevel(i).getName());
+        levelNames.push_back(std::to_string(i+1) + ". " + levelRepository.getLevel(i).getName());
     }
 
-    gui.rebuildTileList();
+    return levelNames;
 }

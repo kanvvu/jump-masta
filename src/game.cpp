@@ -4,14 +4,15 @@
 #include <string>
 
 Game::Game(int windowWidth, int windowHeight, const char *windowTitle)
-  : m_windowWidth(windowWidth),
+  : m_raylibContext(windowWidth, windowHeight, windowTitle),
+    m_windowWidth(windowWidth),
     m_windowHeight(windowHeight),
     m_windowTitle(windowTitle),
     m_levelRepository(m_levelFileLoader),
     m_tileMap(m_levelRepository),
     m_levelEditor(m_levelRepository)
 {
-    InitWindow(windowWidth, windowHeight, windowTitle);
+    // InitWindow(windowWidth, windowHeight, windowTitle);
     SetTargetFPS(60);
 
     camera.offset.x = windowWidth/2 - (m_tileMap.getSize().x*m_tileMap.getTileSize())/2;   // coordinate x origin
@@ -22,11 +23,6 @@ Game::Game(int windowWidth, int windowHeight, const char *windowTitle)
     camera.zoom     = 1.0f;      // magnification, i.e fov or zoom
 
     m_player = Player(m_tileMap.getTileSize(), m_tileMap.getSpawnPosition());
-}
-
-Game::~Game()
-{
-    CloseWindow();
 }
 
 void Game::start()

@@ -270,4 +270,5 @@ void LevelData::changeLevelDimensions(int width, int height)
     level = newLevel;
     this->width = width;
     this->height = height;
+    createEdges();
 }

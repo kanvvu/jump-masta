@@ -7,10 +7,19 @@
 #include "common.hpp"
 #include "levelFileLoader.hpp"
 
+struct RaylibContext {
+    RaylibContext(int w, int h, const char* title) {
+        InitWindow(w, h, title);
+    }
+    ~RaylibContext() {
+        CloseWindow();
+    }
+};
 
 class Game
 {
 private:
+    RaylibContext m_raylibContext;
     int m_windowWidth;
     int m_windowHeight;
     const char *m_windowTitle;
@@ -32,7 +41,7 @@ private:
 
 public:
     Game(int windowWidth, int windowHeight, const char *windowTitle);
-    ~Game();
+    ~Game() = default;
 
     void start();
     void proccessInput();
