@@ -6,7 +6,13 @@
 #include <functional>
 #include <raylib.h>
 #include "interfaces.hpp"
-#include "levelData.hpp"
+
+struct EdgeDropDownRow {
+    int edgeIndex = -1;
+    std::string label;
+    std::vector<std::string> options;
+    int selectedIndex = -1;
+};
 
 class ListView : public IDraw {
 private:
@@ -104,10 +110,12 @@ class TextLabelAndDropDownBoxList : public IDraw {
     Vector2 position;
     
     public:
-    TextLabelAndDropDownBoxList();
-    TextLabelAndDropDownBoxList(Vector2 position, LevelData& level, std::vector<std::string> levelNames);
+    using RowChangedCallback = std::function<void(int, int)>;
 
-    void update(LevelData& level, std::vector<std::string> levelNames);
+    TextLabelAndDropDownBoxList();
+    TextLabelAndDropDownBoxList(Vector2 position, const std::vector<EdgeDropDownRow>& rows, RowChangedCallback onRowChanged = {});
+
+    void update(const std::vector<EdgeDropDownRow>& rows, RowChangedCallback onRowChanged = {});
 
     void draw();
 

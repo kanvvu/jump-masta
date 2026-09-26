@@ -48,8 +48,7 @@ LevelEditor::LevelEditor(LevelRepository& levelRepository, int tileSize) : level
     saveAsNewButton = Button({10, 300 + 210 + 10 + 60, 220, 60}, "Save as new", [this]() {handleSaveAsNew(); });
     guiItems.push_back(&saveAsNewButton);
 
-    // Vector2 textPos = {10, (i-1)*30 + 300 + 210 + 10 + 60 + 80};
-    edgeAssignmentDropDown = TextLabelAndDropDownBoxList( {10, 300 + 210 + 10 + 60 + 80}, state.currentLevel, getLevelNames());
+    edgeAssignmentDropDown = TextLabelAndDropDownBoxList({10, 300 + 210 + 10 + 60 + 80}, {});
     guiItems.push_back(&edgeAssignmentDropDown);
     
 
@@ -64,20 +63,38 @@ LevelEditor::LevelEditor(LevelRepository& tileLevelManager) : LevelEditor(tileLe
 
 }
 
+std::vector<EdgeDropDownRow> buildEdgeDropdownRows(const LevelData& level, const std::vector<std::string>& levelNames)
+{
+    std::vector<EdgeDropDownRow> rows;
+    rows.reserve(level.getEdgesSize());
+
+    for (int i = level.getEdgesSize(); i > 0; --i) {
+        const Edge& edge = level.getEdge(i - 1);
+        EdgeDropDownRow row;
+        row.edgeIndex = i - 1;
+        row.label = "EDGE " + std::to_string(i) + " (" + std::to_string(edge.tilesCount) + ")";
+        row.options = levelNames;
+        row.selectedIndex = edge.assignedNextLevel;
+        rows.push_back(row);
+    }
+
+    return rows;
+}
+
 void LevelEditor::syncCurrentLevelUi()
 {
-    //Sooo what shoudl be updated when
-    //when added/deleted level (repository change)
-    //levelListSelection ,edgeAssigmentDropDowns
-    //when level loaded
-    //TextBoxes..
-
     snprintf(widthTextBox.value, sizeof(widthTextBox.value), std::to_string(state.currentLevel.getWidth()).c_str());
     snprintf(heightTextBox.value, sizeof(heightTextBox.value), std::to_string(state.currentLevel.getHeight()).c_str());
     snprintf(nameTextBox.value, sizeof(nameTextBox.value), state.currentLevel.getName().c_str());
 
-    edgeAssignmentDropDown.update(state.currentLevel, getLevelNames());
-    levelListSelection.setTiles(getLevelNames());
+    std::vector<std::string> levelNames = getLevelNames();
+    auto rows = buildEdgeDropdownRows(state.currentLevel, levelNames);
+    edgeAssignmentDropDown.update(rows, [this](int edgeIndex, int selectedIndex) {
+        if (edgeIndex >= 0 && edgeIndex < state.currentLevel.getEdgesSize()) {
+            state.currentLevel.getEdge(edgeIndex).assignedNextLevel = selectedIndex;
+        }
+    });
+    levelListSelection.setTiles(levelNames);
 }
 
 void LevelEditor::saveLevel(std::string name) {
@@ -162,8 +179,7 @@ void LevelEditor::proccessInput(GameState &gameState)
             else
                 state.currentLevel.set(tileIndex, 0);
 
-            edgeAssignmentDropDown.update(state.currentLevel, getLevelNames());
-            // refreshLevelUiState();
+            syncCurrentLevelUi();
 
         } 
         // std::cout<<xPos<<", "<<yPos<<"\n";

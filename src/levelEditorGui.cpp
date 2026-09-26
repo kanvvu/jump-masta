@@ -184,31 +184,33 @@ void TextLabel::draw()
 }
 TextLabelAndDropDownBoxList::TextLabelAndDropDownBoxList() : position({0,0}) {};
 
-TextLabelAndDropDownBoxList::TextLabelAndDropDownBoxList(Vector2 position, LevelData &level, std::vector<std::string> levelNames) :
+TextLabelAndDropDownBoxList::TextLabelAndDropDownBoxList(Vector2 position, const std::vector<EdgeDropDownRow>& rows, RowChangedCallback onRowChanged) :
 position(position)
 {
-    update(level, levelNames);
+    update(rows, onRowChanged);
 }
 
-void TextLabelAndDropDownBoxList::update(LevelData &level, std::vector<std::string> levelNames)
+void TextLabelAndDropDownBoxList::update(const std::vector<EdgeDropDownRow>& rows, RowChangedCallback onRowChanged)
 {
     textLabels.clear();
-    textLabels.reserve(level.getEdgesSize());
+    textLabels.reserve(rows.size());
     dropdownboxes.clear();
-    dropdownboxes.reserve(level.getEdgesSize());
-    for(int i=level.getEdgesSize(); i>0; i--) {
-        Edge& e = level.getEdge(i-1);
-        std::string str = "EDGE ";
-        str += std::to_string(i) + " (" + std::to_string(e.tilesCount) + ")";
-        // Vector2 textPos = {10, (i-1)*30 + 300 + 210 + 10 + 60 + 80};
-        Vector2 textPos = {position.x, (i-1)*30 + position.y};
-        int textWidth = MeasureText(str.c_str(), 20);
-        
-        textLabels.push_back(TextLabel(textPos, str, 20, BLACK));
-        dropdownboxes.push_back(DropDownBox({ textPos.x + textWidth + 10, textPos.y, 200, 25 }, levelNames));
+    dropdownboxes.reserve(rows.size());
+    for (int i = 0; i < static_cast<int>(rows.size()); ++i) {
+        const EdgeDropDownRow& row = rows.at(i);
+        Vector2 textPos = {position.x, i * 30.0f + position.y};
+        int textWidth = MeasureText(row.label.c_str(), 20);
+
+        textLabels.push_back(TextLabel(textPos, row.label, 20, BLACK));
+        dropdownboxes.push_back(DropDownBox({ textPos.x + textWidth + 10, textPos.y, 200, 25 }, row.options));
         DropDownBox& dropDownBox = dropdownboxes.back();
-        dropDownBox.selectedIndex = e.assignedNextLevel;
-        dropdownboxes.back().setOnChange([this, &e, &dropDownBox]() {e.assignedNextLevel = dropDownBox.selectedIndex;});
+        dropDownBox.selectedIndex = row.selectedIndex;
+
+        if (onRowChanged) {
+            dropdownboxes.back().setOnChange([this, i, onRowChanged]() {
+                onRowChanged(i, dropdownboxes.at(i).selectedIndex);
+            });
+        }
     }
 }
 
