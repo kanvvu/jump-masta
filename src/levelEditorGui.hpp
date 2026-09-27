@@ -11,7 +11,7 @@ struct EdgeDropDownRow {
     int edgeIndex = -1;
     std::string label;
     std::vector<std::string> options;
-    int selectedIndex = -1;
+    int assignedLevel = -1;
 };
 
 class ListView : public IDraw {

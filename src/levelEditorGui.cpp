@@ -30,7 +30,7 @@ void ListView::changeSelected(int index, int maxTilesCount)
     }
     
     selectedIndex = index;
-    std::cout<<"SELECTED: "<<index<<", SCROLL: "<<maxScroll<<", SCROLL INDEX: "<<scrollIndex<<std::endl;
+    // std::cout<<"SELECTED: "<<index<<", SCROLL: "<<maxScroll<<", SCROLL INDEX: "<<scrollIndex<<std::endl;
 
     // std::cout<<index<<" "<<scroll<<std::endl;
 }
@@ -76,7 +76,7 @@ void ListView::draw()
 
     if (GuiListViewEx(bounds, tilesCharPtr.data(), static_cast<int>(tilesCharPtr.size()), &scrollIndex, &selectedIndex, &hoveredIndex)) {
         onChange();
-        std::cout<<"selected: "<<selectedIndex<<", scroll: "<<scrollIndex<<std::endl;
+        // std::cout<<"selected: "<<selectedIndex<<", scroll: "<<scrollIndex<<std::endl;
     }
 }
 
@@ -196,7 +196,7 @@ void TextLabelAndDropDownBoxList::update(const std::vector<EdgeDropDownRow>& row
     textLabels.reserve(rows.size());
     dropdownboxes.clear();
     dropdownboxes.reserve(rows.size());
-    for (int i = 0; i < static_cast<int>(rows.size()); ++i) {
+    for (int i = static_cast<int>(rows.size()) - 1; i >= 0; i--) {
         const EdgeDropDownRow& row = rows.at(i);
         Vector2 textPos = {position.x, i * 30.0f + position.y};
         int textWidth = MeasureText(row.label.c_str(), 20);
@@ -204,13 +204,17 @@ void TextLabelAndDropDownBoxList::update(const std::vector<EdgeDropDownRow>& row
         textLabels.push_back(TextLabel(textPos, row.label, 20, BLACK));
         dropdownboxes.push_back(DropDownBox({ textPos.x + textWidth + 10, textPos.y, 200, 25 }, row.options));
         DropDownBox& dropDownBox = dropdownboxes.back();
-        dropDownBox.selectedIndex = row.selectedIndex;
+        dropDownBox.selectedIndex = row.assignedLevel;
 
-        if (onRowChanged) {
-            dropdownboxes.back().setOnChange([this, i, onRowChanged]() {
-                onRowChanged(i, dropdownboxes.at(i).selectedIndex);
-            });
-        }
+
+        dropdownboxes.back().setOnChange([this, i, onRowChanged, rows]() {
+            // std::cout<<i<<"\n";
+            // for(int j=0; j<dropdownboxes.size(); j++) {
+            //     std::cout<<j<<". "<<dropdownboxes.at(j).selectedIndex<<"\n";
+            // }
+            // std::cout<<"\n";
+            onRowChanged(rows.size() - i - 1, dropdownboxes.at(rows.size() - i - 1).selectedIndex);
+        });
     }
 }
 

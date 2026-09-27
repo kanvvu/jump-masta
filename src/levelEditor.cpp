@@ -12,10 +12,9 @@
 LevelEditor::LevelEditor(LevelRepository& levelRepository, int tileSize) : levelRepository(levelRepository)
 {
     state.currentLevel = LevelData(LevelEditorState::DefaultLevelWidth, LevelEditorState::DefaultLevelHeight);
-    state.tileSize = tileSize;
 
-    state.camera.offset.x = state.screenWidth/2 - (state.currentLevel.getWidth()*state.tileSize)/2;   // coordinate x origin
-    state.camera.offset.y = state.screenHeight/2 - (state.currentLevel.getHeight()*state.tileSize)/2;   // coordinate y origin
+    state.camera.offset.x = state.screenWidth/2 - (state.currentLevel.getWidth()*state.getTileSize())/2;   // coordinate x origin
+    state.camera.offset.y = state.screenHeight/2 - (state.currentLevel.getHeight()*state.getTileSize())/2;   // coordinate y origin
     state.camera.target.x = 0;         // rotation and zoom x origin (from offset above)
     state.camera.target.y = 0;         // rotation and zoom y origin (from offset above)
     state.camera.rotation = 0;        // rotation in deg
@@ -29,6 +28,9 @@ LevelEditor::LevelEditor(LevelRepository& levelRepository, int tileSize) : level
 
     heightTextBox = SmallTextBox({10 + 125 + 10, 50 + 30 + 10 + 20, 125, 50}, [this]() {handleLevelDimensionsInput();}, std::to_string(state.currentLevel.getHeight()));
     guiItems.push_back(&heightTextBox);
+
+    tileSizeTextBox = SmallTextBox({10 + 125 + 10 + 10 + 125, 50 + 30 + 10 + 20, 60, 50}, [this]() {state.currentLevel.setTileSize(std::stoi(tileSizeTextBox.value));syncCurrentLevelUi();}, std::to_string(state.currentLevel.getTileSize()));
+    guiItems.push_back(&tileSizeTextBox);
 
     addNewButton = Button({10, 200,220, 60}, "Add new", [this]() {handleAddNewLevel(); });
     guiItems.push_back(&addNewButton);
@@ -65,13 +67,13 @@ std::vector<EdgeDropDownRow> buildEdgeDropdownRows(const LevelData& level, const
     std::vector<EdgeDropDownRow> rows;
     rows.reserve(level.getEdgesSize());
 
-    for (int i = level.getEdgesSize(); i > 0; --i) {
-        const Edge& edge = level.getEdge(i - 1);
+    for (int i = level.getEdgesSize(); i > 0 ; i--) {
+        const Edge& edge = level.getEdge(i-1);
         EdgeDropDownRow row;
-        row.edgeIndex = i - 1;
+        row.edgeIndex = i-1;
         row.label = "EDGE " + std::to_string(i) + " (" + std::to_string(edge.tilesCount) + ")";
         row.options = levelNames;
-        row.selectedIndex = edge.assignedNextLevel;
+        row.assignedLevel = edge.assignedNextLevel;
         rows.push_back(row);
     }
 
@@ -83,12 +85,16 @@ void LevelEditor::syncCurrentLevelUi()
     snprintf(widthTextBox.value, sizeof(widthTextBox.value), std::to_string(state.currentLevel.getWidth()).c_str());
     snprintf(heightTextBox.value, sizeof(heightTextBox.value), std::to_string(state.currentLevel.getHeight()).c_str());
     snprintf(nameTextBox.value, sizeof(nameTextBox.value), state.currentLevel.getName().c_str());
+    snprintf(tileSizeTextBox.value, sizeof(tileSizeTextBox.value), std::to_string(state.currentLevel.getTileSize()).c_str());
 
     std::vector<std::string> levelNames = getLevelNames();
     auto rows = buildEdgeDropdownRows(state.currentLevel, levelNames);
     edgeAssignmentDropDown.update(rows, [this](int edgeIndex, int selectedIndex) {
         if (edgeIndex >= 0 && edgeIndex < state.currentLevel.getEdgesSize()) {
+            std::cout<<"\tedge: "<<edgeIndex<<", index: "<<selectedIndex<<"\n";
             state.currentLevel.getEdge(edgeIndex).assignedNextLevel = selectedIndex;
+        } else {
+            std::cout<<"lol edgeAssignmentDropDown lol!!!\n";
         }
     });
     levelListSelection.setTiles(levelNames);
@@ -105,11 +111,11 @@ void LevelEditor::saveLevel(std::string name) {
 void LevelEditor::loadLevel(int levelID) {
     LevelData levelData = levelRepository.getLevel(levelID);
 
-    state.camera.offset.x = state.screenWidth/2 - (levelData.getWidth()*state.tileSize)/2;   // coordinate x origin
-    state.camera.offset.y = state.screenHeight/2 - (levelData.getHeight()*state.tileSize)/2;   // coordinate y origin
+    state.camera.offset.x = state.screenWidth/2 - (levelData.getWidth()*levelData.getTileSize())/2;   // coordinate x origin
+    state.camera.offset.y = state.screenHeight/2 - (levelData.getHeight()*levelData.getTileSize())/2;   // coordinate y origin
 
     state.currentLevel = levelData;
-    std::cout<<"LEVELS: "<<state.currentLevel.getLevelSize()<<", EDGES: "<<state.currentLevel.getEdgesSize()<<std::endl;
+    // std::cout<<"LEVELS: "<<state.currentLevel.getLevelSize()<<", EDGES: "<<state.currentLevel.getEdgesSize()<<std::endl;
 
     syncCurrentLevelUi();
 }
@@ -145,8 +151,8 @@ void LevelEditor::proccessInput(GameState &gameState)
 
     if (IsMouseButtonDown(0)) {
         Vector2 mousePos = GetMousePosition();
-        int xPos = (mousePos.x - state.camera.offset.x)/state.tileSize;
-        int yPos = (mousePos.y - state.camera.offset.y)/state.tileSize;
+        int xPos = (mousePos.x - state.camera.offset.x)/state.getTileSize();
+        int yPos = (mousePos.y - state.camera.offset.y)/state.getTileSize();
 
         if (xPos >= 0 && xPos < state.currentLevel.getWidth() && yPos >=0 && yPos < state.currentLevel.getHeight()) {
             int tileIndex = yPos*state.currentLevel.getWidth() + xPos;
@@ -183,18 +189,18 @@ void LevelEditor::draw()
 
     
     Vector2 mousePos = GetMousePosition();
-    if (state.mouseMode == 0 && mousePos.x - state.camera.offset.x >= 0 && mousePos.x - state.camera.offset.x < state.currentLevel.getWidth()*state.tileSize && mousePos.y - state.camera.offset.y >= 0 && mousePos.y - state.camera.offset.y < state.currentLevel.getHeight()*state.tileSize) 
-        DrawRectangle(floor((mousePos.x-state.camera.offset.x)/state.tileSize)*state.tileSize, floor((mousePos.y-state.camera.offset.y)/state.tileSize)*state.tileSize, state.tileSize, state.tileSize, LIGHTGRAY);
+    if (state.mouseMode == 0 && mousePos.x - state.camera.offset.x >= 0 && mousePos.x - state.camera.offset.x < state.currentLevel.getWidth()*state.getTileSize() && mousePos.y - state.camera.offset.y >= 0 && mousePos.y - state.camera.offset.y < state.currentLevel.getHeight()*state.getTileSize()) 
+        DrawRectangle(floor((mousePos.x-state.camera.offset.x)/state.getTileSize())*state.getTileSize(), floor((mousePos.y-state.camera.offset.y)/state.getTileSize())*state.getTileSize(), state.getTileSize(), state.getTileSize(), LIGHTGRAY);
     
     for(int j=0; j<state.currentLevel.getWidth()+1; j++) {
-        Vector2 start = {static_cast<float>(j*state.tileSize), 0.0f};
-        Vector2 end = {static_cast<float>(j*state.tileSize), state.currentLevel.getHeight()*static_cast<float>(state.tileSize)};
+        Vector2 start = {static_cast<float>(j*state.getTileSize()), 0.0f};
+        Vector2 end = {static_cast<float>(j*state.getTileSize()), state.currentLevel.getHeight()*static_cast<float>(state.getTileSize())};
         DrawLineEx(start, end, 1.0f, BLACK);
     }
 
     for(int i=0; i<state.currentLevel.getHeight()+1; i++) {
-        Vector2 start = {0.0f, static_cast<float>(i*state.tileSize)};
-        Vector2 end = {state.currentLevel.getWidth()*static_cast<float>(state.tileSize), static_cast<float>(i*state.tileSize)};
+        Vector2 start = {0.0f, static_cast<float>(i*state.getTileSize())};
+        Vector2 end = {state.currentLevel.getWidth()*static_cast<float>(state.getTileSize()), static_cast<float>(i*state.getTileSize())};
         DrawLineEx(start, end, 1.0f, BLACK);
     }
 
@@ -287,6 +293,7 @@ void LevelEditor::createNewLevel()
 
 void LevelEditor::saveAllLevels()
 {
+    std::cout<<"savealll\n";
     levelRepository.saveAll();
 }
 
@@ -347,16 +354,17 @@ void LevelEditor::drawEdges()
     int i=1;
     for(int j=0; j<state.currentLevel.getEdgesSize(); j++) {
         Edge& e = state.currentLevel.getEdge(j);
+        int tileSize = state.currentLevel.getTileSize();
         Color color = RED;
         if (e.assignedNextLevel != -1) color = GREEN;
-        DrawLineEx({(float)e.start.x*state.tileSize,(float) e.start.y*state.tileSize}, {(float)e.end.x*state.tileSize,(float) e.end.y*state.tileSize}, 4.0f, color);
+        DrawLineEx({(float)e.start.x*tileSize,(float) e.start.y*tileSize}, {(float)e.end.x*tileSize,(float) e.end.y*tileSize}, 4.0f, color);
         std::string str = "EDGE ";
         if (e.type == TOP) str += "TOP ";
         else if (e.type == DOWN) str += "DOWN ";
         else if (e.type == LEFT) str += "LEFT ";
         else  str += "RIGHT ";
         str += std::to_string(i) + " (" + std::to_string(e.tilesCount) + ")"; 
-        Vector2 textPos = {e.start.x*state.tileSize, e.start.y*state.tileSize};
+        Vector2 textPos = {e.start.x*tileSize, e.start.y*tileSize};
         int textWidth = MeasureText(str.c_str(), 20);
         if (e.type == TOP) {
             textPos.y -= 20; 

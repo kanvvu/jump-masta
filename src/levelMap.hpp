@@ -10,7 +10,6 @@ class LevelMap
 {
 private:
     
-    int m_tileSize = 64;
     LevelRepository& levelRepository;
     int currentTileMapIndex = 0;
 
@@ -22,7 +21,7 @@ private:
     void update();
     void draw();
     
-    int getTileSize() {return m_tileSize;}
+    int getTileSize();
     bool isCollision(Vector2 position, int tileType) const;
     Vector2 getSpawnPosition();
     Vector2i getSize();

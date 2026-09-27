@@ -24,11 +24,11 @@ struct LevelEditorState
     int screenWidth = DefaultScreenWidth;
     int screenHeight = DefaultScreenHeight;
 
-    int tileSize = DefaultTileSize;
     bool isMouseDown = false;
     int mouseMode = 0; // 0 - adding, 1 - removing
 
     int selectedTile = 1;
+    int getTileSize() {return currentLevel.getTileSize();}
 };
 
 enum class EditorCommand
@@ -48,6 +48,7 @@ private:
     SmallTextBox nameTextBox;
     SmallTextBox widthTextBox;
     SmallTextBox heightTextBox;
+    SmallTextBox tileSizeTextBox;
     Button addNewButton;
     Button saveAllButton;
     ListView levelListSelection;

@@ -86,8 +86,10 @@ void Game::updateGame(float deltaTime)
 
     m_tileMap.checkAndResolveCollision(m_player);
 
-    if (m_tileMap.checkForNextLevel(m_player.m_position)) 
+    if (m_tileMap.checkForNextLevel(m_player.m_position)) { 
         centerCamera(camera.offset, {m_windowWidth, m_windowHeight}, m_tileMap.getSize(), m_tileMap.getTileSize());
+        m_player.setTileSize(m_tileMap.getTileSize());
+    }
     
 }
 

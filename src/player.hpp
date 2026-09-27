@@ -22,6 +22,8 @@ public:
     void draw();
     void update(float elapsedTime);
 
+    void setTileSize(int tileSize) {m_tileSize = tileSize;}
+
     void reset();
 };
 

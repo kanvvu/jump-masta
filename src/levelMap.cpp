@@ -24,6 +24,7 @@ void LevelMap::draw()
 {
     int m_widthCount = levelRepository.getLevel(currentTileMapIndex).getWidth();
     int m_heightCount = levelRepository.getLevel(currentTileMapIndex).getHeight();
+    int m_tileSize = getTileSize();
 
     for(int i=0; i<m_heightCount; i++) {
         for(int j=0; j<m_widthCount; j++) {
@@ -56,6 +57,11 @@ void LevelMap::draw()
     }
 }
 
+int LevelMap::getTileSize()
+{
+    return levelRepository.getLevel(currentTileMapIndex).getTileSize();
+}
+
 bool LevelMap::isCollision(Vector2 position, int tileType) const
 {
     int m_widthCount = levelRepository.getLevel(currentTileMapIndex).getWidth();
@@ -78,6 +84,7 @@ Vector2 LevelMap::getSpawnPosition()
 {
     int m_widthCount = levelRepository.getLevel(currentTileMapIndex).getWidth();
     int m_heightCount = levelRepository.getLevel(currentTileMapIndex).getHeight();
+    int m_tileSize = getTileSize();
 
     for(int i=0; i<m_heightCount; i++) {
         for(int j=0; j<m_widthCount; j++) {

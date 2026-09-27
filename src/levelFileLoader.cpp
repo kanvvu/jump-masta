@@ -31,7 +31,7 @@ std::ostringstream LevelFileLoader::levelToStream(const LevelData &level) const
 {
     std::ostringstream data;
 
-    data << level.getWidth() << " " << level.getHeight() << "\n";
+    data << level.getWidth() << " " << level.getHeight() << " " << level.getTileSize() <<"\n";
     data << level.getName() << "\n";
 
     for (int i=0; i<level.getHeight(); i++) {
@@ -92,22 +92,24 @@ std::vector<LevelData> LevelFileLoader::loadLevels() const
             std::vector<std::string> tokens;
             tokens = split(s, " ");
 
-            if (tokens.size() != 2) {
-                std::cerr <<"[LevelFileLoader::loadLevels] " <<"Invalid map dimensions, should be 2, is " + tokens.size() << std::endl;
+            if (!(tokens.size() == 2 || tokens.size() == 3)) {
+                std::cerr <<"[LevelFileLoader::loadLevels] " <<"Invalid map dimensions, should be 2 or 3, is " + tokens.size() << std::endl;
                 return empty;
             } 
             int width = std::stoi(tokens[0]);
             int height = std::stoi(tokens[1]);
+            int tileSize = 64;
+            if (tokens.size() == 3) tileSize = std::stoi(tokens[2]); 
 
-            LevelData levelData(width, height);
-
+            
             if (!std::getline(file, s)) {
                 std::cerr <<"[LevelFileLoader::loadLevels] " << "Invalid map file, file to short! \n";
                 return empty;
             }
             std::string levelName = s;
-            std::cout<<width<<" "<<height<<" "<<levelName<<std::endl;
-            levelData.setName(levelName);
+            std::cout<<width<<" "<<height<<" "<<tileSize<<" "<<levelName<<std::endl;
+        
+            LevelData levelData(width, height, levelName, tileSize);
 
             for (int i = 0; i<height; i++) {
                 if (!std::getline(file, s)) {
