@@ -6,6 +6,7 @@
 #include "levelEditor.hpp"
 #include "common.hpp"
 #include "levelFileLoader.hpp"
+#include "assets.hpp"
 
 struct RaylibContext {
     RaylibContext(int w, int h, const char* title) {
@@ -29,6 +30,8 @@ private:
     LevelFileLoader m_levelFileLoader;
 
     LevelRepository m_levelRepository;
+
+    Assets m_assets;
 
     LevelEditor m_levelEditor;
 

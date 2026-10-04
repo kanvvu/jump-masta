@@ -13,9 +13,11 @@ private:
     LevelRepository& levelRepository;
     int currentTileMapIndex = 0;
 
+    Sprite background;
+    Sprite grass;
     
     public:
-    LevelMap(LevelRepository& levelRepository); 
+    LevelMap(LevelRepository& levelRepository, Sprite background, Sprite grass); 
     ~LevelMap() = default;
     
     void update();

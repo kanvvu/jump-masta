@@ -4,8 +4,10 @@
 #include "raymath.h"
 
 
-LevelMap::LevelMap(LevelRepository& levelRepository)
-    : levelRepository(levelRepository)
+LevelMap::LevelMap(LevelRepository& levelRepository, Sprite background, Sprite grass) 
+    : levelRepository(levelRepository),
+    background(background),
+    grass(grass)
 {
 
 }
@@ -20,6 +22,7 @@ void LevelMap::changeLevel(int levelID)
     currentTileMapIndex = levelID;
 }
 
+
 void LevelMap::draw()
 {
     int m_widthCount = levelRepository.getLevel(currentTileMapIndex).getWidth();
@@ -33,11 +36,16 @@ void LevelMap::draw()
             int yPos = i*m_tileSize;
             Color tileColor = WHITE;
 
-            int tile = levelRepository.getLevel(currentTileMapIndex).get(tileIndex);
-            if (tile == 1) tileColor = BLUE;
-            if (tile == 3) tileColor= ORANGE;
+            background.draw({static_cast<float>(xPos),static_cast<float>(yPos)});
 
-            DrawRectangle(xPos, yPos, m_tileSize, m_tileSize, tileColor);
+            int tile = levelRepository.getLevel(currentTileMapIndex).get(tileIndex);
+            if (tile == 1) {
+                tileColor = BLUE;
+                grass.draw({static_cast<float>(xPos),static_cast<float>(yPos)});
+            }
+            if (tile == 3) {tileColor= ORANGE;}
+
+            // DrawRectangle(xPos, yPos, m_tileSize, m_tileSize, tileColor);
             char msg1[64];
             snprintf(msg1, sizeof(msg1), "%i, %i", j, i);
             char msg2[64];

@@ -9,8 +9,10 @@ Game::Game(int windowWidth, int windowHeight, const char *windowTitle)
     m_windowHeight(windowHeight),
     m_windowTitle(windowTitle),
     m_levelRepository(m_levelFileLoader),
-    m_tileMap(m_levelRepository),
-    m_levelEditor(m_levelRepository)
+    m_assets(),
+    m_tileMap(m_levelRepository, m_assets.getBackground(), m_assets.getGrass()),
+    m_levelEditor(m_levelRepository),
+    m_player(m_tileMap.getTileSize(), m_tileMap.getSpawnPosition(), m_assets.getPlayer())
 {
     // InitWindow(windowWidth, windowHeight, windowTitle);
     SetTargetFPS(60);
@@ -21,8 +23,6 @@ Game::Game(int windowWidth, int windowHeight, const char *windowTitle)
     camera.target.y = 0;         // rotation and zoom y origin (from offset above)
     camera.rotation = 0;        // rotation in deg
     camera.zoom     = 1.0f;      // magnification, i.e fov or zoom
-
-    m_player = Player(m_tileMap.getTileSize(), m_tileMap.getSpawnPosition());
 }
 
 void Game::start()
