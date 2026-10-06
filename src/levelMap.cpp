@@ -36,7 +36,8 @@ void LevelMap::draw()
             int yPos = i*m_tileSize;
             Color tileColor = WHITE;
 
-            background.draw({static_cast<float>(xPos),static_cast<float>(yPos)});
+            if (i%2 == 0 && j%2 == 0)
+                background.draw({static_cast<float>(xPos),static_cast<float>(yPos)});
 
             int tile = levelRepository.getLevel(currentTileMapIndex).get(tileIndex);
             if (tile == 1) {

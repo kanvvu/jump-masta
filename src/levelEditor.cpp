@@ -9,7 +9,7 @@
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
 
-LevelEditor::LevelEditor(LevelRepository& levelRepository, int tileSize) : levelRepository(levelRepository)
+LevelEditor::LevelEditor(LevelRepository& levelRepository,Assets& assets, int tileSize) : levelRepository(levelRepository), assets(assets)
 {
     state.currentLevel = LevelData(LevelEditorState::DefaultLevelWidth, LevelEditorState::DefaultLevelHeight);
 
@@ -57,7 +57,7 @@ LevelEditor::LevelEditor(LevelRepository& levelRepository, int tileSize) : level
     syncCurrentLevelUi();
 }
 
-LevelEditor::LevelEditor(LevelRepository& tileLevelManager) : LevelEditor(tileLevelManager, LevelEditorState::DefaultTileSize)
+LevelEditor::LevelEditor(LevelRepository& tileLevelManager, Assets& assets) : LevelEditor(tileLevelManager, assets, LevelEditorState::DefaultTileSize)
 {
 
 }
@@ -163,7 +163,7 @@ void LevelEditor::proccessInput(GameState &gameState)
             }
             
             if (state.mouseMode == 0)
-                state.currentLevel.set(tileIndex,1);
+                state.currentLevel.set(tileIndex, state.selectedTile);
             else
                 state.currentLevel.set(tileIndex, 0);
 
@@ -185,12 +185,51 @@ void LevelEditor::draw()
     BeginMode2D(state.camera);
 
 
-    state.currentLevel.draw();
+    int m_widthCount =  state.currentLevel.getWidth();
+    int m_heightCount = state.currentLevel.getHeight();
+    int m_tileSize = state.currentLevel.getTileSize();
+
+    for(int i=0; i<m_heightCount; i++) {
+        for(int j=0; j<m_widthCount; j++) {
+            int tileIndex = i*m_widthCount+ j;
+            int xPos = j*m_tileSize;
+            int yPos = i*m_tileSize;
+            Color tileColor = WHITE;
+            DrawRectangle(xPos, yPos, m_tileSize, m_tileSize, tileColor);
+
+            int tile = state.currentLevel.get(tileIndex);
+            // if (tile == 1) {
+            //     tileColor = BLUE;
+            //     grass.draw({static_cast<float>(xPos),static_cast<float>(yPos)});
+            // }
+            if (tile != 0)
+                assets.getSprite(tile).draw({static_cast<float>(xPos),static_cast<float>(yPos)});
+            // if (tile == 3) {tileColor= ORANGE;}
+
+            // DrawRectangle(xPos, yPos, m_tileSize, m_tileSize, tileColor);
+            // char msg1[64];
+            // snprintf(msg1, sizeof(msg1), "%i, %i", j, i);
+            // char msg2[64];
+            // snprintf(msg2, sizeof(msg2), "%i, %i", xPos, yPos);
+            // if (tile == 1) {
+            //     DrawLineEx({(float) xPos, (float) yPos}, {(float) (xPos + m_tileSize),  (float) yPos}, 1, BLACK);
+            //     DrawLineEx({(float) (xPos + m_tileSize), (float) yPos}, {(float) (xPos + m_tileSize), (float) (yPos + m_tileSize)}, 1, BLACK);
+            //     DrawText(msg1, xPos, yPos, 5, BLACK);
+            // }
+            // DrawLineEx((Vector2) {xPos, yPos}, (Vector2) {xPos + tileSize, yPos}, 1, GRAY);
+            // DrawLineEx((Vector2) {xPos, yPos}, (Vector2) {xPos, yPos + tileSize}, 1, GRAY);
+            // DrawLineEx((Vector2) {xPos+tileSize, yPos}, (Vector2) {xPos + tileSize, yPos + tileSize}, 1, GRAY);
+            // DrawLineEx((Vector2) {xPos, yPos+tileSize}, (Vector2) {xPos + tileSize, yPos+ tileSize}, 1, GRAY);
+            // DrawText(msg1, xPos, yPos, 5, BLACK);
+            // DrawText(msg2, xPos, yPos+10, 5, BLACK);
+        }
+    }
 
     
     Vector2 mousePos = GetMousePosition();
     if (state.mouseMode == 0 && mousePos.x - state.camera.offset.x >= 0 && mousePos.x - state.camera.offset.x < state.currentLevel.getWidth()*state.getTileSize() && mousePos.y - state.camera.offset.y >= 0 && mousePos.y - state.camera.offset.y < state.currentLevel.getHeight()*state.getTileSize()) 
-        DrawRectangle(floor((mousePos.x-state.camera.offset.x)/state.getTileSize())*state.getTileSize(), floor((mousePos.y-state.camera.offset.y)/state.getTileSize())*state.getTileSize(), state.getTileSize(), state.getTileSize(), LIGHTGRAY);
+        // DrawRectangle(floor((mousePos.x-state.camera.offset.x)/state.getTileSize())*state.getTileSize(), floor((mousePos.y-state.camera.offset.y)/state.getTileSize())*state.getTileSize(), state.getTileSize(), state.getTileSize(), LIGHTGRAY);
+        assets.getSprite(state.selectedTile).draw({floor((mousePos.x-state.camera.offset.x)/state.getTileSize())*state.getTileSize(), floor((mousePos.y-state.camera.offset.y)/state.getTileSize())*state.getTileSize()});
     
     for(int j=0; j<state.currentLevel.getWidth()+1; j++) {
         Vector2 start = {static_cast<float>(j*state.getTileSize()), 0.0f};
@@ -210,6 +249,8 @@ void LevelEditor::draw()
     EndMode2D();
 
     drawGUI();
+
+    drawSprites();
 }
 
 
@@ -374,6 +415,33 @@ void LevelEditor::drawEdges()
         DrawText(str.c_str(), textPos.x, textPos.y, 20, BLACK);
         i++;
     }
+}
+
+void LevelEditor::drawSprites()
+{
+    Vector2 position = {0,300 + 210 + 10 + 60 + 80 + edgeAssignmentDropDown.getCount()*40};
+    for(int i=0; i<assets.getSpritesSize(); i++) {
+        
+        Sprite sprite = assets.getSprite(i);
+
+        if (i == state.selectedTile) {
+            int border = 3;
+            DrawRectangle(position.x-border, position.y-border, sprite.getSize().x+2*border, sprite.getSize().y+2*border, BLACK);
+        }
+        if (CheckCollisionPointRec(GetMousePosition(), {position.x, position.y, sprite.getSize().x, sprite.getSize().y})) {
+            int border = 3;
+            DrawRectangle(position.x-border, position.y-border, sprite.getSize().x+2*border, sprite.getSize().y+2*border, GRAY);
+
+            if (IsMouseButtonDown(0)) {
+                state.selectedTile = i;
+            }
+        }
+        sprite.draw(position);
+
+        position.x += sprite.getSize().x + 10; 
+        
+    }
+    
 }
 
 std::vector<std::string> LevelEditor::getLevelNames()

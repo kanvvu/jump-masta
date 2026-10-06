@@ -3,6 +3,9 @@
 #include <vector>
 #include <string>
 
+class LevelRepository;
+class Assets;
+
 enum GameState {
     GAME,
     LEVEL_EDITOR
@@ -32,3 +35,5 @@ struct DropDownState {
     int dropdownActive = -1;
     bool dropDownEditMode = false;
 };
+
+// void drawLevel(LevelRepository& levelRepository, Assets& assets);

@@ -3,6 +3,12 @@
 #include <vector>
 #include <string>
 #include "common.hpp"
+#include "sprite.hpp"
+
+struct Tile {
+    int type;
+    Sprite sprite;
+};
 
 class LevelData {
 private:
@@ -21,9 +27,6 @@ private:
 public:
     LevelData(int width, int height, std::string name = "level", int tileSize = 64);
     LevelData& operator=(const LevelData& other);
-
-
-    void draw();
 
     int getWidth() const {return width;};
     // void setWidth(int width);

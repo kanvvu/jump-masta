@@ -11,7 +11,7 @@ Game::Game(int windowWidth, int windowHeight, const char *windowTitle)
     m_levelRepository(m_levelFileLoader),
     m_assets(),
     m_tileMap(m_levelRepository, m_assets.getBackground(), m_assets.getGrass()),
-    m_levelEditor(m_levelRepository),
+    m_levelEditor(m_levelRepository, m_assets),
     m_player(m_tileMap.getTileSize(), m_tileMap.getSpawnPosition(), m_assets.getPlayer())
 {
     // InitWindow(windowWidth, windowHeight, windowTitle);

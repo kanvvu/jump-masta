@@ -7,6 +7,7 @@
 #include "levelRepository.hpp"
 #include "levelData.hpp"
 #include "levelEditorGui.hpp"
+#include "assets.hpp"
 
 
 struct LevelEditorState
@@ -62,6 +63,7 @@ private:
     LevelEditorState state;
 
     LevelRepository& levelRepository;
+    Assets& assets;
 
     void saveCurrentLevel();
     void loadSelectedLevel();
@@ -72,8 +74,8 @@ private:
 
 
 public:
-    LevelEditor(LevelRepository& levelRepository);
-    LevelEditor(LevelRepository& levelRepository, int tileSize);
+    LevelEditor(LevelRepository& levelRepository, Assets& assets);
+    LevelEditor(LevelRepository& levelRepository, Assets& assets, int tileSize);
     ~LevelEditor() = default;
 
     void proccessInput(GameState& gameState);
@@ -89,6 +91,8 @@ public:
     void handleLevelSave();
     void handleSaveAsNew();
     void drawEdges();
+
+    void drawSprites();
 
     void syncCurrentLevelUi();
     std::vector<std::string> getLevelNames();

@@ -117,6 +117,8 @@ class TextLabelAndDropDownBoxList : public IDraw {
 
     void update(const std::vector<EdgeDropDownRow>& rows, RowChangedCallback onRowChanged = {});
 
+    int getCount() {return textLabels.size();};
+
     void draw();
 
 };

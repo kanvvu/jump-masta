@@ -29,24 +29,24 @@ LevelData& LevelData::operator=(const LevelData &other)
     return *this;
 }
 
-void LevelData::draw()
-{
-    for(int i=0; i<height; i++) {
-        for(int j=0; j<width; j++) {
-            int tileIndex = i*width + j;
-            int xPos = j*tileSize;
-            int yPos = i*tileSize;
-            Color tileColor = WHITE;
+// void LevelData::draw()
+// {
+//     for(int i=0; i<height; i++) {
+//         for(int j=0; j<width; j++) {
+//             int tileIndex = i*width + j;
+//             int xPos = j*tileSize;
+//             int yPos = i*tileSize;
+//             Color tileColor = WHITE;
 
-            // std::vector<int>& tileMap = tileMaps[currentTileMapIndex];
-            if (level.at(tileIndex) == 1) tileColor = BLUE;
-            if (level[tileIndex] == 3) tileColor= ORANGE;
+//             // std::vector<int>& tileMap = tileMaps[currentTileMapIndex];
+//             if (level.at(tileIndex) == 1) tileColor = BLUE;
+//             if (level[tileIndex] == 3) tileColor= ORANGE;
 
 
-            DrawRectangle(xPos, yPos, tileSize, tileSize, tileColor);
-        }
-    }
-}
+//             DrawRectangle(xPos, yPos, tileSize, tileSize, tileColor);
+//         }
+//     }
+// }
 
 // void LevelData::setWidth(int width)
 // {
