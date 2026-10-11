@@ -162,8 +162,20 @@ void LevelEditor::proccessInput(GameState &gameState)
                 else state.mouseMode = 0;
             }
             
-            if (state.mouseMode == 0)
-                state.currentLevel.set(tileIndex, state.selectedTile);
+            if (state.mouseMode == 0) {
+                // state.currentLevel.set(tileIndex, state.selectedTile);
+                int offsetX = 0;
+                int offsetY = 0;
+                for(int i=0; i<state.selectedTiles.size(); i++) {
+                    int tileIndex = (yPos+offsetY)*state.currentLevel.getWidth() + (xPos+offsetX);
+                    state.currentLevel.set(tileIndex, state.selectedTiles[i]);
+                    if (i+1 <state.selectedTiles.size() && state.selectedTiles[i+1] - state.selectedTiles[i] != 1) {
+                        offsetX = -1;
+                        offsetY++;
+                    }
+                    offsetX++;
+                }
+            }
             else
                 state.currentLevel.set(tileIndex, 0);
 
@@ -195,7 +207,7 @@ void LevelEditor::draw()
             int xPos = j*m_tileSize;
             int yPos = i*m_tileSize;
             Color tileColor = WHITE;
-            DrawRectangle(xPos, yPos, m_tileSize, m_tileSize, tileColor);
+            // DrawRectangle(xPos, yPos, m_tileSize, m_tileSize, tileColor);
 
             int tile = state.currentLevel.get(tileIndex);
             // if (tile == 1) {
@@ -203,7 +215,7 @@ void LevelEditor::draw()
             //     grass.draw({static_cast<float>(xPos),static_cast<float>(yPos)});
             // }
             if (tile != 0)
-                assets.getSprite(tile).draw({static_cast<float>(xPos),static_cast<float>(yPos)});
+                assets.getSprite(tile).draw({static_cast<float>(xPos),static_cast<float>(yPos)}, {(float) state.currentLevel.getTileSize(),(float) state.currentLevel.getTileSize()});
             // if (tile == 3) {tileColor= ORANGE;}
 
             // DrawRectangle(xPos, yPos, m_tileSize, m_tileSize, tileColor);
@@ -227,10 +239,22 @@ void LevelEditor::draw()
 
     
     Vector2 mousePos = GetMousePosition();
-    if (state.mouseMode == 0 && mousePos.x - state.camera.offset.x >= 0 && mousePos.x - state.camera.offset.x < state.currentLevel.getWidth()*state.getTileSize() && mousePos.y - state.camera.offset.y >= 0 && mousePos.y - state.camera.offset.y < state.currentLevel.getHeight()*state.getTileSize()) 
+    if (state.mouseMode == 0 && mousePos.x - state.camera.offset.x >= 0 && mousePos.x - state.camera.offset.x < state.currentLevel.getWidth()*state.getTileSize() && mousePos.y - state.camera.offset.y >= 0 && mousePos.y - state.camera.offset.y < state.currentLevel.getHeight()*state.getTileSize()) { 
         // DrawRectangle(floor((mousePos.x-state.camera.offset.x)/state.getTileSize())*state.getTileSize(), floor((mousePos.y-state.camera.offset.y)/state.getTileSize())*state.getTileSize(), state.getTileSize(), state.getTileSize(), LIGHTGRAY);
-        assets.getSprite(state.selectedTile).draw({floor((mousePos.x-state.camera.offset.x)/state.getTileSize())*state.getTileSize(), floor((mousePos.y-state.camera.offset.y)/state.getTileSize())*state.getTileSize()});
-    
+        // assets.getSprite(state.selectedTile).draw({floor((mousePos.x-state.camera.offset.x)/state.getTileSize())*state.getTileSize(), floor((mousePos.y-state.camera.offset.y)/state.getTileSize())*state.getTileSize()}, {(float) state.getTileSize(),(float) state.getTileSize()});
+        int offsetX = 0;
+        int offsetY = 0;
+        for(int i=0; i<state.selectedTiles.size(); i++) {
+            Vector2 pos = {(floor((mousePos.x-state.camera.offset.x)/state.getTileSize()) + offsetX)*state.getTileSize(), (floor((mousePos.y-state.camera.offset.y)/state.getTileSize())+offsetY)*state.getTileSize()};
+            assets.getSprite(state.selectedTiles[i]).draw(pos, {(float) state.getTileSize(),(float) state.getTileSize()});
+            if (i+1 <state.selectedTiles.size() && state.selectedTiles[i+1] - state.selectedTiles[i] != 1) {
+                offsetX = -1;
+                offsetY++;
+            }
+            offsetX++;
+        }
+    }
+
     for(int j=0; j<state.currentLevel.getWidth()+1; j++) {
         Vector2 start = {static_cast<float>(j*state.getTileSize()), 0.0f};
         Vector2 end = {static_cast<float>(j*state.getTileSize()), state.currentLevel.getHeight()*static_cast<float>(state.getTileSize())};
@@ -417,30 +441,148 @@ void LevelEditor::drawEdges()
     }
 }
 
+Rectangle rectAbs(const Rectangle& rect) {
+    if (rect.width >= 0 && rect.height >= 0) {
+        return rect;
+    }
+
+    if (rect.width <= 0 && rect.height >= 0) {
+        Vector2 start = {rect.x + rect.width, rect.y};
+        return {start.x, start.y, abs(rect.width), rect.height};
+    }
+
+    if (rect.width >= 0 && rect.height <= 0) {
+        Vector2 start = {rect.x, rect.y + rect.height};
+        return {start.x, start.y, abs(rect.width), abs(rect.height)};
+        
+    }
+
+    if (rect.width <= 0 && rect.height <= 0) {
+        Vector2 start = {rect.x + rect.width, rect.y + rect.height};
+        return {start.x, start.y, abs(rect.width), abs(rect.height)};
+    }
+
+    return rect;
+}
+
+void drawRectLines(Rectangle rect, float thick, Color color ) {
+    if (rect.height < 3 && rect.height >= 0) DrawLine(rect.x, rect.y, rect.x + rect.width, rect.y + rect.height, RED);
+
+    DrawRectangleLinesEx(rectAbs(rect), thick, color);
+}
+
 void LevelEditor::drawSprites()
 {
-    Vector2 position = {0,300 + 210 + 10 + 60 + 80 + edgeAssignmentDropDown.getCount()*40};
+
+    int spriteSize = 32;
+    Vector2 position = {0,300 + 210 + 10 + 60 + 80 + edgeAssignmentDropDown.getCount()*35 + state.mouseWheel*20};
+    Vector2 startPosition = {0,300 + 210 + 10 + 60 + 80 + edgeAssignmentDropDown.getCount()*35};
+    Rectangle selectionArea = {startPosition.x, startPosition.y, assets.getTextureWidth()*spriteSize, assets.getTextureHeight()*spriteSize};
+
+    if (CheckCollisionPointRec(GetMousePosition(), selectionArea)) {
+        state.mouseWheel += GetMouseWheelMove();
+    }
+    bool isSelected = false;
+    Rectangle selected;
+    bool isHover = false;
+    Rectangle hover;
+    int hoverNum = -1;
+
     for(int i=0; i<assets.getSpritesSize(); i++) {
+        
+        if (i%(assets.getTextureWidth()) == 0 && i != 0) {
+            position.y += spriteSize;
+            position.x = 0;
+        }
         
         Sprite sprite = assets.getSprite(i);
 
-        if (i == state.selectedTile) {
-            int border = 3;
-            DrawRectangle(position.x-border, position.y-border, sprite.getSize().x+2*border, sprite.getSize().y+2*border, BLACK);
-        }
-        if (CheckCollisionPointRec(GetMousePosition(), {position.x, position.y, sprite.getSize().x, sprite.getSize().y})) {
-            int border = 3;
-            DrawRectangle(position.x-border, position.y-border, sprite.getSize().x+2*border, sprite.getSize().y+2*border, GRAY);
-
-            if (IsMouseButtonDown(0)) {
-                state.selectedTile = i;
+        if (position.y >= selectionArea.y) {
+            if (i == state.selectedTile) {
+                int border = 3;
+                // DrawRectangle(position.x-border, position.y-border, spriteSize+2*border, spriteSize+2*border, BLACK);
+                selected = {position.x-border, position.y-border,(float) spriteSize+2*border,(float) spriteSize+2*border};
+                isSelected = true;
             }
-        }
-        sprite.draw(position);
+            if (CheckCollisionPointRec(GetMousePosition(), {position.x, position.y,(float) spriteSize,(float) spriteSize})) {
+                int border = 3;
+                // DrawRectangle(position.x-border, position.y-border, spriteSize+2*border, spriteSize+2*border, GRAY);
+                hover = {position.x-border, position.y-border, (float) spriteSize+2*border,(float) spriteSize+2*border};
+                isHover = true;
+                hoverNum = i;
 
-        position.x += sprite.getSize().x + 10; 
+                if (IsMouseButtonDown(0)) {
+                    state.selectedTile = i;
+                }
+            }
+        
+        sprite.draw(position, {(float) spriteSize,(float) spriteSize});
+
+        }
+
+        position.x += spriteSize;
         
     }
+
+    if (isSelected)
+        DrawRectangleLinesEx(selected, 2, BLACK);
+
+    if (isHover) {
+        DrawRectangleLinesEx(hover, 2, GRAY);
+        // DrawText(std::to_string(hoverNum).c_str(), hover.x+10, hover.y, 32, BLUE);
+    }
+
+    if (CheckCollisionPointRec(GetMousePosition(), selectionArea)) {
+        if (IsMouseButtonDown(0) && state.isSelection == false) {
+            //first time;
+            state.startSelection = GetMousePosition();
+            state.isSelection = true;
+        } 
+        if (IsMouseButtonDown(0)) {
+            //being pressed
+            state.endSelection = GetMousePosition();
+            state.selectedTiles.clear();
+            Vector2 startP = {state.startSelection.x, state.startSelection.y - startPosition.y - state.mouseWheel*20};
+            Vector2 endP= {state.endSelection.x, state.endSelection.y - startPosition.y - state.mouseWheel*20};
+            // Rectangle absSelectedArea = rectAbs({state.startSelection.x, state.startSelection.y,state.endSelection.x - state.startSelection.x, state.endSelection.y - state.startSelection.y});
+            Rectangle absSelectedArea = rectAbs({startP.x, startP.y, endP.x - startP.x, endP.y - startP.y});
+
+
+            int startX = absSelectedArea.x/32;
+            int startY = absSelectedArea.y/32;
+
+            int endX= (absSelectedArea.x+absSelectedArea.width)/32;
+            int endY= (absSelectedArea.y+absSelectedArea.height)/32;
+
+            for(int y=startY; y<=endY; y++) {
+                for(int x=startX; x<=endX; x++) {
+                    state.selectedTiles.push_back(y*assets.getTextureWidth() + x);
+                }
+            }
+
+        } else {
+            state.isSelection = false;
+        }
+
+
+
+        Rectangle linesRect = {state.startSelection.x, state.startSelection.y,state.endSelection.x - state.startSelection.x, state.endSelection.y - state.startSelection.y};
+        // DrawRectangleLinesEx({state.startSelection.x, state.startSelection.y,state.endSelection.x - state.startSelection.x, state.endSelection.y - state.startSelection.y}, 3 , RED);
+        // drawRectLines(linesRect, 3, RED);
+        // DrawRectangle(state.startSelection.x, state.startSelection.y, 10, 10, RED); 
+        // DrawRectangle(startPosition.x, startPosition.y, 10, 10, RED);
+
+    } else {
+        state.isSelection = false;
+    }
+
+    for(int i=0; i<state.selectedTiles.size(); i++) {
+        Rectangle rect = {(state.selectedTiles[i] % assets.getTextureWidth()) * spriteSize, (state.selectedTiles[i] / assets.getTextureWidth()) * spriteSize, spriteSize, spriteSize};
+        if (rect.y + startPosition.y + state.mouseWheel*20 >= selectionArea.y )
+            DrawRectangleLinesEx({rect.x + startPosition.x, rect.y + startPosition.y + state.mouseWheel*20, rect.width, rect.height}, 2, GRAY);
+    }
+
+    DrawRectangleLines(selectionArea.x, selectionArea.y, selectionArea.width, selectionArea.height, BLACK);
     
 }
 

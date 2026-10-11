@@ -29,7 +29,15 @@ struct LevelEditorState
     int mouseMode = 0; // 0 - adding, 1 - removing
 
     int selectedTile = 1;
+    std::vector<int> selectedTiles = {1};
     int getTileSize() {return currentLevel.getTileSize();}
+
+    int mouseWheel = 0;
+
+    Vector2 startSelection;
+    Vector2 endSelection;
+    bool isSelection = false;
+
 };
 
 enum class EditorCommand

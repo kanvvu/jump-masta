@@ -13,3 +13,8 @@ void Sprite::draw(Vector2 position)
 {
     DrawTexturePro(texture, sourceRectangle, {position.x, position.y, size.x, size.y}, origin, (float)rotation, WHITE);
 }
+
+void Sprite::draw(Vector2 position, Vector2 size)
+{
+    DrawTexturePro(texture, sourceRectangle, {position.x, position.y, size.x, size.y}, origin, (float)rotation, WHITE);
+}

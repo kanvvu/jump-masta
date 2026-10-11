@@ -11,6 +11,7 @@ private:
     Vector2 origin;
     int rotation;
     Vector2 size;
+    Vector2 m_size;
     
 
 public:
@@ -19,5 +20,6 @@ public:
 
     Vector2 getSize() {return size;};
     void draw(Vector2 position);
+    void draw(Vector2 position, Vector2 size);
 };
 
