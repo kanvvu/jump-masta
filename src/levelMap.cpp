@@ -4,10 +4,11 @@
 #include "raymath.h"
 
 
-LevelMap::LevelMap(LevelRepository& levelRepository, Sprite background, Sprite grass) 
+LevelMap::LevelMap(LevelRepository& levelRepository, Assets& assets) 
     : levelRepository(levelRepository),
-    background(background),
-    grass(grass)
+    assets(assets),
+    background(assets.getBackground()),
+    grass(assets.getGrass())
 {
 
 }
@@ -37,14 +38,18 @@ void LevelMap::draw()
             Color tileColor = WHITE;
 
             // if (i%2 == 0 && j%2 == 0)
-                background.draw({static_cast<float>(xPos),static_cast<float>(yPos)});
+            //     background.draw({static_cast<float>(xPos),static_cast<float>(yPos)});
+
+            // int tile = levelRepository.getLevel(currentTileMapIndex).get(tileIndex);
+            // if (tile == 1) {
+            //     tileColor = BLUE;
+            //     grass.draw({static_cast<float>(xPos),static_cast<float>(yPos)});
+            // }
+            // if (tile == 3) {tileColor= ORANGE;}
 
             int tile = levelRepository.getLevel(currentTileMapIndex).get(tileIndex);
-            if (tile == 1) {
-                tileColor = BLUE;
-                grass.draw({static_cast<float>(xPos),static_cast<float>(yPos)});
-            }
-            if (tile == 3) {tileColor= ORANGE;}
+            if (tile != -1)
+                assets.getSprite(tile).draw({static_cast<float>(xPos),static_cast<float>(yPos)}, {(float) levelRepository.getLevel(currentTileMapIndex).getTileSize(),(float) levelRepository.getLevel(currentTileMapIndex).getTileSize()});
 
             // DrawRectangle(xPos, yPos, m_tileSize, m_tileSize, tileColor);
             char msg1[64];
@@ -82,9 +87,12 @@ bool LevelMap::isCollision(Vector2 position, int tileType) const
         // printf("COLLSION POSITION OUT OF BOUNDS!\n");
         return false;
     }
+    //quick cheat
+    std::vector<int> collisonIDs = {182,183,184, 204, 205, 206, 226, 227, 228};
 
     const LevelData& level = levelRepository.getLevel(currentTileMapIndex);
-    if (level.get(posY*m_widthCount + posX) == tileType) return true;
+    for (const auto& collsionID : collisonIDs) 
+        if (level.get(posY*m_widthCount + posX) == collsionID) return true;
     
     return false;
 }
@@ -132,34 +140,35 @@ bool LevelMap::checkForNextLevel(Vector2& playerPosition)
         const Edge& edge = levelData.getEdge(i);
 
         if (edge.assignedNextLevel == -1) continue;
-        // std::cout<<playerPosition.y<<" "<<edge.start.y<<std::endl;
+        std::cout<<playerPosition.y<<" "<<edge.start.y<<"\n";
         int m_widthCount = levelRepository.getLevel(edge.assignedNextLevel).getWidth();
         int m_heightCount = levelRepository.getLevel(edge.assignedNextLevel).getHeight();
 
         switch (edge.type)
         {
-        case TOP:
+        case EdgeType::TOP:
             if (playerPosition.y + 0.5f < edge.start.y) {
+                std::cout<<"EY JOL\n";
                 changeLevel(edge.assignedNextLevel);
                 playerPosition.y = m_heightCount - 1.0f;
                 return true;
             }
             break;
-        case DOWN:
+        case EdgeType::DOWN:
             if (playerPosition.y + 0.5f> edge.start.y) {
                 changeLevel(edge.assignedNextLevel);
                 playerPosition.y = 0.0f;
                 return true;
             }
             break;
-        case LEFT:
+        case EdgeType::LEFT:
             if (playerPosition.x + 0.5f < edge.start.x) {
                 changeLevel(edge.assignedNextLevel);
                 playerPosition.x = m_widthCount - 1.0f;
                 return true;
             }
             break;
-        case RIGHT:
+        case EdgeType::RIGHT:
             if (playerPosition.x + 0.5f > edge.start.x) {
                 changeLevel(edge.assignedNextLevel);
                 playerPosition.x = 0.0f;
@@ -244,18 +253,35 @@ bool LevelMap::checkForNextLevel(Vector2& playerPosition)
 void LevelMap::checkAndResolveCollision(Player& player) {
     Vector2 bP = player.m_previousPosition; 
     Vector2 nBP = player.m_position;
+
+    //if player has more tiles then we need to check more points.
+    //the points are going in for directins left, right, up and down
+
+
+
+
     
     Vector2 movementDirection = Vector2Subtract(nBP, bP);
     if (movementDirection.x <= 0) { //left
-        if (isCollision({nBP.x, bP.y}, 1) ||
-            isCollision({nBP.x, bP.y + 0.99f}, 1)) {
+
+        Vector2 leftTop = {nBP.x, bP.y};
+        Vector2 left = {nBP.x, bP.y + 1.0f};
+        Vector2 leftDown = {nBP.x, bP.y + 1.99f};
+
+        if (isCollision({nBP.x, bP.y}, 1) || isCollision({nBP.x, bP.y + 1.0f}, 1) ||
+            isCollision({nBP.x, bP.y + 1.99f}, 1)) {
             nBP.x = (int) nBP.x + 1;
             player.m_velocity.x = -0.5*player.m_velocity.x;
             }
     }
     else {  //right
-        if (isCollision({nBP.x + 1.0f, bP.y}, 1) ||
-            isCollision({nBP.x + 1.0f, bP.y + 0.99f}, 1)) {
+
+        Vector2 rightTop = {nBP.x + 2.0f, bP.y};
+        Vector2 right = {nBP.x + 2.0f, bP.y + 1.0f};
+        Vector2 rightDown = {nBP.x + 2.0f, bP.y + 1.99f};
+
+        if (isCollision({nBP.x + 2.0f, bP.y}, 1) || isCollision({nBP.x + 2.0f, bP.y + 1.0f}, 1) ||
+            isCollision({nBP.x + 2.0f, bP.y + 1.99f}, 1)) {
             nBP.x = (int) nBP.x;
             player.m_velocity.x = -0.5*player.m_velocity.x;
         }
@@ -263,21 +289,46 @@ void LevelMap::checkAndResolveCollision(Player& player) {
 
     player.onGround = false;
     if (movementDirection.y <= 0) { //up
-        if (isCollision({nBP.x, nBP.y}, 1) ||
-            isCollision({nBP.x + 0.90f, nBP.y}, 1)) {
+
+        Vector2 topLeft = {nBP.x, nBP.y};
+        Vector2 topMid = {nBP.x + 1.0f, nBP.y};
+        Vector2 topRight = {nBP.x + 1.90f, nBP.y};
+
+        if (isCollision({nBP.x, nBP.y}, 1) || isCollision({nBP.x + 1.0f, nBP.y}, 1) ||
+            isCollision({nBP.x + 1.90f, nBP.y}, 1)) {
             nBP.y = (int) nBP.y + 1;
             player.m_velocity.y = -0.5*player.m_velocity.y;
         }
     }
     else { //down
-        if (isCollision({nBP.x, nBP.y + 1.0f}, 1) ||
-            isCollision({nBP.x + 0.90f, nBP.y + 1.0f}, 1)) {
+
+        Vector2 downLeft = {nBP.x, nBP.y + 2.0f};
+        Vector2 downMid = {nBP.x + 1.0f, nBP.y + 2.0f};
+        Vector2 downRight = {nBP.x + 1.90f, nBP.y + 2.0f};
+
+        if (isCollision({nBP.x, nBP.y + 2.0f}, 1) || isCollision({nBP.x + 1.0f, nBP.y + 2.0f}, 1) ||
+            isCollision({nBP.x + 1.90f, nBP.y + 2.0f}, 1)) {
             nBP.y = (int) nBP.y;
             player.m_velocity.y = 0;
             player.onGround = true;
         }
     }
     player.m_position = nBP;
+}
+
+void LevelMap::resolveCollision(Player &player, CollisionSide collisionSide)
+{
+    switch (collisionSide) {
+        case CollisionSide::LEFT: 
+            break;
+        case CollisionSide::RIGHT: 
+            break;
+        case CollisionSide::TOP: 
+            break;
+        case CollisionSide::DOWN: 
+            break;
+       
+    }
 }
 
 // void helper(std::vector<Edge>& edges, std::vector<int>& tileMap, int tileSize, int widthCount, int heightCount, bool iterateX, int constValue) {

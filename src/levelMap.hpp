@@ -5,19 +5,27 @@
 #include "raylib.h"
 #include "common.hpp"
 #include "player.hpp"
+#include "assets.hpp"
 
 class LevelMap
 {
 private:
+    enum CollisionSide {
+        LEFT,
+        RIGHT,
+        TOP,
+        DOWN
+    };
     
     LevelRepository& levelRepository;
-    int currentTileMapIndex = 0;
+    Assets& assets;
+    int currentTileMapIndex = 11;
 
     Sprite background;
     Sprite grass;
     
     public:
-    LevelMap(LevelRepository& levelRepository, Sprite background, Sprite grass); 
+    LevelMap(LevelRepository& levelRepository, Assets& assets); 
     ~LevelMap() = default;
     
     void update();
@@ -29,7 +37,9 @@ private:
     Vector2i getSize();
     
     void checkAndResolveCollision(Player& player);
+    void resolveCollision(Player& player, CollisionSide collisionSide);
     bool checkForNextLevel(Vector2& playerPosition);
     void changeLevel(int levelID);
+    void resetLevel() {changeLevel(currentTileMapIndex);};
 };
 

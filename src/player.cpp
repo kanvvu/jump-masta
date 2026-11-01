@@ -28,7 +28,7 @@ Player::Player(int tileSize, Vector2 position, Sprite sprite) :
 void Player::draw()
 {
     // DrawRectangle(m_position.x*m_tileSize, m_position.y*m_tileSize, m_tileSize, m_tileSize, MAROON);
-    sprite.draw({m_position.x*m_tileSize, m_position.y*m_tileSize});
+    sprite.draw({m_position.x*m_tileSize, m_position.y*m_tileSize}, {64,64});
     std::string msg = "" +  std::to_string(m_velocity.x) + ", " + std::to_string(m_velocity.y);
     DrawText(msg.c_str(), m_position.x*m_tileSize, m_position.y*m_tileSize-20, 18, BLACK);
 

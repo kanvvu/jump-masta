@@ -17,7 +17,6 @@ public:
     bool onGround = false;
     Sprite sprite;
 
-
     Player(int tileSize, Vector2 position, Sprite sprite);
     ~Player() = default;
 

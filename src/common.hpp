@@ -23,6 +23,11 @@ enum EdgeType {
     RIGHT
 };
 
+struct CollisionPoint {
+    Vector2i point;
+    EdgeType side;
+};
+
 struct Edge {
     Vector2i start;
     Vector2i end;

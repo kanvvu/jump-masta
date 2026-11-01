@@ -10,7 +10,7 @@ Game::Game(int windowWidth, int windowHeight, const char *windowTitle)
     m_windowTitle(windowTitle),
     m_levelRepository(m_levelFileLoader),
     m_assets(),
-    m_tileMap(m_levelRepository, m_assets.getBackground(), m_assets.getGrass()),
+    m_tileMap(m_levelRepository, m_assets),
     m_levelEditor(m_levelRepository, m_assets),
     m_player(m_tileMap.getTileSize(), m_tileMap.getSpawnPosition(), m_assets.getPlayer())
 {
@@ -43,7 +43,7 @@ void Game::proccessInputGame() {
 
     if (IsKeyPressed(KEY_R)) {
         m_player.reset();
-        m_tileMap.changeLevel(0);
+        m_tileMap.resetLevel();
         m_player.m_position = m_tileMap.getSpawnPosition();
     }
 
@@ -87,6 +87,7 @@ void Game::updateGame(float deltaTime)
     m_tileMap.checkAndResolveCollision(m_player);
 
     if (m_tileMap.checkForNextLevel(m_player.m_position)) { 
+        std::cout<<"NEXT LEVEL\n";
         centerCamera(camera.offset, {m_windowWidth, m_windowHeight}, m_tileMap.getSize(), m_tileMap.getTileSize());
         m_player.setTileSize(m_tileMap.getTileSize());
     }

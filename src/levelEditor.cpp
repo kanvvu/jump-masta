@@ -177,7 +177,7 @@ void LevelEditor::proccessInput(GameState &gameState)
                 }
             }
             else
-                state.currentLevel.set(tileIndex, 0);
+                state.currentLevel.set(tileIndex, -1);
 
             syncCurrentLevelUi();
 
@@ -214,7 +214,7 @@ void LevelEditor::draw()
             //     tileColor = BLUE;
             //     grass.draw({static_cast<float>(xPos),static_cast<float>(yPos)});
             // }
-            if (tile != 0)
+            if (tile != -1)
                 assets.getSprite(tile).draw({static_cast<float>(xPos),static_cast<float>(yPos)}, {(float) state.currentLevel.getTileSize(),(float) state.currentLevel.getTileSize()});
             // if (tile == 3) {tileColor= ORANGE;}
 
@@ -529,7 +529,7 @@ void LevelEditor::drawSprites()
 
     if (isHover) {
         DrawRectangleLinesEx(hover, 2, GRAY);
-        // DrawText(std::to_string(hoverNum).c_str(), hover.x+10, hover.y, 32, BLUE);
+        DrawText(std::to_string(hoverNum).c_str(), hover.x+10, hover.y, 32, BLUE);
     }
 
     if (CheckCollisionPointRec(GetMousePosition(), selectionArea)) {
