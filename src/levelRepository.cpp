@@ -4,6 +4,8 @@
 #include <sstream>
 #include <string>
 
+#include <cassert>
+
 
 std::vector<std::string> split(std::string s, const std::string& delimiter);
 std::string GetLevelPath();
@@ -85,21 +87,16 @@ void LevelRepository::editLevel(int levelID, const LevelData& levelData)
 }
 
 
-LevelData LevelRepository::getLevel(int levelID) const
+LevelData& LevelRepository::getLevel(int levelID)
 {
-    if (levelID >= levels.size() || levelID < 0) {
-        std::cerr<<"ERROR [LevelRepository::getLevel] id : "<<levelID<<" >= "<<levels.size()<<"\n";
-        return LevelData(0,0);
-    }
+    assert(levelID >= 0 && levelID < (int)levels.size() && "getLevel: invalid id");
 
-    // std::cout<<"LEVEL: "<<levelID<<std::endl;
-    // for(int i=0; i<levels[levelID].height; i++) {
-    //     for(int j=0; j<levels[levelID].width; j++) {
-    //         std::cout<<levels[levelID].level[i*levels[levelID].width+j]<<", ";
-    //     }
-    //     std::cout<<"\n";
-    // }
-    // std::cout<<std::endl;
+    return levels.at(levelID);
+}
+
+const LevelData& LevelRepository::getLevel(int levelID) const
+{
+    assert(levelID >= 0 && levelID < (int)levels.size() && "getLevel: invalid id");
 
     return levels.at(levelID);
 }

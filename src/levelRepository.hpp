@@ -22,7 +22,8 @@ public:
     void deleteLevel(int levelID);
     void editLevel(int levelID, const LevelData& levelData);
 
-    LevelData getLevel(int levelID) const;
+    LevelData& getLevel(int levelID);
+    const LevelData& getLevel(int levelID) const; 
     int getLevelCount();
 
     std::vector<Edge> createEdges(const LevelData& levelData) const;
