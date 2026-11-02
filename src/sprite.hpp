@@ -4,18 +4,17 @@
 class Sprite
 {
 private:
-    Texture2D& texture;
+    const Texture2D* texture;
 
     Rectangle sourceRectangle;
 
     Vector2 origin;
     int rotation;
     Vector2 size;
-    Vector2 m_size;
     
 
 public:
-    Sprite(Texture2D& texture, Rectangle sourceRectangle, Vector2 size = {64,64});
+    Sprite(const Texture2D* texture, Rectangle sourceRectangle, Vector2 size = {64,64});
     ~Sprite() = default;
 
     Vector2 getSize() {return size;};

@@ -2,13 +2,13 @@
 #include <iostream>
 
 Assets::Assets() : 
- texture(LoadTexture("resources/map.png")), player(texture,{0,0,32,32})
+ texture(LoadTexture("resources/map.png")), player(&texture,{0,0,32,32})
 {
     int width = texture.width / tileSize;
     int height = texture.height / tileSize;
     for(int i=0; i<height; i++) {
         for(int j=0; j<width; j++) {
-            sprites.push_back(Sprite(texture, {(float)j*tileSize, (float)i*tileSize,(float) tileSize,(float) tileSize}));
+            sprites.push_back(Sprite(&texture, {(float)j*tileSize, (float)i*tileSize,(float) tileSize,(float) tileSize}));
         }
     }
     // sprites.push_back(Sprite(texture, {0,0,32,32})); // Player

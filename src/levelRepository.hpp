@@ -26,6 +26,5 @@ public:
     const LevelData& getLevel(int levelID) const; 
     int getLevelCount();
 
-    std::vector<Edge> createEdges(const LevelData& levelData) const;
 };
 
