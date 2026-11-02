@@ -4,7 +4,7 @@
 #include "sprite.hpp"
 
 
-enum SpriteNames {
+enum class SpriteNames {
     PLAYER = 1,
     GRASS,
     WALL,

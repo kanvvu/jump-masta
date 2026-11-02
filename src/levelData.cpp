@@ -162,7 +162,7 @@ void LevelData::createEdges()
         int index = i;
         if (level.at(index) == 0) {
             Edge edge;
-            edge.type = TOP;
+            edge.type = EdgeType::TOP;
             edge.assignedNextLevel = -1;
             edge.tilesCount = 1;
             edge.start = {i, 0};
@@ -182,7 +182,7 @@ void LevelData::createEdges()
         int index = (heightCount-1)*widthCount + i;
         if (level.at(index) == 0) {
             Edge edge;
-            edge.type = DOWN;
+            edge.type = EdgeType::DOWN;
             edge.assignedNextLevel = -1;
             edge.tilesCount = 1;
             edge.start = {i, (heightCount)};
@@ -202,7 +202,7 @@ void LevelData::createEdges()
         int index = j*widthCount;
         if (level.at(index) == 0) {
             Edge edge;
-            edge.type = LEFT;
+            edge.type = EdgeType::LEFT;
             edge.assignedNextLevel = -1;
             edge.tilesCount = 1;
             edge.start = {0, j};
@@ -223,7 +223,7 @@ void LevelData::createEdges()
         int index = j*widthCount + (widthCount-1);
         if (level.at(index) == 0) {
             Edge edge;
-            edge.type = RIGHT;
+            edge.type = EdgeType::RIGHT;
             edge.assignedNextLevel = -1;
             edge.tilesCount = 1;
             edge.start = {widthCount, j};

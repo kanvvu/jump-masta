@@ -6,7 +6,7 @@
 class LevelRepository;
 class Assets;
 
-enum GameState {
+enum class GameState {
     GAME,
     LEVEL_EDITOR
 };
@@ -16,7 +16,7 @@ struct Vector2i {
     int y;
 };
 
-enum EdgeType {
+enum class EdgeType {
     TOP,
     DOWN,
     LEFT,

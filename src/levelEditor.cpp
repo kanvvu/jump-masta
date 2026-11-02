@@ -5,8 +5,6 @@
 #include <iostream>
 #include <string>
 #include <cstring>
-
-#define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
 
 LevelEditor::LevelEditor(LevelRepository& levelRepository,Assets& assets, int tileSize) : levelRepository(levelRepository), assets(assets)
@@ -124,7 +122,7 @@ void LevelEditor::proccessInput(GameState &gameState)
 {
     if (!nameTextBox.getEditMode()) {
         if (IsKeyPressed(KEY_E)) {
-            gameState = GAME;
+            gameState = GameState::GAME;
         }   
 
         if (IsKeyPressed(KEY_R)) {
@@ -424,16 +422,16 @@ void LevelEditor::drawEdges()
         if (e.assignedNextLevel != -1) color = GREEN;
         DrawLineEx({(float)e.start.x*tileSize,(float) e.start.y*tileSize}, {(float)e.end.x*tileSize,(float) e.end.y*tileSize}, 4.0f, color);
         std::string str = "EDGE ";
-        if (e.type == TOP) str += "TOP ";
-        else if (e.type == DOWN) str += "DOWN ";
-        else if (e.type == LEFT) str += "LEFT ";
+        if (e.type == EdgeType::TOP) str += "TOP ";
+        else if (e.type == EdgeType::DOWN) str += "DOWN ";
+        else if (e.type == EdgeType::LEFT) str += "LEFT ";
         else  str += "RIGHT ";
         str += std::to_string(i) + " (" + std::to_string(e.tilesCount) + ")"; 
         Vector2 textPos = {e.start.x*tileSize, e.start.y*tileSize};
         int textWidth = MeasureText(str.c_str(), 20);
-        if (e.type == TOP) {
+        if (e.type == EdgeType::TOP) {
             textPos.y -= 20; 
-        } else if (e.type == LEFT) {
+        } else if (e.type == EdgeType::LEFT) {
             textPos.x -= textWidth - 1;
         }
         DrawText(str.c_str(), textPos.x, textPos.y, 20, BLACK);

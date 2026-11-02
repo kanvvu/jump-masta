@@ -38,7 +38,7 @@ void Game::start()
 
 void Game::proccessInputGame() {
     if (IsKeyPressed(KEY_E)) {
-        currentGameState = LEVEL_EDITOR;
+        currentGameState = GameState::LEVEL_EDITOR;
     }   
 
     if (IsKeyPressed(KEY_R)) {
@@ -61,10 +61,10 @@ void Game::proccessInput()
 
     switch (currentGameState)
     {
-    case GAME:
+    case GameState::GAME:
         proccessInputGame();
         break;
-    case LEVEL_EDITOR:
+    case GameState::LEVEL_EDITOR:
         m_levelEditor.proccessInput(currentGameState);
         break;
 
@@ -100,10 +100,10 @@ void Game::update()
 
     switch (currentGameState)
     {
-    case GAME:
+    case GameState::GAME:
         updateGame(deltaTime);
         break;
-    case LEVEL_EDITOR:
+    case GameState::LEVEL_EDITOR:
         m_levelEditor.update(deltaTime);
         break;
 
@@ -137,10 +137,10 @@ void Game::draw()
 
         switch (currentGameState)
         {
-        case GAME:
+        case GameState::GAME:
             drawGame();
             break;
-        case LEVEL_EDITOR:
+        case GameState::LEVEL_EDITOR:
             m_levelEditor.draw();
             break;
 

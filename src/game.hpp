@@ -25,7 +25,7 @@ private:
     int m_windowHeight;
     const char *m_windowTitle;
     Camera2D camera = {0};
-    GameState currentGameState = LEVEL_EDITOR;
+    GameState currentGameState = GameState::LEVEL_EDITOR;
 
     LevelFileLoader m_levelFileLoader;
 

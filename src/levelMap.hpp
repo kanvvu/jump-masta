@@ -10,7 +10,7 @@
 class LevelMap
 {
 private:
-    enum CollisionSide {
+    enum class CollisionSide {
         LEFT,
         RIGHT,
         TOP,
