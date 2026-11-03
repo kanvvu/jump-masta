@@ -5,6 +5,8 @@
 #include "common.hpp"
 #include "sprite.hpp"
 
+class Assets;
+
 struct Tile {
     int type;
     Sprite sprite;
@@ -13,6 +15,7 @@ struct Tile {
 class LevelData {
 private:
     std::vector<int> level;
+    std::vector<CellType> collision;
     std::vector<Edge> edges;
 
     int width;
@@ -40,20 +43,25 @@ public:
     std::string getName() const {return name;};
     void setName(std::string name);
 
-    int getLevelSize() const {return level.size();};
-    int getEdgesSize() const {return edges.size();};
+    int getLevelSize() const {return static_cast<int>(level.size());};
+    int getEdgesSize() const {return static_cast<int>(edges.size());};
 
     int get(int x, int y) const;
     int get(int index) const;
 
-    void set(int x, int y, int value);
-    void set(int index, int value);
+    CellType getTileCollision(int spriteId) const {return collision[spriteId];};
+
+    void set(int x, int y, int value, CellType cellType = CellType::Empty);
+    void set(int index, int value, CellType cellType = CellType::Empty);
+
 
     Edge& getEdge(int index);
     Edge getEdge(int index) const;
     void setEdges(std::vector<Edge> edges);
 
     void changeLevelDimensions(int width, int height);
+
+    void rebuildCollision(Assets& assets);
 
 
 };

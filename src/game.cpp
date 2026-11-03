@@ -17,8 +17,10 @@ Game::Game(int windowWidth, int windowHeight, const char *windowTitle)
     // InitWindow(windowWidth, windowHeight, windowTitle);
     SetTargetFPS(60);
 
-    camera.offset.x = windowWidth/2 - (m_tileMap.getSize().x*m_tileMap.getTileSize())/2;   // coordinate x origin
-    camera.offset.y = windowHeight/2 - (m_tileMap.getSize().y*m_tileMap.getTileSize())/2;   // coordinate y origin
+    for(int i=0; i<m_levelRepository.getLevelCount(); i++) m_levelRepository.getLevel(i).rebuildCollision(m_assets);
+
+    camera.offset.x = windowWidth/2.0f - (m_tileMap.getSize().x*m_tileMap.getTileSize())/2;   // coordinate x origin
+    camera.offset.y = windowHeight/2.0f - (m_tileMap.getSize().y*m_tileMap.getTileSize())/2;   // coordinate y origin
     camera.target.x = 0;         // rotation and zoom x origin (from offset above)
     camera.target.y = 0;         // rotation and zoom y origin (from offset above)
     camera.rotation = 0;        // rotation in deg
@@ -75,8 +77,8 @@ void Game::proccessInput()
 
 
 static void centerCamera(Vector2& cameraOffset, Vector2i windowSize, Vector2i tileMapSize, int tileSize) {
-    cameraOffset.x =windowSize.x/2 - (tileMapSize.x*tileSize)/2;   // coordinate x origin
-    cameraOffset.y = windowSize.y/2 - (tileMapSize.y*tileSize)/2;   // coordinate y origin
+    cameraOffset.x =windowSize.x/2.0f - (tileMapSize.x*tileSize)/2;   // coordinate x origin
+    cameraOffset.y = windowSize.y/2.0f - (tileMapSize.y*tileSize)/2;   // coordinate y origin
 }
 
 void Game::updateGame(float deltaTime) 

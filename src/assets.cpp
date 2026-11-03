@@ -34,3 +34,16 @@ Sprite Assets::getSprite(int index)
     return sprites.at(index);
 
 }
+
+CellType Assets::getCellType(int spriteId)
+{
+
+    std::vector<int> collisonIDs = {182,183,184, 204, 205, 206, 226, 227, 228};
+    for (const auto& collsionID : collisonIDs) {
+        if (spriteId == collsionID) {
+            return CellType::Solid;
+        }
+    } 
+
+    return CellType::Empty;
+}

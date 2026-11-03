@@ -23,6 +23,12 @@ enum class EdgeType {
     RIGHT
 };
 
+enum class CellType {
+    Empty,
+    Solid,
+    Spawn
+};
+
 struct CollisionPoint {
     Vector2i point;
     EdgeType side;

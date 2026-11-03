@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <raylib.h>
+#include "assets.hpp"
 
 LevelData::LevelData(int width, int height, std::string name, int tileSize)
  : width(width),
@@ -10,6 +11,7 @@ LevelData::LevelData(int width, int height, std::string name, int tileSize)
  tileSize(tileSize)
 {
     level = std::vector<int>(width*height, 0);
+    collision = std::vector<CellType>(width*height, CellType::Empty);
     createEdges();
 }
 
@@ -19,6 +21,7 @@ LevelData& LevelData::operator=(const LevelData &other)
         return *this;
     }
     this->level = other.level;
+    this->collision = other.collision;
     this->edges = other.edges;
 
     this->width = other.width;
@@ -58,14 +61,14 @@ LevelData& LevelData::operator=(const LevelData &other)
 //     this->height = height;
 // }
 
-void LevelData::setTileSize(int tileSize)
+void LevelData::setTileSize(int _tileSize)
 {
-    this->tileSize = tileSize;
+    this->tileSize = _tileSize;
 }
 
-void LevelData::setName(std::string name)
+void LevelData::setName(std::string _name)
 {
-    this->name = name;
+    this->name = _name;
 }
 
 int LevelData::get(int x, int y) const
@@ -87,7 +90,7 @@ int LevelData::get(int index) const
     return level[index];
 }
 
-void LevelData::set(int x, int y, int value)
+void LevelData::set(int x, int y, int value, CellType cellType)
 {
     int index = y*width + x;
     if (index >= level.size() || index < 0 ) {
@@ -95,18 +98,21 @@ void LevelData::set(int x, int y, int value)
         return;
     }
     level[index] = value;
+    collision[index] = cellType;
 
     if(x == 0 || y == 0 || x == width - 1 || y == height - 1)
         createEdges();
 }
 
-void LevelData::set(int index, int value)
+void LevelData::set(int index, int value, CellType cellType)
 {
     if (index >= level.size() || index < 0 ) {
         std::cerr<<"ERROR [LevelData::set(int)] id : "<<index<<" >= "<<level.size()<<"\n";
         return;
     }
     level[index] = value;
+    collision[index] = cellType;
+
     int x = index % width;
     int y = index/width;
 
@@ -136,16 +142,16 @@ Edge& LevelData::getEdge(int index)
     return edges[index];
 }
 
-void LevelData::setEdges(std::vector<Edge> edges)
+void LevelData::setEdges(std::vector<Edge> _edges)
 {
     createEdges();
-    if (this->edges.size() != edges.size()) {
-        std::cerr<<"ERROR [LevelData::setEdges] created edges not equal assigend edges : "<<this->edges.size()<<" != "<<edges.size()<<"\n";
+    if (this->edges.size() != _edges.size()) {
+        std::cerr<<"ERROR [LevelData::setEdges] created edges not equal assigend edges : "<<this->edges.size()<<" != "<<_edges.size()<<"\n";
         return;
     }
 
     for(int i=0; i<this->edges.size(); i++) {
-        this->edges[i].assignedNextLevel = edges[i].assignedNextLevel;
+        this->edges[i].assignedNextLevel = _edges[i].assignedNextLevel;
     }
 }
 
@@ -160,7 +166,7 @@ void LevelData::createEdges()
     for(int i=0; i<widthCount; i++) {
         //top
         int index = i;
-        if (level.at(index) == 0) {
+        if (collision.at(index) == CellType::Empty) {
             Edge edge;
             edge.type = EdgeType::TOP;
             edge.assignedNextLevel = -1;
@@ -180,7 +186,7 @@ void LevelData::createEdges()
     for(int i=0; i<widthCount; i++) {
         //bottom
         int index = (heightCount-1)*widthCount + i;
-        if (level.at(index) == 0) {
+        if (collision.at(index) == CellType::Empty) {
             Edge edge;
             edge.type = EdgeType::DOWN;
             edge.assignedNextLevel = -1;
@@ -200,7 +206,7 @@ void LevelData::createEdges()
     for(int j=0; j<heightCount; j++) {
         // left
         int index = j*widthCount;
-        if (level.at(index) == 0) {
+        if (collision.at(index) == CellType::Empty) {
             Edge edge;
             edge.type = EdgeType::LEFT;
             edge.assignedNextLevel = -1;
@@ -221,7 +227,7 @@ void LevelData::createEdges()
     for(int j=0; j<heightCount; j++) {
         // right
         int index = j*widthCount + (widthCount-1);
-        if (level.at(index) == 0) {
+        if (collision.at(index) == CellType::Empty) {
             Edge edge;
             edge.type = EdgeType::RIGHT;
             edge.assignedNextLevel = -1;
@@ -244,16 +250,17 @@ void LevelData::createEdges()
     edges = newEdges;
 }
 
-void LevelData::changeLevelDimensions(int width, int height)
+void LevelData::changeLevelDimensions(int newWidth, int newHeight)
 {
-    std::vector<int> newLevel = std::vector<int>(width*height, 0);
+    std::vector<int> newLevel = std::vector<int>(newWidth*newHeight, 0);
+    std::vector<CellType> newCollision = std::vector<CellType>(newWidth*newHeight, CellType::Empty);
 
-    int minWidth = width > this->width ? this->width : width;
-    int minHeight = height > this->height ? this->height : height;
+    int minWidth = newWidth > this->width ? this->width : newWidth;
+    int minHeight = newHeight > this->height ? this->height : newHeight;
 
     for(int i=0; i<minHeight; i++) {
         for(int j=0; j<minWidth; j++) {
-            int index = i*width + j;
+            int index = i*newWidth + j;
             if (index >= newLevel.size()) {
                 std::cerr<<"[LevelData::changeLevelDimensions] wrong index: "<<index<<", should be "<<newLevel.size()<<"\n";
                 return;
@@ -264,11 +271,20 @@ void LevelData::changeLevelDimensions(int width, int height)
                 return;
             }
             newLevel[index] = level[index2];
+            newCollision[index] = collision[index2];
         }
     }
 
     level = newLevel;
-    this->width = width;
-    this->height = height;
+    collision = newCollision;
+    this->width = newWidth;
+    this->height = newHeight;
     createEdges();
+}
+
+void LevelData::rebuildCollision(Assets& assets)
+{
+    for(int i=0; i<level.size(); i++) {
+        collision[i] = assets.getCellType(level[i]);
+    }
 }

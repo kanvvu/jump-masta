@@ -2,6 +2,7 @@
 #include <vector>
 #include <unordered_map>
 #include "sprite.hpp"
+#include "common.hpp"
 
 
 enum class SpriteNames {
@@ -27,7 +28,7 @@ public:
     Assets();
     ~Assets();
 
-    int getSpritesSize() {return sprites.size();};
+    int getSpritesSize() {return static_cast<int>(sprites.size());};
     Sprite getSprite(int index);
     int getTextureWidth() {return texture.width/tileSize;};
     int getTextureHeight() {return texture.height/tileSize;};
@@ -37,6 +38,8 @@ public:
     Sprite getGrass() {return sprites.at(22*4 + 6);};
     Sprite getWall() {return sprites.at(2);};
     Sprite getBackground() {return sprites.at(22*16 + 4);};
+
+    CellType getCellType(int spriteId);
 
     std::vector<int> getSpritesInArea(Rectangle area);
 

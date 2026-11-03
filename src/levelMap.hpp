@@ -32,7 +32,7 @@ private:
     void draw();
     
     int getTileSize();
-    bool isCollision(Vector2 position, int tileType) const;
+    bool isCollision(Vector2 position, CellType cellType = CellType::Solid) const;
     Vector2 getSpawnPosition();
     Vector2i getSize();
     

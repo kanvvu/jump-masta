@@ -76,7 +76,7 @@ int LevelMap::getTileSize()
     return levelRepository.getLevel(currentTileMapIndex).getTileSize();
 }
 
-bool LevelMap::isCollision(Vector2 position, int tileType) const
+bool LevelMap::isCollision(Vector2 position, CellType cellType) const
 {
     int m_widthCount = levelRepository.getLevel(currentTileMapIndex).getWidth();
     int m_heightCount = levelRepository.getLevel(currentTileMapIndex).getHeight();
@@ -87,12 +87,10 @@ bool LevelMap::isCollision(Vector2 position, int tileType) const
         // printf("COLLSION POSITION OUT OF BOUNDS!\n");
         return false;
     }
-    //quick cheat
-    std::vector<int> collisonIDs = {182,183,184, 204, 205, 206, 226, 227, 228};
-
+    int tileId = posY*m_widthCount + posX;
     const LevelData& level = levelRepository.getLevel(currentTileMapIndex);
-    for (const auto& collsionID : collisonIDs) 
-        if (level.get(posY*m_widthCount + posX) == collsionID) return true;
+    
+    if (level.getTileCollision(tileId) == cellType) return true;
     
     return false;
 }
@@ -268,8 +266,8 @@ void LevelMap::checkAndResolveCollision(Player& player) {
         Vector2 left = {nBP.x, bP.y + 1.0f};
         Vector2 leftDown = {nBP.x, bP.y + 1.99f};
 
-        if (isCollision({nBP.x, bP.y}, 1) || isCollision({nBP.x, bP.y + 1.0f}, 1) ||
-            isCollision({nBP.x, bP.y + 1.99f}, 1)) {
+        if (isCollision({nBP.x, bP.y}) || isCollision({nBP.x, bP.y + 1.0f}) ||
+            isCollision({nBP.x, bP.y + 1.99f})) {
             nBP.x = (int) nBP.x + 1;
             player.m_velocity.x = -0.5*player.m_velocity.x;
             }
@@ -280,8 +278,8 @@ void LevelMap::checkAndResolveCollision(Player& player) {
         Vector2 right = {nBP.x + 2.0f, bP.y + 1.0f};
         Vector2 rightDown = {nBP.x + 2.0f, bP.y + 1.99f};
 
-        if (isCollision({nBP.x + 2.0f, bP.y}, 1) || isCollision({nBP.x + 2.0f, bP.y + 1.0f}, 1) ||
-            isCollision({nBP.x + 2.0f, bP.y + 1.99f}, 1)) {
+        if (isCollision({nBP.x + 2.0f, bP.y}) || isCollision({nBP.x + 2.0f, bP.y + 1.0f}) ||
+            isCollision({nBP.x + 2.0f, bP.y + 1.99f})) {
             nBP.x = (int) nBP.x;
             player.m_velocity.x = -0.5*player.m_velocity.x;
         }
@@ -294,8 +292,8 @@ void LevelMap::checkAndResolveCollision(Player& player) {
         Vector2 topMid = {nBP.x + 1.0f, nBP.y};
         Vector2 topRight = {nBP.x + 1.90f, nBP.y};
 
-        if (isCollision({nBP.x, nBP.y}, 1) || isCollision({nBP.x + 1.0f, nBP.y}, 1) ||
-            isCollision({nBP.x + 1.90f, nBP.y}, 1)) {
+        if (isCollision({nBP.x, nBP.y}) || isCollision({nBP.x + 1.0f, nBP.y}) ||
+            isCollision({nBP.x + 1.90f, nBP.y})) {
             nBP.y = (int) nBP.y + 1;
             player.m_velocity.y = -0.5*player.m_velocity.y;
         }
@@ -306,8 +304,8 @@ void LevelMap::checkAndResolveCollision(Player& player) {
         Vector2 downMid = {nBP.x + 1.0f, nBP.y + 2.0f};
         Vector2 downRight = {nBP.x + 1.90f, nBP.y + 2.0f};
 
-        if (isCollision({nBP.x, nBP.y + 2.0f}, 1) || isCollision({nBP.x + 1.0f, nBP.y + 2.0f}, 1) ||
-            isCollision({nBP.x + 1.90f, nBP.y + 2.0f}, 1)) {
+        if (isCollision({nBP.x, nBP.y + 2.0f}) || isCollision({nBP.x + 1.0f, nBP.y + 2.0f}) ||
+            isCollision({nBP.x + 1.90f, nBP.y + 2.0f})) {
             nBP.y = (int) nBP.y;
             player.m_velocity.y = 0;
             player.onGround = true;
