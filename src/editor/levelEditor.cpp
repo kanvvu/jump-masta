@@ -11,8 +11,9 @@ LevelEditor::LevelEditor(LevelRepository& levelRepository,Assets& assets, int ti
 {
     state.currentLevel = LevelData(LevelEditorState::DefaultLevelWidth, LevelEditorState::DefaultLevelHeight);
 
-    state.camera.offset.x = state.screenWidth/2 - (state.currentLevel.getWidth()*state.getTileSize())/2;   // coordinate x origin
-    state.camera.offset.y = state.screenHeight/2 - (state.currentLevel.getHeight()*state.getTileSize())/2;   // coordinate y origin
+    // state.camera.offset.x = state.screenWidth/2 - (state.currentLevel.getWidth()*state.getTileSize())/2;   // coordinate x origin
+    // state.camera.offset.y = state.screenHeight/2 - (state.currentLevel.getHeight()*state.getTileSize())/2;   // coordinate y origin
+    state.camera.offset = calculateCameraCenterOffset({state.screenWidth, state.screenHeight}, {state.currentLevel.getWidth(), state.currentLevel.getHeight()}, state.getTileSize());
     state.camera.target.x = 0;         // rotation and zoom x origin (from offset above)
     state.camera.target.y = 0;         // rotation and zoom y origin (from offset above)
     state.camera.rotation = 0;        // rotation in deg
@@ -109,8 +110,9 @@ void LevelEditor::saveLevel(std::string name) {
 void LevelEditor::loadLevel(int levelID) {
     LevelData levelData = levelRepository.getLevel(levelID);
 
-    state.camera.offset.x = state.screenWidth/2 - (levelData.getWidth()*levelData.getTileSize())/2;   // coordinate x origin
-    state.camera.offset.y = state.screenHeight/2 - (levelData.getHeight()*levelData.getTileSize())/2;   // coordinate y origin
+    // state.camera.offset.x = state.screenWidth/2 - (levelData.getWidth()*levelData.getTileSize())/2;   // coordinate x origin
+    // state.camera.offset.y = state.screenHeight/2 - (levelData.getHeight()*levelData.getTileSize())/2;   // coordinate y origin
+    state.camera.offset = calculateCameraCenterOffset({state.screenWidth, state.screenHeight}, {state.currentLevel.getWidth(), state.currentLevel.getHeight()}, state.getTileSize());
 
     state.currentLevel = levelData;
     // std::cout<<"LEVELS: "<<state.currentLevel.getLevelSize()<<", EDGES: "<<state.currentLevel.getEdgesSize()<<std::endl;

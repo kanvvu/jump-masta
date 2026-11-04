@@ -12,15 +12,16 @@ Game::Game(int windowWidth, int windowHeight, const char *windowTitle)
     m_assets(),
     m_tileMap(m_levelRepository, m_assets),
     m_levelEditor(m_levelRepository, m_assets),
-    m_player(m_tileMap.getTileSize(), m_tileMap.getSpawnPosition(), m_assets.getPlayer())
+    m_player(m_tileMap.getSpawnPosition(), m_assets.getPlayer())
 {
     // InitWindow(windowWidth, windowHeight, windowTitle);
     SetTargetFPS(60);
 
     for(int i=0; i<m_levelRepository.getLevelCount(); i++) m_levelRepository.getLevel(i).rebuildCollision(m_assets);
 
-    camera.offset.x = windowWidth/2.0f - (m_tileMap.getSize().x*m_tileMap.getTileSize())/2;   // coordinate x origin
-    camera.offset.y = windowHeight/2.0f - (m_tileMap.getSize().y*m_tileMap.getTileSize())/2;   // coordinate y origin
+    // camera.offset.x = windowWidth/2.0f - (m_tileMap.getSize().x*m_tileMap.getTileSize())/2;   // coordinate x origin
+    // camera.offset.y = windowHeight/2.0f - (m_tileMap.getSize().y*m_tileMap.getTileSize())/2;   // coordinate y origin
+    camera.offset = calculateCameraCenterOffset({windowWidth, windowHeight}, m_tileMap.getSize(), m_tileMap.getTileSize());
     camera.target.x = 0;         // rotation and zoom x origin (from offset above)
     camera.target.y = 0;         // rotation and zoom y origin (from offset above)
     camera.rotation = 0;        // rotation in deg
@@ -76,10 +77,10 @@ void Game::proccessInput()
 }
 
 
-static void centerCamera(Vector2& cameraOffset, Vector2i windowSize, Vector2i tileMapSize, int tileSize) {
-    cameraOffset.x =windowSize.x/2.0f - (tileMapSize.x*tileSize)/2;   // coordinate x origin
-    cameraOffset.y = windowSize.y/2.0f - (tileMapSize.y*tileSize)/2;   // coordinate y origin
-}
+// static void centerCamera(Vector2& cameraOffset, Vector2i windowSize, Vector2i tileMapSize, int tileSize) {
+//     cameraOffset.x = windowSize.x/2.0f - (tileMapSize.x*tileSize)/2;   // coordinate x origin
+//     cameraOffset.y = windowSize.y/2.0f - (tileMapSize.y*tileSize)/2;   // coordinate y origin
+// }
 
 void Game::updateGame(float deltaTime) 
 {
@@ -90,8 +91,8 @@ void Game::updateGame(float deltaTime)
 
     if (m_tileMap.checkForNextLevel(m_player.m_position)) { 
         std::cout<<"NEXT LEVEL\n";
-        centerCamera(camera.offset, {m_windowWidth, m_windowHeight}, m_tileMap.getSize(), m_tileMap.getTileSize());
-        m_player.setTileSize(m_tileMap.getTileSize());
+        camera.offset = calculateCameraCenterOffset({m_windowWidth, m_windowHeight}, m_tileMap.getSize(), m_tileMap.getTileSize());
+        // centerCamera(camera.offset, {m_windowWidth, m_windowHeight}, m_tileMap.getSize(), m_tileMap.getTileSize());
     }
     
 }
@@ -122,7 +123,7 @@ void Game::drawGame() {
 
     BeginMode2D (camera);  // next objects effected by Camera2D
     m_tileMap.draw();
-    m_player.draw();
+    m_player.draw(m_tileMap.getTileSize());
     EndMode2D (); 
     m_line.draw();
 

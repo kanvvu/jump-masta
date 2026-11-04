@@ -4,11 +4,8 @@
 #include "app/interfaces.hpp"
 #include "assets/assets.hpp"
 
-class Player : IDraw, IUpdate
+class Player : IUpdate
 {
-private:
-    int m_tileSize;
-
 public:
     Vector2 m_position;
     Vector2 m_previousPosition;
@@ -17,13 +14,11 @@ public:
     bool onGround = false;
     Sprite sprite;
 
-    Player(int tileSize, Vector2 position, Sprite sprite);
+    Player(Vector2 position, Sprite sprite);
     ~Player() = default;
 
-    void draw();
+    void draw(int tileSize);
     void update(float elapsedTime);
-
-    void setTileSize(int tileSize) {m_tileSize = tileSize;}
 
     void reset();
 };

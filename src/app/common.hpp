@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <string>
+#include "raylib.h"
 
 class LevelRepository;
 class Assets;
@@ -46,3 +47,10 @@ struct DropDownState {
     int dropdownActive = -1;
     bool dropDownEditMode = false;
 };
+
+inline Vector2 calculateCameraCenterOffset(Vector2i windowSize, Vector2i mapTileCount, int tileSize) {
+    return {
+        windowSize.x / 2.0f - (mapTileCount.x * tileSize) / 2.0f,
+        windowSize.y / 2.0f - (mapTileCount.y * tileSize) / 2.0f
+    };
+}
