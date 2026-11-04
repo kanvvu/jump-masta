@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-#include "common.hpp"
+#include "app/common.hpp"
 #include "levelFileLoader.hpp"
 
 class LevelRepository

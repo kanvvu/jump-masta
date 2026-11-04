@@ -2,7 +2,7 @@
 #include <vector>
 #include <unordered_map>
 #include "sprite.hpp"
-#include "common.hpp"
+#include "app/common.hpp"
 
 
 enum class SpriteNames {

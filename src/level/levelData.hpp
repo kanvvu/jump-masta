@@ -2,8 +2,8 @@
 
 #include <vector>
 #include <string>
-#include "common.hpp"
-#include "sprite.hpp"
+#include "app/common.hpp"
+#include "assets/sprite.hpp"
 
 class Assets;
 

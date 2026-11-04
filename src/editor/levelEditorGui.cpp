@@ -1,7 +1,7 @@
 #include "levelEditorGui.hpp"
 
 #include <iostream>
-#include "raygui.h"
+#include "third_party/raygui.h"
 
 
 

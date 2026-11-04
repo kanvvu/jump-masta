@@ -1,12 +1,12 @@
 #pragma once
 #include "raylib.h"
-#include "levelMap.hpp"
-#include "player.hpp"
-#include "line.hpp"
-#include "levelEditor.hpp"
+#include "level/levelMap.hpp"
+#include "game/player.hpp"
+#include "game/line.hpp"
+#include "editor/levelEditor.hpp"
 #include "common.hpp"
-#include "levelFileLoader.hpp"
-#include "assets.hpp"
+#include "level/levelFileLoader.hpp"
+#include "assets/assets.hpp"
 
 struct RaylibContext {
     RaylibContext(int w, int h, const char* title) {

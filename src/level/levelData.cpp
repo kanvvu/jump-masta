@@ -2,7 +2,7 @@
 
 #include <iostream>
 #include <raylib.h>
-#include "assets.hpp"
+#include "assets/assets.hpp"
 
 LevelData::LevelData(int width, int height, std::string name, int tileSize)
  : width(width),

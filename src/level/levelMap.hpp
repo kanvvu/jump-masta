@@ -3,9 +3,9 @@
 #include <vector>
 #include "levelRepository.hpp"
 #include "raylib.h"
-#include "common.hpp"
-#include "player.hpp"
-#include "assets.hpp"
+#include "app/common.hpp"
+#include "game/player.hpp"
+#include "assets/assets.hpp"
 
 class LevelMap
 {

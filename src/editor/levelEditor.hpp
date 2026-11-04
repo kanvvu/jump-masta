@@ -1,13 +1,13 @@
 #pragma once
 
 #include "raylib.h"
-#include "interfaces.hpp"
-#include "common.hpp"
+#include "app/interfaces.hpp"
+#include "app/common.hpp"
 #include <vector>
-#include "levelRepository.hpp"
-#include "levelData.hpp"
+#include "level/levelRepository.hpp"
+#include "level/levelData.hpp"
 #include "levelEditorGui.hpp"
-#include "assets.hpp"
+#include "assets/assets.hpp"
 
 
 struct LevelEditorState

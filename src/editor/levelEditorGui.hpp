@@ -2,10 +2,10 @@
 
 #include <string>
 #include <vector>
-#include "common.hpp"
+#include "app/common.hpp"
 #include <functional>
 #include <raylib.h>
-#include "interfaces.hpp"
+#include "app/interfaces.hpp"
 
 struct EdgeDropDownRow {
     int edgeIndex = -1;

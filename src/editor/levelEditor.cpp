@@ -5,7 +5,7 @@
 #include <iostream>
 #include <string>
 #include <cstring>
-#include "raygui.h"
+#include "third_party/raygui.h"
 
 LevelEditor::LevelEditor(LevelRepository& levelRepository,Assets& assets, int tileSize) : levelRepository(levelRepository), assets(assets)
 {

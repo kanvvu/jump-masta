@@ -1,7 +1,7 @@
 #pragma once
 
 #include "raylib.h"
-#include "interfaces.hpp"
+#include "app/interfaces.hpp"
 #include "player.hpp"
 
 

@@ -1,8 +1,8 @@
 #pragma once
 
 #include "raylib.h"
-#include "interfaces.hpp"
-#include "assets.hpp"
+#include "app/interfaces.hpp"
+#include "assets/assets.hpp"
 
 class Player : IDraw, IUpdate
 {
