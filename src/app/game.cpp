@@ -5,32 +5,33 @@
 
 Game::Game(int windowWidth, int windowHeight, const char *windowTitle)
   : m_raylibContext(windowWidth, windowHeight, windowTitle),
-    m_windowWidth(windowWidth),
-    m_windowHeight(windowHeight),
+    // m_windowWidth(windowWidth),
+    // m_windowHeight(windowHeight),
     m_windowTitle(windowTitle),
     m_levelRepository(m_levelFileLoader),
     m_assets(),
-    m_tileMap(m_levelRepository, m_assets),
-    m_levelEditor(m_levelRepository, m_assets),
-    m_player(m_tileMap.getSpawnPosition(), m_assets.getPlayer())
+    m_levelEditor(std::make_unique<LevelEditor>(m_levelRepository, m_assets,[this]() {onSwitchToGame();})),
+    m_gameScene(std::make_unique<GameScene>(windowWidth, windowHeight, Player(m_assets.getPlayer()), LevelMap(m_levelRepository, m_assets), [this] () {onSwitchToEditor();}))
 {
-    // InitWindow(windowWidth, windowHeight, windowTitle);
     SetTargetFPS(60);
 
-    for(int i=0; i<m_levelRepository.getLevelCount(); i++) m_levelRepository.getLevel(i).rebuildCollision(m_assets);
+    m_currentScene = m_levelEditor.get();
 
-    // camera.offset.x = windowWidth/2.0f - (m_tileMap.getSize().x*m_tileMap.getTileSize())/2;   // coordinate x origin
-    // camera.offset.y = windowHeight/2.0f - (m_tileMap.getSize().y*m_tileMap.getTileSize())/2;   // coordinate y origin
-    camera.offset = calculateCameraCenterOffset({windowWidth, windowHeight}, m_tileMap.getSize(), m_tileMap.getTileSize());
-    camera.target.x = 0;         // rotation and zoom x origin (from offset above)
-    camera.target.y = 0;         // rotation and zoom y origin (from offset above)
-    camera.rotation = 0;        // rotation in deg
-    camera.zoom     = 1.0f;      // magnification, i.e fov or zoom
+    for(int i=0; i<m_levelRepository.getLevelCount(); i++) m_levelRepository.getLevel(i).rebuildCollision(m_assets);
+}
+
+void Game::onSwitchToGame()
+{
+    m_currentScene = m_gameScene.get();
+}
+
+void Game::onSwitchToEditor()
+{
+    m_currentScene = m_levelEditor.get();
 }
 
 void Game::start()
 {
-
     while (!WindowShouldClose())
     {
         proccessInput();
@@ -39,94 +40,15 @@ void Game::start()
     }
 }
 
-void Game::proccessInputGame() {
-    if (IsKeyPressed(KEY_E)) {
-        currentGameState = GameState::LEVEL_EDITOR;
-    }   
-
-    if (IsKeyPressed(KEY_R)) {
-        m_player.reset();
-        m_tileMap.resetLevel();
-        m_player.m_position = m_tileMap.getSpawnPosition();
-    }
-
-    if (IsMouseButtonDown(0)) {
-        m_line.mouseButtonDown();
-    }
-
-    if (!IsMouseButtonDown(0)) {
-        m_line.mouseButtonUp(m_player.m_velocity);
-    }
-}
-
 void Game::proccessInput()
 {
-
-    switch (currentGameState)
-    {
-    case GameState::GAME:
-        proccessInputGame();
-        break;
-    case GameState::LEVEL_EDITOR:
-        m_levelEditor.proccessInput(currentGameState);
-        break;
-
-    default:
-        break;
-    }
-}
-
-
-// static void centerCamera(Vector2& cameraOffset, Vector2i windowSize, Vector2i tileMapSize, int tileSize) {
-//     cameraOffset.x = windowSize.x/2.0f - (tileMapSize.x*tileSize)/2;   // coordinate x origin
-//     cameraOffset.y = windowSize.y/2.0f - (tileMapSize.y*tileSize)/2;   // coordinate y origin
-// }
-
-void Game::updateGame(float deltaTime) 
-{
-    m_player.update(deltaTime);
-    m_line.update(deltaTime);
-
-    m_tileMap.checkAndResolveCollision(m_player);
-
-    if (m_tileMap.checkForNextLevel(m_player.m_position)) { 
-        std::cout<<"NEXT LEVEL\n";
-        camera.offset = calculateCameraCenterOffset({m_windowWidth, m_windowHeight}, m_tileMap.getSize(), m_tileMap.getTileSize());
-        // centerCamera(camera.offset, {m_windowWidth, m_windowHeight}, m_tileMap.getSize(), m_tileMap.getTileSize());
-    }
-    
+    if (m_currentScene) m_currentScene->processInput();
 }
 
 void Game::update()
 {
     float deltaTime = GetFrameTime();
-
-    switch (currentGameState)
-    {
-    case GameState::GAME:
-        updateGame(deltaTime);
-        break;
-    case GameState::LEVEL_EDITOR:
-        m_levelEditor.update(deltaTime);
-        break;
-
-    default:
-        break;
-    }
-}
-
-
-void Game::drawGame() {
-    ClearBackground(DARKGRAY);
-
-    Vector2 offset = {500,64*2};
-
-    BeginMode2D (camera);  // next objects effected by Camera2D
-    m_tileMap.draw();
-    m_player.draw(m_tileMap.getTileSize());
-    EndMode2D (); 
-    m_line.draw();
-
+    if (m_currentScene) m_currentScene->update(deltaTime);
 }
 
 static void drawFPS() {
@@ -138,20 +60,7 @@ void Game::draw()
 {
     BeginDrawing();
 
-        switch (currentGameState)
-        {
-        case GameState::GAME:
-            drawGame();
-            break;
-        case GameState::LEVEL_EDITOR:
-            m_levelEditor.draw();
-            break;
-
-        default:
-            break;
-        }
-
-    
+    m_currentScene->draw();
     drawFPS();
 
     EndDrawing();

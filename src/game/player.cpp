@@ -14,12 +14,15 @@
 // {
 // }
 
-Player::Player(Vector2 position, Sprite sprite) :
-    m_position(position),
-    sprite(sprite),
-    m_previousPosition(position),
-    m_velocity({0, 0}),
-    m_direction({0, 0})
+Player::Player(Sprite sprite) : Player({0.0f, 0.0f}, sprite)
+{
+}
+
+Player::Player(Vector2 position, Sprite sprite) : m_position(position),
+                                                  sprite(sprite),
+                                                  m_previousPosition(position),
+                                                  m_velocity({0, 0}),
+                                                  m_direction({0, 0})
 
 {
 }

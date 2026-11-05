@@ -7,7 +7,10 @@
 #include <cstring>
 #include "third_party/raygui.h"
 
-LevelEditor::LevelEditor(LevelRepository& levelRepository,Assets& assets, int tileSize) : levelRepository(levelRepository), assets(assets)
+LevelEditor::LevelEditor(LevelRepository& levelRepository,Assets& assets, std::function<void()> onSwitchToGame)
+: levelRepository(levelRepository),
+  assets(assets),
+  m_onSwitchToGame(onSwitchToGame)
 {
     state.currentLevel = LevelData(LevelEditorState::DefaultLevelWidth, LevelEditorState::DefaultLevelHeight);
 
@@ -56,10 +59,6 @@ LevelEditor::LevelEditor(LevelRepository& levelRepository,Assets& assets, int ti
     syncCurrentLevelUi();
 }
 
-LevelEditor::LevelEditor(LevelRepository& tileLevelManager, Assets& assets) : LevelEditor(tileLevelManager, assets, LevelEditorState::DefaultTileSize)
-{
-
-}
 
 std::vector<EdgeDropDownRow> buildEdgeDropdownRows(const LevelData& level, const std::vector<std::string>& levelNames)
 {
@@ -120,11 +119,11 @@ void LevelEditor::loadLevel(int levelID) {
     syncCurrentLevelUi();
 }
 
-void LevelEditor::proccessInput(GameState &gameState)
+void LevelEditor::processInput()
 {
     if (!nameTextBox.getEditMode()) {
         if (IsKeyPressed(KEY_E)) {
-            gameState = GameState::GAME;
+            m_onSwitchToGame();
         }   
 
         if (IsKeyPressed(KEY_R)) {

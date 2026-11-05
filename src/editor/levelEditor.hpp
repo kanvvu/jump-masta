@@ -8,6 +8,7 @@
 #include "level/levelData.hpp"
 #include "levelEditorGui.hpp"
 #include "assets/assets.hpp"
+#include <functional>
 
 
 struct LevelEditorState
@@ -38,6 +39,7 @@ struct LevelEditorState
     Vector2 endSelection;
     bool isSelection = false;
 
+
 };
 
 enum class EditorCommand
@@ -50,7 +52,7 @@ enum class EditorCommand
     ApplyLevelDimensions,
 };
 
-class LevelEditor
+class LevelEditor : public IScene
 {
 private:
 
@@ -73,6 +75,8 @@ private:
     LevelRepository& levelRepository;
     Assets& assets;
 
+    std::function<void()> m_onSwitchToGame;
+
     void saveCurrentLevel();
     void loadSelectedLevel();
     void deleteSelectedLevel();
@@ -82,13 +86,12 @@ private:
 
 
 public:
-    LevelEditor(LevelRepository& levelRepository, Assets& assets);
-    LevelEditor(LevelRepository& levelRepository, Assets& assets, int tileSize);
+    LevelEditor(LevelRepository& levelRepository, Assets& assets, std::function<void()> onSwitchToGame);
     ~LevelEditor() = default;
 
-    void proccessInput(GameState& gameState);
-    void update(float deltaTime);
-    void draw();
+    void processInput() override;
+    void update(float deltaTime) override;
+    void draw() override;
     void drawGUI();
     void handleLevelNameInput();
     void handleLevelDimensionsInput();

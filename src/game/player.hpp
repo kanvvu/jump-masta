@@ -14,6 +14,7 @@ public:
     bool onGround = false;
     Sprite sprite;
 
+    Player(Sprite sprite);
     Player(Vector2 position, Sprite sprite);
     ~Player() = default;
 

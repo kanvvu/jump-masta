@@ -7,11 +7,6 @@
 class LevelRepository;
 class Assets;
 
-enum class GameState {
-    GAME,
-    LEVEL_EDITOR
-};
-
 struct Vector2i {
     int x;
     int y;
