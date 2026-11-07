@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include "raylib.h"
+#include <tuple>
 
 class LevelRepository;
 class Assets;
@@ -17,6 +18,22 @@ enum class EdgeType {
     DOWN,
     LEFT,
     RIGHT
+};
+
+using LevelId = int;
+
+struct ExitKey {
+    EdgeType side;
+    int start;
+
+    bool operator<(const ExitKey& other) const {
+        return std::tie(side, start) < std::tie(other.side, other.start);
+    }
+
+    bool operator==(const ExitKey& other) const {
+        return side == other.side && start == other.start;
+    }
+
 };
 
 enum class CellType {
@@ -36,6 +53,11 @@ struct Edge {
     int assignedNextLevel; 
     int tilesCount;
     EdgeType type;
+
+    ExitKey getKey() const {
+        int offset = (type == EdgeType::TOP || type == EdgeType::DOWN) ? start.x : start.y;
+        return ExitKey{type, offset};
+    }
 };
 
 struct DropDownState {
