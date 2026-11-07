@@ -25,6 +25,16 @@ public:
         return m_data[y*m_width+x];
     }
 
+    T& at(int index) {
+        assert(index < m_data.size() && index >= 0 && "Grid::at out of bounds!");
+        return m_data[index];
+    }
+
+    const T& at(int index) const{
+        assert(index < m_data.size() && index >= 0 && "Grid::at out of bounds!");
+        return m_data[index];
+    }
+
     bool inBounds(int x, int y) const {
         return x >= 0 && x < m_width && y >= 0 && y < m_height;
     }

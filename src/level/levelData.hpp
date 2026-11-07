@@ -4,6 +4,7 @@
 #include <string>
 #include "app/common.hpp"
 #include "assets/sprite.hpp"
+#include "core/grid.hpp"
 
 class Assets;
 
@@ -14,12 +15,10 @@ struct Tile {
 
 class LevelData {
 private:
-    std::vector<int> level;
-    std::vector<CellType> collision;
+    Grid<int> level;
+    Grid<CellType> collision;
     std::vector<Edge> edges;
 
-    int width;
-    int height;
     int tileSize;
     
     std::string name;
@@ -31,11 +30,9 @@ public:
     LevelData(int width, int height, std::string name = "level", int tileSize = 64);
     LevelData& operator=(const LevelData& other);
 
-    int getWidth() const {return width;};
-    // void setWidth(int width);
+    int getWidth() const {return level.getWidth();};
 
-    int getHeight() const {return height;};
-    // void setHeight(int height);
+    int getHeight() const {return level.getHeight();};
 
     int getTileSize() const {return tileSize;};
     void setTileSize(int tileSize);
@@ -49,7 +46,7 @@ public:
     int get(int x, int y) const;
     int get(int index) const;
 
-    CellType getTileCollision(int spriteId) const {return collision[spriteId];};
+    CellType getTileCollision(int spriteId) const {return collision.at(spriteId);};
 
     void set(int x, int y, int value, CellType cellType = CellType::Empty);
     void set(int index, int value, CellType cellType = CellType::Empty);
