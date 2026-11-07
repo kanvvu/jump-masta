@@ -90,7 +90,8 @@ void LevelEditor::syncCurrentLevelUi()
     edgeAssignmentDropDown.update(rows, [this](int edgeIndex, int selectedIndex) {
         if (edgeIndex >= 0 && edgeIndex < state.currentLevel.getEdgesSize()) {
             std::cout<<"\tedge: "<<edgeIndex<<", index: "<<selectedIndex<<"\n";
-            state.currentLevel.getEdge(edgeIndex).assignedNextLevel = selectedIndex;
+            const auto& edge = state.currentLevel.getEdge(edgeIndex);
+            state.currentLevel.setLink(edge.getKey(), selectedIndex);
         } else {
             std::cout<<"lol edgeAssignmentDropDown lol!!!\n";
         }

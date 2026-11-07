@@ -5,6 +5,7 @@
 #include "app/common.hpp"
 #include "assets/sprite.hpp"
 #include "core/grid.hpp"
+#include <map>
 
 class Assets;
 
@@ -18,6 +19,7 @@ private:
     Grid<int> level;
     Grid<CellType> collision;
     std::vector<Edge> edges;
+    std::map<ExitKey, LevelId> links;
 
     int tileSize;
     
@@ -59,6 +61,10 @@ public:
     void changeLevelDimensions(int width, int height);
 
     void rebuildCollision(Assets& assets);
+
+    void setLink(const ExitKey& key, LevelId targetId);
+    LevelId getLink(const ExitKey& key) const;
+    const std::map<ExitKey, LevelId>& getLinks() const {return links; }
 
 
 };

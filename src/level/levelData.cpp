@@ -21,6 +21,7 @@ LevelData& LevelData::operator=(const LevelData &other)
     this->level = other.level;
     this->collision = other.collision;
     this->edges = other.edges;
+    this->links = other.links;
 
     this->name = other.name;
     this->tileSize = other.tileSize;
@@ -120,6 +121,9 @@ void LevelData::setEdges(std::vector<Edge> _edges)
 
     for(int i=0; i<this->edges.size(); i++) {
         this->edges[i].assignedNextLevel = _edges[i].assignedNextLevel;
+        if (edges[i].assignedNextLevel != -1) {
+            setLink(edges[i].getKey(), edges[i].assignedNextLevel);
+        }
     }
 }
 
@@ -212,8 +216,10 @@ void LevelData::createEdges()
         }
     }
 
-    for(int i=0; i<edges.size() && i<newEdges.size(); i++) 
-        newEdges[i].assignedNextLevel = edges[i].assignedNextLevel;
+    for(auto& edge : newEdges) {
+        int levelId = getLink(edge.getKey());
+        edge.assignedNextLevel = levelId;
+    }
     
     edges = newEdges;
 }
@@ -231,4 +237,26 @@ void LevelData::rebuildCollision(Assets& assets)
     for(int i=0; i<level.size(); i++) {
         collision.at(i) = assets.getCellType(level.at(i));
     }
+    createEdges();
+}
+
+void LevelData::setLink(const ExitKey &key, LevelId targetId)
+{
+    if (targetId == -1) {
+        links.erase(key);
+    } else {
+        links[key] = targetId;
+    }
+
+    for(auto& edge : edges) {
+        if (edge.getKey() == key) {
+            edge.assignedNextLevel = targetId;
+        }
+    }
+}
+
+LevelId LevelData::getLink(const ExitKey &key) const
+{
+    auto it = links.find(key);
+    return (it != links.end()) ? it->second : -1;
 }
