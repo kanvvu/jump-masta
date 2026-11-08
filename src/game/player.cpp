@@ -44,20 +44,12 @@ void Player::update(float elapsedTime)
 
     m_velocity = Vector2Add(m_velocity, accel*elapsedTime);
 
-
-    // float velocityThreshold = 20.0;
-    // if (m_velocity.x > velocityThreshold) m_velocity.x = velocityThreshold;
-    // if (m_velocity.x < -velocityThreshold) m_velocity.x = -velocityThreshold;
-
-    // if (m_velocity.y > velocityThreshold) m_velocity.y = velocityThreshold;
-    // if (m_velocity.y < -velocityThreshold) m_velocity.y = -velocityThreshold;
-
     if (onGround) {
         float frictionFactor = powf(PlayerConfig::GROUND_FRICTION, elapsedTime*60.0f);
-        m_velocity = Vector2Scale(m_velocity, frictionFactor);
+        m_velocity.x *= frictionFactor;
 
         if (Vector2Length(m_velocity) < PlayerConfig::STOP_VELOCITY_THRESHOLD) 
-            m_velocity = Vector2Zero();
+            m_velocity.x = 0.0f;
     }
 
 

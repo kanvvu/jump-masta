@@ -34,8 +34,14 @@ void GameScene::processInput()
         m_line.mouseButtonDown();
     }
 
+    // std::cout<<m_player.onGround<<"\n";
     if (!IsMouseButtonDown(0)) {
-        m_line.mouseButtonUp(m_player.m_velocity);
+        if (auto impulse = m_line.mouseButtonUp()) {
+            if (m_player.onGround) {
+                m_player.m_velocity = *impulse; 
+                m_player.onGround = false;
+            }
+        }
     }
 }
 

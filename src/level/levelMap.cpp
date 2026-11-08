@@ -286,7 +286,7 @@ void LevelMap::checkAndResolveCollision(Player& player) {
     }
 
     player.onGround = false;
-    if (movementDirection.y <= 0) { //up
+    if (movementDirection.y < 0) { //up
 
         Vector2 topLeft = {nBP.x, nBP.y};
         Vector2 topMid = {nBP.x + 1.0f, nBP.y};
