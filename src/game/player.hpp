@@ -4,6 +4,12 @@
 #include "app/interfaces.hpp"
 #include "assets/assets.hpp"
 
+namespace PlayerConfig {
+    constexpr float GRAVITY = 45.0f;                // tiles/s^2
+    constexpr float GROUND_FRICTION = 0.90f;        // dacay base 1/60s
+    constexpr float STOP_VELOCITY_THRESHOLD = 1.0f; // tiles/s
+}
+
 class Player : IUpdate
 {
 public:

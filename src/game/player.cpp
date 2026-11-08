@@ -40,9 +40,9 @@ void Player::draw(int tileSize)
 
 void Player::update(float elapsedTime)
 {
-    Vector2 accel = {0,40.0f/64};
+    Vector2 accel = {0, PlayerConfig::GRAVITY};
 
-    m_velocity = Vector2Add(m_velocity, accel);
+    m_velocity = Vector2Add(m_velocity, accel*elapsedTime);
 
 
     // float velocityThreshold = 20.0;
@@ -53,15 +53,15 @@ void Player::update(float elapsedTime)
     // if (m_velocity.y < -velocityThreshold) m_velocity.y = -velocityThreshold;
 
     if (onGround) {
-        float friction = 0.90;
-        m_velocity = Vector2Scale(m_velocity, friction);
-        if (fabs(Vector2Distance({0,0}, m_velocity)) < 1.0) m_velocity = {0,0};
+        float frictionFactor = powf(PlayerConfig::GROUND_FRICTION, elapsedTime*60.0f);
+        m_velocity = Vector2Scale(m_velocity, frictionFactor);
+
+        if (Vector2Length(m_velocity) < PlayerConfig::STOP_VELOCITY_THRESHOLD) 
+            m_velocity = Vector2Zero();
     }
 
 
-    Vector2 halfAccel = Vector2Scale(accel, 0.5);
-    Vector2 velocityAndAccel = Vector2Add(m_velocity, halfAccel);
-    Vector2 move = Vector2Scale(velocityAndAccel, elapsedTime); 
+    Vector2 move = Vector2Scale(m_velocity, elapsedTime); 
     Vector2 new_position = Vector2Add(m_position, move); 
 
     m_previousPosition = m_position;
