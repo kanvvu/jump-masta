@@ -10,8 +10,15 @@ namespace PlayerConfig {
     constexpr float STOP_VELOCITY_THRESHOLD = 1.0f; // tiles/s
 }
 
+enum class PlayerState {
+    Idle,
+    Jumping,
+    Falling
+};
+
 class Player : IUpdate
 {
+    
     public:
     Vector2 m_position;
     Vector2 m_previousPosition;
@@ -19,14 +26,18 @@ class Player : IUpdate
     Vector2 m_direction;
     Sprite sprite;
     bool onGround = false;
-
+    bool m_facingRight = true;
+    bool m_hitWall = false;
+    
     Player(Sprite sprite);
     Player(Vector2 position, Sprite sprite);
     ~Player() = default;
 
+    PlayerState getState() const;
+    
     void draw(int tileSize);
     void update(float elapsedTime);
-
+    
     void reset();
 };
 

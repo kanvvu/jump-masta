@@ -260,7 +260,7 @@ void LevelMap::checkAndResolveCollision(Player& player) {
 
     
     Vector2 movementDirection = Vector2Subtract(nBP, bP);
-    if (movementDirection.x <= 0) { //left
+    if (movementDirection.x < 0) { //left
 
         Vector2 leftTop = {nBP.x, bP.y};
         Vector2 left = {nBP.x, bP.y + 1.0f};
@@ -270,9 +270,10 @@ void LevelMap::checkAndResolveCollision(Player& player) {
             isCollision({nBP.x, bP.y + 1.99f})) {
             nBP.x = (int) nBP.x + 1;
             player.m_velocity.x = -0.5*player.m_velocity.x;
+            player.m_hitWall = true;
             }
     }
-    else {  //right
+    if (movementDirection.x > 0) { //right
 
         Vector2 rightTop = {nBP.x + 2.0f, bP.y};
         Vector2 right = {nBP.x + 2.0f, bP.y + 1.0f};
@@ -282,6 +283,7 @@ void LevelMap::checkAndResolveCollision(Player& player) {
             isCollision({nBP.x + 2.0f, bP.y + 1.99f})) {
             nBP.x = (int) nBP.x;
             player.m_velocity.x = -0.5*player.m_velocity.x;
+            player.m_hitWall = true;
         }
     }
 

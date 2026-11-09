@@ -40,6 +40,8 @@ void Player::draw(int tileSize)
 
 void Player::update(float elapsedTime)
 {
+    m_hitWall = false;
+
     Vector2 accel = {0, PlayerConfig::GRAVITY};
 
     m_velocity = Vector2Add(m_velocity, accel*elapsedTime);
@@ -59,6 +61,18 @@ void Player::update(float elapsedTime)
     m_previousPosition = m_position;
     m_position = new_position;
 
+    if (m_velocity.x > 0.1f) m_facingRight = true;
+    if (m_velocity.x < -0.1f) m_facingRight = false;
+}
+
+PlayerState Player::getState() const
+{
+    if (onGround)
+        return PlayerState::Idle;
+    else if (m_velocity.y < 0.0f)
+        return PlayerState::Jumping;
+    else
+        return PlayerState::Falling;
 }
 
 void Player::reset()
@@ -67,5 +81,7 @@ void Player::reset()
     m_position = Vector2Zero();
     m_previousPosition = Vector2Zero();
     m_velocity = Vector2Zero();
+    m_facingRight = true;
+    m_hitWall = false;
 
 }
