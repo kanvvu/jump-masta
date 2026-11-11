@@ -5,6 +5,7 @@
 #include "line.hpp"
 #include <functional>
 #include "app/common.hpp"
+#include "game/saveSystem.hpp"
 
 class GameScene : public IScene {
 private:
@@ -28,6 +29,12 @@ private:
 
 public:
     GameScene(int windowWidth, int windowHeight, Player player, LevelMap tileMap, const GameSettings& gameSettings, std::function<void()> onSwitchToEditor, std::function<void()> onSwitchToMenu);
+
+    void saveCurrentState() const;
+
+    void loadFromSave(const SaveData& data);
+    void startNewGame();
+
     void processInput() override;
     void update(float deltaTime) override;
     void draw() override;

@@ -49,7 +49,8 @@ public:
     void update();
     void draw();
 
-    void onSwitchToGame();
+    void onSwitchToNewGame();
+    void onSwitchToLoadGame();
     void onSwitchToEditor();
     void onSwitchToExit();
     void onSwitchToMenu();

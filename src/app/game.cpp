@@ -2,6 +2,7 @@
 #include "raymath.h"
 #include <iostream>
 #include <string>
+#include "game/saveSystem.hpp"
 
 Game::Game(int windowWidth, int windowHeight, const char *windowTitle)
   : m_raylibContext(windowWidth, windowHeight, windowTitle),
@@ -10,9 +11,9 @@ Game::Game(int windowWidth, int windowHeight, const char *windowTitle)
     m_windowTitle(windowTitle),
     m_levelRepository(m_levelFileLoader),
     m_assets(),
-    m_levelEditor(std::make_unique<LevelEditor>(m_levelRepository, m_assets,[this]() {onSwitchToGame();}, [this]() {onSwitchToMenu();})),
+    m_levelEditor(std::make_unique<LevelEditor>(m_levelRepository, m_assets,[this]() {onSwitchToNewGame();}, [this]() {onSwitchToMenu();})),
     m_gameScene(std::make_unique<GameScene>(windowWidth, windowHeight, Player(m_assets.getPlayer()), LevelMap(m_levelRepository, m_assets), m_gameSettings, [this] () {onSwitchToEditor();}, [this] () {onSwitchToMenu();})),
-    m_menuScene(std::make_unique<MenuScene>(windowWidth, windowHeight, m_gameSettings, [this]() {onSwitchToGame();}, [this]() {onSwitchToEditor();}, [this]() {onSwitchToExit();}))
+    m_menuScene(std::make_unique<MenuScene>(windowWidth, windowHeight, m_gameSettings, [this]() {onSwitchToNewGame();}, [this]() {onSwitchToEditor();}, [this]() {onSwitchToExit();}, [this]() {onSwitchToLoadGame();}))
 {
     SetTargetFPS(60);
     SetExitKey(KEY_NULL);
@@ -22,9 +23,20 @@ Game::Game(int windowWidth, int windowHeight, const char *windowTitle)
     for(int i=0; i<m_levelRepository.getLevelCount(); i++) m_levelRepository.getLevel(i).rebuildCollision(m_assets);
 }
 
-void Game::onSwitchToGame()
+void Game::onSwitchToNewGame()
 {
     m_currentScene = m_gameScene.get();
+    m_gameScene->startNewGame();
+}
+
+void Game::onSwitchToLoadGame()
+{
+    m_currentScene = m_gameScene.get();
+
+    SaveData data;
+    loadGame(data);
+    m_gameScene->loadFromSave(data);
+
 }
 
 void Game::onSwitchToEditor()

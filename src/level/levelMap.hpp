@@ -35,6 +35,7 @@ private:
     bool isCollision(Vector2 position, CellType cellType = CellType::Solid) const;
     Vector2 getSpawnPosition();
     Vector2i getSize();
+    int getCurrentLevelIndex() const {return currentTileMapIndex;}
     
     void checkAndResolveCollision(Player& player);
     void resolveCollision(Player& player, CollisionSide collisionSide);

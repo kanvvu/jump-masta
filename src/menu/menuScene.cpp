@@ -4,14 +4,16 @@
 #include <string>
 #include <third_party/raygui.h>
 #include "app/common.hpp"
+#include "game/saveSystem.hpp"
 
-MenuScene::MenuScene(int windowWidth, int windowHeight, GameSettings& gameSettings, std::function<void()> onPlay, std::function<void()> onEditor, std::function<void()> onExit)
+MenuScene::MenuScene(int windowWidth, int windowHeight, GameSettings& gameSettings, std::function<void()> onPlay, std::function<void()> onEditor, std::function<void()> onExit, std::function<void()> onContinue)
 : m_windowWidth(windowWidth),
   m_windowHeight(windowHeight),
   m_gameSettings(gameSettings),
   m_onPlay(onPlay),
   m_onEditor(onEditor),
-  m_onExit(onExit)
+  m_onExit(onExit),
+  m_onContinue(onContinue)
 {
 }
 
@@ -44,10 +46,16 @@ void MenuScene::draw() {
 
         //how do i set a font size for GuiButton?
         Rectangle buttonBounds {centerX, titlePosition.y + offsetFromTitle, buttonSize.x, buttonSize.y};
-        if (GuiButton(buttonBounds,"PLAY"))
+        if (GuiButton(buttonBounds,"NEW GAME"))
             m_onPlay();
 
         int offsetFromButton = 80;
+        if(hasSaveGame()) {
+            buttonBounds = {centerX, buttonBounds.y + offsetFromButton, buttonSize.x, buttonSize.y};
+            if (GuiButton(buttonBounds,"CONTINUE"))
+                m_onContinue();
+        }
+
         buttonBounds = {centerX, buttonBounds.y + offsetFromButton, buttonSize.x, buttonSize.y};
         if (GuiButton(buttonBounds,"EDITOR"))
             m_onEditor();

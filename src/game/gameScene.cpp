@@ -20,6 +20,54 @@ GameScene::GameScene(int windowWidth, int windowHeight, Player player, LevelMap 
     m_player.m_previousPosition = m_player.m_position;
 }
 
+void GameScene::saveCurrentState() const
+{
+    SaveData data;
+
+    data.levelIndex = m_tileMap.getCurrentLevelIndex();
+
+    data.playerPosition = m_player.m_position;
+    data.playerVelocity = m_player.m_velocity;
+    data.facingRight = m_player.m_facingRight;
+    data.onGround = m_player.onGround;
+
+    data.jumpCount = m_jumpCount;
+    data.elapsedTime = m_elapsedTime;
+    saveGame(data);
+}
+
+void GameScene::loadFromSave(const SaveData &data)
+{
+    m_tileMap.changeLevel(data.levelIndex);
+
+    m_player.m_position = data.playerPosition;
+    m_player.m_previousPosition = data.playerPosition;
+    m_player.m_velocity =  data.playerVelocity;
+    m_player.m_facingRight = data.facingRight;
+    m_player.onGround = data.onGround;
+
+    m_jumpCount = data.jumpCount;
+    m_elapsedTime = data.elapsedTime;
+
+    camera.offset = calculateCameraCenterOffset({m_windowWidth, m_windowHeight}, m_tileMap.getSize(), m_tileMap.getTileSize());
+}
+
+void GameScene::startNewGame()
+{
+    camera.offset = calculateCameraCenterOffset({m_windowWidth, m_windowHeight}, m_tileMap.getSize(), m_tileMap.getTileSize());
+    camera.target.x = 0;         // rotation and zoom x origin (from offset above)
+    camera.target.y = 0;         // rotation and zoom y origin (from offset above)
+    camera.rotation = 0;        // rotation in deg
+    camera.zoom     = 1.0f;      // magnification, i.e fov or zoom
+
+    m_player.m_position = m_tileMap.getSpawnPosition();
+    m_player.m_previousPosition = m_player.m_position;
+
+    m_jumpCount = 0;
+    m_elapsedTime = 0;
+    m_player.reset();
+}
+
 void GameScene::processInput()
 {
     if (IsKeyPressed(KEY_E)) {
@@ -27,6 +75,7 @@ void GameScene::processInput()
     }   
 
     if (IsKeyPressed(KEY_ESCAPE)) {
+        saveCurrentState();
         m_onSwitchToMenu();
     }
 
@@ -68,6 +117,7 @@ void GameScene::update(float deltaTime)
         std::cout<<"NEXT LEVEL\n";
         camera.offset = calculateCameraCenterOffset({m_windowWidth, m_windowHeight}, m_tileMap.getSize(), m_tileMap.getTileSize());
         // centerCamera(camera.offset, {m_windowWidth, m_windowHeight}, m_tileMap.getSize(), m_tileMap.getTileSize());
+        saveCurrentState();
     }
 }
 
