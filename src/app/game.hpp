@@ -6,6 +6,7 @@
 #include "level/levelFileLoader.hpp"
 #include "assets/assets.hpp"
 #include <memory>
+#include "menu/menuScene.hpp"
 
 
 struct RaylibContext {
@@ -29,8 +30,11 @@ private:
 
     std::unique_ptr<LevelEditor> m_levelEditor;
     std::unique_ptr<GameScene> m_gameScene;
+    std::unique_ptr<MenuScene> m_menuScene;
 
     IScene* m_currentScene = nullptr;
+
+    bool m_running = true;
 
 public:
     Game(int windowWidth, int windowHeight, const char *windowTitle);
@@ -45,5 +49,7 @@ public:
 
     void onSwitchToGame();
     void onSwitchToEditor();
+    void onSwitchToExit();
+    void onSwitchToMenu();
 };
 

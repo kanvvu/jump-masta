@@ -76,6 +76,8 @@ private:
     Assets& assets;
 
     std::function<void()> m_onSwitchToGame;
+    std::function<void()> m_onSwitchToMenu;
+
 
     void saveCurrentLevel();
     void loadSelectedLevel();
@@ -86,7 +88,7 @@ private:
 
 
 public:
-    LevelEditor(LevelRepository& levelRepository, Assets& assets, std::function<void()> onSwitchToGame);
+    LevelEditor(LevelRepository& levelRepository, Assets& assets, std::function<void()> onSwitchToGame, std::function<void()> onSwitchToMenu);
     ~LevelEditor() = default;
 
     void processInput() override;

@@ -1,12 +1,13 @@
 #include "gameScene.hpp"
 #include  <iostream>
 
-GameScene::GameScene(int windowWidth, int windowHeight, Player player, LevelMap tileMap, std::function<void()> onSwitchToEditor)
+GameScene::GameScene(int windowWidth, int windowHeight, Player player, LevelMap tileMap, std::function<void()> onSwitchToEditor, std::function<void()> onSwitchToMenu)
 : m_windowWidth(windowWidth),
   m_windowHeight(windowHeight),
   m_player(player),
   m_tileMap(tileMap),
-  m_onSwitchToEditor(onSwitchToEditor)
+  m_onSwitchToEditor(onSwitchToEditor),
+  m_onSwitchToMenu(onSwitchToMenu)
 {
     camera.offset = calculateCameraCenterOffset({windowWidth, windowHeight}, m_tileMap.getSize(), m_tileMap.getTileSize());
     camera.target.x = 0;         // rotation and zoom x origin (from offset above)
@@ -23,6 +24,10 @@ void GameScene::processInput()
     if (IsKeyPressed(KEY_E)) {
         m_onSwitchToEditor();
     }   
+
+    if (IsKeyPressed(KEY_ESCAPE)) {
+        m_onSwitchToMenu();
+    }
 
     if (IsKeyPressed(KEY_R)) {
         m_player.reset();

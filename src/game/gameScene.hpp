@@ -18,9 +18,10 @@ private:
     Camera2D camera;
 
     std::function<void()> m_onSwitchToEditor;
+    std::function<void()> m_onSwitchToMenu;
 
 public:
-    GameScene(int windowWidth, int windowHeight, Player player, LevelMap tileMap, std::function<void()> onSwitchToEditor);
+    GameScene(int windowWidth, int windowHeight, Player player, LevelMap tileMap, std::function<void()> onSwitchToEditor, std::function<void()> onSwitchToMenu);
     void processInput() override;
     void update(float deltaTime) override;
     void draw() override;

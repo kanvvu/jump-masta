@@ -7,10 +7,11 @@
 #include <cstring>
 #include "third_party/raygui.h"
 
-LevelEditor::LevelEditor(LevelRepository& levelRepository,Assets& assets, std::function<void()> onSwitchToGame)
+LevelEditor::LevelEditor(LevelRepository& levelRepository,Assets& assets, std::function<void()> onSwitchToGame, std::function<void()> onSwitchToMenu)
 : levelRepository(levelRepository),
   assets(assets),
-  m_onSwitchToGame(onSwitchToGame)
+  m_onSwitchToGame(onSwitchToGame),
+  m_onSwitchToMenu(onSwitchToMenu)
 {
     state.currentLevel = LevelData(LevelEditorState::DefaultLevelWidth, LevelEditorState::DefaultLevelHeight);
 
@@ -123,6 +124,10 @@ void LevelEditor::loadLevel(int levelID) {
 void LevelEditor::processInput()
 {
     if (!nameTextBox.getEditMode()) {
+        if (IsKeyPressed(KEY_ESCAPE)) {
+            m_onSwitchToMenu();
+        }
+
         if (IsKeyPressed(KEY_E)) {
             m_onSwitchToGame();
         }   
