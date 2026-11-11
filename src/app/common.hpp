@@ -8,6 +8,12 @@
 class LevelRepository;
 class Assets;
 
+struct GameSettings {
+    int showFps = false;
+    int showTimer= false;
+    int showJumpCount = false;
+};
+
 struct Vector2i {
     int x;
     int y;

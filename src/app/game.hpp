@@ -36,6 +36,8 @@ private:
 
     bool m_running = true;
 
+    GameSettings m_gameSettings;
+
 public:
     Game(int windowWidth, int windowHeight, const char *windowTitle);
     ~Game() = default;

@@ -11,8 +11,8 @@ Game::Game(int windowWidth, int windowHeight, const char *windowTitle)
     m_levelRepository(m_levelFileLoader),
     m_assets(),
     m_levelEditor(std::make_unique<LevelEditor>(m_levelRepository, m_assets,[this]() {onSwitchToGame();}, [this]() {onSwitchToMenu();})),
-    m_gameScene(std::make_unique<GameScene>(windowWidth, windowHeight, Player(m_assets.getPlayer()), LevelMap(m_levelRepository, m_assets), [this] () {onSwitchToEditor();}, [this] () {onSwitchToMenu();})),
-    m_menuScene(std::make_unique<MenuScene>(windowWidth, windowHeight, [this]() {onSwitchToGame();}, [this]() {onSwitchToEditor();}, [this]() {onSwitchToExit();}))
+    m_gameScene(std::make_unique<GameScene>(windowWidth, windowHeight, Player(m_assets.getPlayer()), LevelMap(m_levelRepository, m_assets), m_gameSettings, [this] () {onSwitchToEditor();}, [this] () {onSwitchToMenu();})),
+    m_menuScene(std::make_unique<MenuScene>(windowWidth, windowHeight, m_gameSettings, [this]() {onSwitchToGame();}, [this]() {onSwitchToEditor();}, [this]() {onSwitchToExit();}))
 {
     SetTargetFPS(60);
     SetExitKey(KEY_NULL);
@@ -65,7 +65,7 @@ void Game::update()
 
 static void drawFPS() {
     std::string frameRate = std::to_string(1.0/GetFrameTime());
-    DrawText(frameRate.c_str(), 0, 0, 30, BLACK);
+    DrawText(frameRate.c_str(), 0, 0, 30, RAYWHITE);
 }
 
 void Game::draw()
@@ -73,7 +73,8 @@ void Game::draw()
     BeginDrawing();
 
     m_currentScene->draw();
-    drawFPS();
+    if (m_gameSettings.showFps)
+        drawFPS();
 
     EndDrawing();
 }

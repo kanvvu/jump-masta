@@ -4,6 +4,7 @@
 #include "level/levelMap.hpp"
 #include "line.hpp"
 #include <functional>
+#include "app/common.hpp"
 
 class GameScene : public IScene {
 private:
@@ -20,8 +21,13 @@ private:
     std::function<void()> m_onSwitchToEditor;
     std::function<void()> m_onSwitchToMenu;
 
+    int m_jumpCount = 0;
+    float m_elapsedTime = 0.0f;
+
+    const GameSettings& m_gameSettings;
+
 public:
-    GameScene(int windowWidth, int windowHeight, Player player, LevelMap tileMap, std::function<void()> onSwitchToEditor, std::function<void()> onSwitchToMenu);
+    GameScene(int windowWidth, int windowHeight, Player player, LevelMap tileMap, const GameSettings& gameSettings, std::function<void()> onSwitchToEditor, std::function<void()> onSwitchToMenu);
     void processInput() override;
     void update(float deltaTime) override;
     void draw() override;

@@ -1,11 +1,12 @@
 #include "gameScene.hpp"
 #include  <iostream>
 
-GameScene::GameScene(int windowWidth, int windowHeight, Player player, LevelMap tileMap, std::function<void()> onSwitchToEditor, std::function<void()> onSwitchToMenu)
+GameScene::GameScene(int windowWidth, int windowHeight, Player player, LevelMap tileMap, const GameSettings& gameSettings, std::function<void()> onSwitchToEditor, std::function<void()> onSwitchToMenu)
 : m_windowWidth(windowWidth),
   m_windowHeight(windowHeight),
   m_player(player),
   m_tileMap(tileMap),
+  m_gameSettings(gameSettings),
   m_onSwitchToEditor(onSwitchToEditor),
   m_onSwitchToMenu(onSwitchToMenu)
 {
@@ -33,6 +34,8 @@ void GameScene::processInput()
         m_player.reset();
         m_tileMap.resetLevel();
         m_player.m_position = m_tileMap.getSpawnPosition();
+        m_jumpCount = 0;
+        m_elapsedTime = 0.0f;
     }
 
     if (IsMouseButtonDown(0)) {
@@ -45,6 +48,8 @@ void GameScene::processInput()
             if (m_player.onGround) {
                 m_player.m_velocity = *impulse; 
                 m_player.onGround = false;
+
+                m_jumpCount++;
             }
         }
     }
@@ -52,6 +57,8 @@ void GameScene::processInput()
 
 void GameScene::update(float deltaTime)
 {
+    m_elapsedTime += deltaTime;
+
     m_player.update(deltaTime);
     m_line.update(deltaTime);
 
@@ -70,6 +77,7 @@ void GameScene::draw()
 
     Vector2 offset = {500,64*2};
 
+
     BeginMode2D (camera);  // next objects effected by Camera2D
 
         m_tileMap.draw();
@@ -77,5 +85,18 @@ void GameScene::draw()
 
     EndMode2D (); 
 
-        m_line.draw();
+    m_line.draw();
+
+    if (m_gameSettings.showTimer) {
+        char buffer[64];
+        int ret = snprintf(buffer, sizeof buffer, "Time: %.2f s", m_elapsedTime);
+        if (ret >= 0) 
+            DrawText(buffer, 0, 30, 30, RAYWHITE);
+    }
+
+    if (m_gameSettings.showJumpCount) {
+        std::string jumpCount = "Jumps: " + std::to_string(m_jumpCount);
+        DrawText(jumpCount.c_str(), 0, 60, 30, RAYWHITE);
+    }
+
 }
