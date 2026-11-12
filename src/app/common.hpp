@@ -45,7 +45,8 @@ struct ExitKey {
 enum class CellType {
     Empty,
     Solid,
-    Spawn
+    Spawn,
+    Goal,
 };
 
 struct CollisionPoint {

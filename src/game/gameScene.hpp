@@ -12,6 +12,8 @@ private:
     int m_windowWidth;
     int m_windowHeight;
 
+    bool m_victory = false;
+
 
     LevelMap m_tileMap;
     Player m_player;

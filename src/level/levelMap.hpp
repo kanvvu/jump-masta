@@ -6,9 +6,10 @@
 #include "app/common.hpp"
 #include "game/player.hpp"
 #include "assets/assets.hpp"
+#include <optional>
 
 
-void drawLevel(const LevelData& level, Assets& assets);
+void drawLevel(const LevelData& level, Assets& assets, bool debugInfo = false);
 
 class LevelMap
 {
@@ -38,8 +39,11 @@ private:
     int getTileSize();
     bool isCollision(Vector2 position, CellType cellType = CellType::Solid) const;
     Vector2 getSpawnPosition();
+    std::optional<Vector2> getGoalPosition();
     Vector2i getSize();
     int getCurrentLevelIndex() const {return currentTileMapIndex;}
+
+    bool isGoalReached(Vector2 playerPosition) const;
     
     void checkAndResolveCollision(Player& player);
     void resolveCollision(Player& player, CollisionSide collisionSide);

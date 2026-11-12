@@ -22,6 +22,10 @@ GameScene::GameScene(int windowWidth, int windowHeight, Player player, LevelMap 
 
 void GameScene::saveCurrentState() const
 {
+    if (m_victory) {
+        std::remove("save.txt");
+        return;
+    }
     SaveData data;
 
     data.levelIndex = m_tileMap.getCurrentLevelIndex();
@@ -48,6 +52,7 @@ void GameScene::loadFromSave(const SaveData &data)
 
     m_jumpCount = data.jumpCount;
     m_elapsedTime = data.elapsedTime;
+    m_victory = false;
 
     camera.offset = calculateCameraCenterOffset({m_windowWidth, m_windowHeight}, m_tileMap.getSize(), m_tileMap.getTileSize());
 }
@@ -60,24 +65,24 @@ void GameScene::startNewGame()
     camera.rotation = 0;        // rotation in deg
     camera.zoom     = 1.0f;      // magnification, i.e fov or zoom
 
+    m_player.reset();
     m_player.m_position = m_tileMap.getSpawnPosition();
     m_player.m_previousPosition = m_player.m_position;
 
     m_jumpCount = 0;
     m_elapsedTime = 0;
-    m_player.reset();
+    m_victory = false;
 }
 
 void GameScene::processInput()
 {
-    if (IsKeyPressed(KEY_E)) {
-        m_onSwitchToEditor();
-    }   
-
+    
     if (IsKeyPressed(KEY_ESCAPE)) {
         saveCurrentState();
         m_onSwitchToMenu();
     }
+    
+    if (m_victory) return;
 
     if (IsKeyPressed(KEY_R)) {
         m_player.reset();
@@ -106,12 +111,16 @@ void GameScene::processInput()
 
 void GameScene::update(float deltaTime)
 {
+    if (m_victory) return;
+
     m_elapsedTime += deltaTime;
 
     m_player.update(deltaTime);
     m_line.update(deltaTime);
 
     m_tileMap.checkAndResolveCollision(m_player);
+
+    m_victory = m_tileMap.isGoalReached(m_player.m_position);
 
     if (m_tileMap.checkForNextLevel(m_player.m_position)) { 
         std::cout<<"NEXT LEVEL\n";
@@ -147,6 +156,45 @@ void GameScene::draw()
     if (m_gameSettings.showJumpCount) {
         std::string jumpCount = "Jumps: " + std::to_string(m_jumpCount);
         DrawText(jumpCount.c_str(), 0, 60, 30, RAYWHITE);
+    }
+
+    if (m_victory) {
+
+        Vector2 backgroundSize{800, 310};
+        Vector2 backgroundPosition{m_windowWidth / 2.0f - backgroundSize.x/ 2.0f, 300};
+        DrawRectangle((int) backgroundPosition.x,(int) backgroundPosition.y,(int) backgroundSize.x,(int) backgroundSize.y, {0, 0, 0, 162});
+
+        std::string text = "YOU WON!!!!";
+        int fontSize = 100;
+        int textWidth = MeasureText(text.c_str(), fontSize);
+        Vector2i textPosition { m_windowWidth / 2 - textWidth / 2, backgroundPosition.y + 10};
+        DrawText(text.c_str(), textPosition.x,textPosition.y, fontSize, RAYWHITE);
+
+        int textOffset = 50;
+
+        char buffer[64];
+        int ret = snprintf(buffer, sizeof buffer, "Total Time: %.2f s", m_elapsedTime);
+        if (ret >= 0) { 
+            fontSize = 50;
+            textWidth = MeasureText(buffer, fontSize);
+            textPosition  = { m_windowWidth / 2 - textWidth / 2, textPosition.y + textOffset + 80};
+
+            DrawText(buffer, textPosition.x, textPosition.y, fontSize, RAYWHITE);
+        }
+
+        text = "Total Jumps: " + std::to_string(m_jumpCount);
+        fontSize = 50;
+        textWidth = MeasureText(text.c_str(), fontSize);
+        textPosition  = { m_windowWidth / 2 - textWidth / 2, textPosition.y + textOffset};
+
+        DrawText(text.c_str(), textPosition.x,textPosition.y, fontSize, RAYWHITE);
+
+        text = "(Press ESC to return to Main Menu)";
+        fontSize = 30;
+        textWidth = MeasureText(text.c_str(), fontSize);
+        textPosition  = { m_windowWidth / 2 - textWidth / 2, textPosition.y + textOffset + 30};
+
+        DrawText(text.c_str(), textPosition.x,textPosition.y, fontSize, RAYWHITE);
     }
 
 }

@@ -60,20 +60,40 @@ Vector2 LevelMap::getSpawnPosition()
 {
     int m_widthCount = levelRepository.getLevel(currentTileMapIndex).getWidth();
     int m_heightCount = levelRepository.getLevel(currentTileMapIndex).getHeight();
-    int m_tileSize = getTileSize();
 
     for(int i=0; i<m_heightCount; i++) {
         for(int j=0; j<m_widthCount; j++) {
             int tileIndex = i*m_widthCount+ j;
-            int xPos = j*m_tileSize;
-            int yPos = i*m_tileSize;
-            Color tileColor = WHITE;
 
-            int tile = levelRepository.getLevel(currentTileMapIndex).get(tileIndex);
-            if (tile == 2) return {(float) j,(float) i};
+            CellType cellType = levelRepository.getLevel(currentTileMapIndex).getTileCollision(tileIndex);
+            if (cellType == CellType::Spawn) {
+                return {(float) j,(float) i};
+            }
         }
     }
+
     return {0,0};
+}
+
+std::optional<Vector2> LevelMap::getGoalPosition()
+{
+    int m_widthCount = levelRepository.getLevel(currentTileMapIndex).getWidth();
+    int m_heightCount = levelRepository.getLevel(currentTileMapIndex).getHeight();
+
+    std::optional<Vector2> position;
+
+    for(int i=0; i<m_heightCount; i++) {
+        for(int j=0; j<m_widthCount; j++) {
+            int tileIndex = i*m_widthCount+ j;
+
+            CellType cellType = levelRepository.getLevel(currentTileMapIndex).getTileCollision(tileIndex);
+            if (cellType == CellType::Goal) {
+                position = std::make_optional<Vector2>({(float) j,(float) i});
+                return position;
+            }
+        }
+    }
+    return position;
 }
 
 Vector2i LevelMap::getSize()
@@ -209,7 +229,17 @@ bool LevelMap::checkForNextLevel(Vector2& playerPosition)
 
 // }
 
-void LevelMap::checkAndResolveCollision(Player& player) {
+bool LevelMap::isGoalReached(Vector2 playerPosition) const
+{
+    return isCollision({playerPosition.x + 1.0f, playerPosition.y + 1.0f}, CellType::Goal) ||
+           isCollision({playerPosition.x, playerPosition.y}, CellType::Goal) ||
+           isCollision({playerPosition.x + 1.0f, playerPosition.y}, CellType::Goal) ||
+           isCollision({playerPosition.x, playerPosition.y + 1.0f}, CellType::Goal);
+
+}
+
+void LevelMap::checkAndResolveCollision(Player &player)
+{
     Vector2 bP = player.m_previousPosition; 
     Vector2 nBP = player.m_position;
 
@@ -311,7 +341,7 @@ void LevelMap::resolveCollision(Player &player, CollisionSide collisionSide)
 //     }
 // }
 
-void drawLevel(const LevelData &level, Assets &assets)
+void drawLevel(const LevelData &level, Assets &assets, bool debugInfo)
 {
     int widthCount = level.getWidth();
     int heightCount = level.getHeight();
@@ -346,15 +376,20 @@ void drawLevel(const LevelData &level, Assets &assets)
             // if (tile == 3) {tileColor= ORANGE;}
 
             int tile = level.get(tileIndex);
-            if (tile != -1)
-                assets.getSprite(tile).draw({static_cast<float>(xPos),static_cast<float>(yPos)}, {(float) tileSize, (float) tileSize});
-
+            CellType cellType = level.getTileCollision(tileIndex);
+            if (tile != -1 ) {
+                if (debugInfo || cellType != CellType::Spawn)
+                    assets.getSprite(tile).draw({static_cast<float>(xPos),static_cast<float>(yPos)}, {(float) tileSize, (float) tileSize});
+            }
             // DrawRectangle(xPos, yPos, ileSize, ileSize, tileColor);
+
+            if (!debugInfo) continue;
+
             char msg1[64];
             snprintf(msg1, sizeof(msg1), "%i, %i", j, i);
             char msg2[64];
             snprintf(msg2, sizeof(msg2), "%i, %i", xPos, yPos);
-            if (tile == 1) {
+            if (cellType == CellType::Solid ) {
                 DrawLineEx({(float) xPos, (float) yPos}, {(float) (xPos + tileSize),  (float) yPos}, 1, BLACK);
                 DrawLineEx({(float) (xPos + tileSize), (float) yPos}, {(float) (xPos + tileSize), (float) (yPos + tileSize)}, 1, BLACK);
                 DrawText(msg1, xPos, yPos, 5, BLACK);

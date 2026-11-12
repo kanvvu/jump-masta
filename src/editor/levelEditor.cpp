@@ -205,7 +205,7 @@ void LevelEditor::draw()
     GuiSetStyle(DEFAULT, TEXT_SIZE, GuiGetFont().baseSize*3);
     BeginMode2D(state.camera);
 
-    drawLevel(state.currentLevel, assets);
+    drawLevel(state.currentLevel, assets, true);
     
     Vector2 mousePos = GetMousePosition();
     if (state.mouseMode == 0 && mousePos.x - state.camera.offset.x >= 0 && mousePos.x - state.camera.offset.x < state.currentLevel.getWidth()*state.getTileSize() && mousePos.y - state.camera.offset.y >= 0 && mousePos.y - state.camera.offset.y < state.currentLevel.getHeight()*state.getTileSize()) { 

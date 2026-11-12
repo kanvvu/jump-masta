@@ -57,6 +57,11 @@ SpriteGroup Assets::getBackgroundGroup()
 CellType Assets::getCellType(int spriteId)
 {
 
+    
+    if (spriteId == 47) return CellType::Spawn;
+    if (spriteId == 48) return CellType::Goal;
+    
+    
     std::vector<int> collisonIDs = {182,183,184, 204, 205, 206, 226, 227, 228};
     for (const auto& collsionID : collisonIDs) {
         if (spriteId == collsionID) {
