@@ -1,5 +1,7 @@
 #pragma once
 #include "raylib.h"
+#include <vector>
+
 
 class Sprite
 {
@@ -22,3 +24,12 @@ public:
     void draw(Vector2 position, Vector2 size);
 };
 
+struct SpriteGroup {
+    std::vector<Sprite> sprites;
+    int xCount;
+    int yCount;
+
+    void draw(Vector2 position);
+    void draw(Vector2 position, Vector2 size);
+    void draw(Vector2 position, Vector2 size, Vector2 drawBounds);
+};

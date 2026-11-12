@@ -7,6 +7,9 @@
 #include "game/player.hpp"
 #include "assets/assets.hpp"
 
+
+void drawLevel(const LevelData& level, Assets& assets);
+
 class LevelMap
 {
 private:
@@ -29,6 +32,7 @@ private:
     ~LevelMap() = default;
     
     void update();
+    void drawBackground();
     void draw();
     
     int getTileSize();

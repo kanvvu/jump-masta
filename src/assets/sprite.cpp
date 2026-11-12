@@ -18,3 +18,40 @@ void Sprite::draw(Vector2 position, Vector2 drawSize)
 {
     DrawTexturePro(*texture, sourceRectangle, {position.x, position.y, drawSize.x, drawSize.y}, origin, (float)rotation, WHITE);
 }
+
+void SpriteGroup::draw(Vector2 position)
+{
+    for(int i=0; i<yCount; i++) {
+        for( int j=0; j<xCount; j++) {
+            int index = i*xCount + j;
+            Sprite& sprite = sprites[index];
+            Vector2 newPosition = {position.x + j*sprite.getSize().x, position.y + i*sprite.getSize().y};
+            sprite.draw(newPosition);
+        }
+    }
+}
+
+void SpriteGroup::draw(Vector2 position, Vector2 size)
+{
+    for(int j=0; j<yCount; j++) {
+        for( int i=0; i<xCount; i++) {
+            int index = j*xCount + i;
+            Sprite& sprite = sprites[index];
+            Vector2 newPosition = {position.x + i*size.x, position.y + j*size.y};
+            sprite.draw(newPosition, size);
+        }
+    }
+}
+
+void SpriteGroup::draw(Vector2 position, Vector2 size, Vector2 drawBounds)
+{
+    for(int j=0; j<yCount; j++) {
+        for( int i=0; i<xCount; i++) {
+            int index = j*xCount + i;
+            Sprite& sprite = sprites[index];
+            Vector2 newPosition = {position.x + i*size.x, position.y + j*size.y};
+            if (newPosition.x < drawBounds.x && newPosition.y < drawBounds.y)
+                sprite.draw(newPosition, size);
+        }
+    }
+}

@@ -35,6 +35,25 @@ Sprite Assets::getSprite(int index)
 
 }
 
+SpriteGroup Assets::getBackgroundGroup()
+{
+    std::vector<int> backgroundIDs = {
+        364, 365, 366, 367,
+        386, 387, 388, 389,
+        408, 409, 410, 411,
+        430, 431, 432, 433
+    };
+
+    SpriteGroup spriteGroup;
+    spriteGroup.xCount = 4;
+    spriteGroup.yCount = 4;
+    for(const auto& i : backgroundIDs) {
+        spriteGroup.sprites.push_back(getSprite(i));
+    }
+
+    return spriteGroup;
+}
+
 CellType Assets::getCellType(int spriteId)
 {
 

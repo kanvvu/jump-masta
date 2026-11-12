@@ -12,6 +12,7 @@ enum class SpriteNames {
     BACKGROUND
 };
 
+
 class Assets
 {
 private:
@@ -38,6 +39,7 @@ public:
     Sprite getGrass() {return sprites.at(22*4 + 6);};
     Sprite getWall() {return sprites.at(2);};
     Sprite getBackground() {return sprites.at(22*16 + 4);};
+    SpriteGroup getBackgroundGroup();
 
     CellType getCellType(int spriteId);
 

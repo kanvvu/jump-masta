@@ -23,52 +23,13 @@ void LevelMap::changeLevel(int levelID)
     currentTileMapIndex = levelID;
 }
 
+void LevelMap::drawBackground()
+{
+}
 
 void LevelMap::draw()
 {
-    int m_widthCount = levelRepository.getLevel(currentTileMapIndex).getWidth();
-    int m_heightCount = levelRepository.getLevel(currentTileMapIndex).getHeight();
-    int m_tileSize = getTileSize();
-
-    for(int i=0; i<m_heightCount; i++) {
-        for(int j=0; j<m_widthCount; j++) {
-            int tileIndex = i*m_widthCount+ j;
-            int xPos = j*m_tileSize;
-            int yPos = i*m_tileSize;
-            Color tileColor = WHITE;
-
-            // if (i%2 == 0 && j%2 == 0)
-            //     background.draw({static_cast<float>(xPos),static_cast<float>(yPos)});
-
-            // int tile = levelRepository.getLevel(currentTileMapIndex).get(tileIndex);
-            // if (tile == 1) {
-            //     tileColor = BLUE;
-            //     grass.draw({static_cast<float>(xPos),static_cast<float>(yPos)});
-            // }
-            // if (tile == 3) {tileColor= ORANGE;}
-
-            int tile = levelRepository.getLevel(currentTileMapIndex).get(tileIndex);
-            if (tile != -1)
-                assets.getSprite(tile).draw({static_cast<float>(xPos),static_cast<float>(yPos)}, {(float) levelRepository.getLevel(currentTileMapIndex).getTileSize(),(float) levelRepository.getLevel(currentTileMapIndex).getTileSize()});
-
-            // DrawRectangle(xPos, yPos, m_tileSize, m_tileSize, tileColor);
-            char msg1[64];
-            snprintf(msg1, sizeof(msg1), "%i, %i", j, i);
-            char msg2[64];
-            snprintf(msg2, sizeof(msg2), "%i, %i", xPos, yPos);
-            if (tile == 1) {
-                DrawLineEx({(float) xPos, (float) yPos}, {(float) (xPos + m_tileSize),  (float) yPos}, 1, BLACK);
-                DrawLineEx({(float) (xPos + m_tileSize), (float) yPos}, {(float) (xPos + m_tileSize), (float) (yPos + m_tileSize)}, 1, BLACK);
-                DrawText(msg1, xPos, yPos, 5, BLACK);
-            }
-            // DrawLineEx((Vector2) {xPos, yPos}, (Vector2) {xPos + tileSize, yPos}, 1, GRAY);
-            // DrawLineEx((Vector2) {xPos, yPos}, (Vector2) {xPos, yPos + tileSize}, 1, GRAY);
-            // DrawLineEx((Vector2) {xPos+tileSize, yPos}, (Vector2) {xPos + tileSize, yPos + tileSize}, 1, GRAY);
-            // DrawLineEx((Vector2) {xPos, yPos+tileSize}, (Vector2) {xPos + tileSize, yPos+ tileSize}, 1, GRAY);
-            // DrawText(msg1, xPos, yPos, 5, BLACK);
-            // DrawText(msg2, xPos, yPos+10, 5, BLACK);
-        }
-    }
+    drawLevel(levelRepository.getLevel(currentTileMapIndex), assets);
 }
 
 int LevelMap::getTileSize()
@@ -350,3 +311,60 @@ void LevelMap::resolveCollision(Player &player, CollisionSide collisionSide)
 //     }
 // }
 
+void drawLevel(const LevelData &level, Assets &assets)
+{
+    int widthCount = level.getWidth();
+    int heightCount = level.getHeight();
+    int tileSize = level.getTileSize(); 
+    SpriteGroup background = assets.getBackgroundGroup();
+
+    for(int i=0; i<heightCount; i++) {
+        for(int j=0; j<widthCount; j++) {
+            int xPos = j*tileSize;
+            int yPos = i*tileSize;
+
+            if (i%background.xCount == 0 && j%background.yCount == 0)
+                background.draw({static_cast<float>(xPos),static_cast<float>(yPos)}, {static_cast<float>(tileSize), static_cast<float>(tileSize)}, {(float) widthCount*tileSize, (float) heightCount*tileSize});
+        }
+    }
+
+    for(int i=0; i<heightCount; i++) {
+        for(int j=0; j<widthCount; j++) {
+            int tileIndex = i*widthCount+ j;
+            int xPos = j*tileSize;
+            int yPos = i*tileSize;
+            Color tileColor = WHITE;
+
+            // if (i%background.xCount == 0 && j%background.yCount == 0)
+            //     background.draw({static_cast<float>(xPos),static_cast<float>(yPos)}, {static_cast<float>(tileSize), static_cast<float>(tileSize)}, {(float) widthCount*tileSize, (float) heightCount*tileSize});
+
+            // int tile = levelRepository.getLevel(currentTileMapIndex).get(tileIndex);
+            // if (tile == 1) {
+            //     tileColor = BLUE;
+            //     grass.draw({static_cast<float>(xPos),static_cast<float>(yPos)});
+            // }
+            // if (tile == 3) {tileColor= ORANGE;}
+
+            int tile = level.get(tileIndex);
+            if (tile != -1)
+                assets.getSprite(tile).draw({static_cast<float>(xPos),static_cast<float>(yPos)}, {(float) tileSize, (float) tileSize});
+
+            // DrawRectangle(xPos, yPos, ileSize, ileSize, tileColor);
+            char msg1[64];
+            snprintf(msg1, sizeof(msg1), "%i, %i", j, i);
+            char msg2[64];
+            snprintf(msg2, sizeof(msg2), "%i, %i", xPos, yPos);
+            if (tile == 1) {
+                DrawLineEx({(float) xPos, (float) yPos}, {(float) (xPos + tileSize),  (float) yPos}, 1, BLACK);
+                DrawLineEx({(float) (xPos + tileSize), (float) yPos}, {(float) (xPos + tileSize), (float) (yPos + tileSize)}, 1, BLACK);
+                DrawText(msg1, xPos, yPos, 5, BLACK);
+            }
+            // DrawLineEx((Vector2) {xPos, yPos}, (Vector2) {xPos + tileSize, yPos}, 1, GRAY);
+            // DrawLineEx((Vector2) {xPos, yPos}, (Vector2) {xPos, yPos + tileSize}, 1, GRAY);
+            // DrawLineEx((Vector2) {xPos+tileSize, yPos}, (Vector2) {xPos + tileSize, yPos + tileSize}, 1, GRAY);
+            // DrawLineEx((Vector2) {xPos, yPos+tileSize}, (Vector2) {xPos + tileSize, yPos+ tileSize}, 1, GRAY);
+            // DrawText(msg1, xPos, yPos, 5, BLACK);
+            // DrawText(msg2, xPos, yPos+10, 5, BLACK);
+        }
+    }
+}

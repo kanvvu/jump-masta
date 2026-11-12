@@ -8,7 +8,7 @@ LevelData::LevelData(int width, int height, std::string name, int tileSize)
  : name(name),
    tileSize(tileSize)
 {
-    level = Grid<int>(width, height, 0);
+    level = Grid<int>(width, height, -1);
     collision = Grid<CellType>(width, height, CellType::Empty);
     createEdges();
 }
