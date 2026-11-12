@@ -15,6 +15,7 @@ MenuScene::MenuScene(int windowWidth, int windowHeight, GameSettings& gameSettin
   m_onExit(onExit),
   m_onContinue(onContinue)
 {
+    m_hasSave = hasSaveGame();
 }
 
 void MenuScene::processInput() {
@@ -50,7 +51,7 @@ void MenuScene::draw() {
             m_onPlay();
 
         int offsetFromButton = 80;
-        if(hasSaveGame()) {
+        if(m_hasSave) {
             buttonBounds = {centerX, buttonBounds.y + offsetFromButton, buttonSize.x, buttonSize.y};
             if (GuiButton(buttonBounds,"CONTINUE"))
                 m_onContinue();

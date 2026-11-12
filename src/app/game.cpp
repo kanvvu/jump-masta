@@ -34,8 +34,10 @@ void Game::onSwitchToLoadGame()
     m_currentScene = m_gameScene.get();
 
     SaveData data;
-    loadGame(data);
-    m_gameScene->loadFromSave(data);
+    if (loadGame(data))
+        m_gameScene->loadFromSave(data);
+    else
+        m_gameScene->startNewGame();
 
 }
 
@@ -52,6 +54,7 @@ void Game::onSwitchToExit()
 void Game::onSwitchToMenu()
 {
     m_currentScene = m_menuScene.get();
+    m_menuScene->refreshSaveState();
 }
 
 void Game::start()
@@ -76,7 +79,7 @@ void Game::update()
 }
 
 static void drawFPS() {
-    std::string frameRate = std::to_string(1.0/GetFrameTime());
+    std::string frameRate = std::to_string(GetFPS());
     DrawText(frameRate.c_str(), 0, 0, 30, RAYWHITE);
 }
 

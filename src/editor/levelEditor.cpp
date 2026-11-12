@@ -17,6 +17,7 @@ LevelEditor::LevelEditor(LevelRepository& levelRepository,Assets& assets, std::f
   m_onSwitchToMenu(onSwitchToMenu)
 {
     state.currentLevel = LevelData(LevelEditorState::DefaultLevelWidth, LevelEditorState::DefaultLevelHeight);
+    m_background = assets.getBackgroundGroup();
 
     // state.camera.offset.x = state.screenWidth/2 - (state.currentLevel.getWidth()*state.getTileSize())/2;   // coordinate x origin
     // state.camera.offset.y = state.screenHeight/2 - (state.currentLevel.getHeight()*state.getTileSize())/2;   // coordinate y origin
@@ -205,7 +206,7 @@ void LevelEditor::draw()
     GuiSetStyle(DEFAULT, TEXT_SIZE, GuiGetFont().baseSize*3);
     BeginMode2D(state.camera);
 
-    drawLevel(state.currentLevel, assets, true);
+    drawLevel(state.currentLevel, assets, m_background,true);
     
     Vector2 mousePos = GetMousePosition();
     if (state.mouseMode == 0 && mousePos.x - state.camera.offset.x >= 0 && mousePos.x - state.camera.offset.x < state.currentLevel.getWidth()*state.getTileSize() && mousePos.y - state.camera.offset.y >= 0 && mousePos.y - state.camera.offset.y < state.currentLevel.getHeight()*state.getTileSize()) { 

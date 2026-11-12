@@ -74,6 +74,7 @@ private:
 
     LevelRepository& levelRepository;
     Assets& assets;
+    SpriteGroup m_background;
 
     std::function<void()> m_onSwitchToGame;
     std::function<void()> m_onSwitchToMenu;

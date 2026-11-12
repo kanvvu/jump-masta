@@ -65,6 +65,8 @@ void GameScene::startNewGame()
     camera.rotation = 0;        // rotation in deg
     camera.zoom     = 1.0f;      // magnification, i.e fov or zoom
 
+    m_tileMap.changeLevel(m_tileMap.getStartLevelIndex());
+
     m_player.reset();
     m_player.m_position = m_tileMap.getSpawnPosition();
     m_player.m_previousPosition = m_player.m_position;
@@ -72,14 +74,18 @@ void GameScene::startNewGame()
     m_jumpCount = 0;
     m_elapsedTime = 0;
     m_victory = false;
+
+    m_line.reset();
 }
 
 void GameScene::processInput()
 {
     
     if (IsKeyPressed(KEY_ESCAPE)) {
+        m_line.reset();
         saveCurrentState();
         m_onSwitchToMenu();
+        return;
     }
     
     if (m_victory) return;
@@ -88,8 +94,10 @@ void GameScene::processInput()
         m_player.reset();
         m_tileMap.resetLevel();
         m_player.m_position = m_tileMap.getSpawnPosition();
+        m_player.m_previousPosition = m_player.m_position;
         m_jumpCount = 0;
         m_elapsedTime = 0.0f;
+        m_line.reset();
     }
 
     if (IsMouseButtonDown(0)) {
@@ -120,7 +128,12 @@ void GameScene::update(float deltaTime)
 
     m_tileMap.checkAndResolveCollision(m_player);
 
-    m_victory = m_tileMap.isGoalReached(m_player.m_position);
+    if (m_tileMap.isGoalReached(m_player.m_position)) {
+        m_victory = true;
+        std::remove("save.txt");
+        m_line.reset();
+        return;
+    }
 
     if (m_tileMap.checkForNextLevel(m_player.m_position)) { 
         std::cout<<"NEXT LEVEL\n";
@@ -167,7 +180,7 @@ void GameScene::draw()
         std::string text = "YOU WON!!!!";
         int fontSize = 100;
         int textWidth = MeasureText(text.c_str(), fontSize);
-        Vector2i textPosition { m_windowWidth / 2 - textWidth / 2, backgroundPosition.y + 10};
+        Vector2i textPosition { m_windowWidth / 2 - textWidth / 2,(int) backgroundPosition.y + 10};
         DrawText(text.c_str(), textPosition.x,textPosition.y, fontSize, RAYWHITE);
 
         int textOffset = 50;

@@ -9,7 +9,7 @@
 #include <optional>
 
 
-void drawLevel(const LevelData& level, Assets& assets, bool debugInfo = false);
+void drawLevel(const LevelData &level, Assets &assets, const SpriteGroup& background, bool debugInfo=false);
 
 class LevelMap
 {
@@ -20,13 +20,16 @@ private:
         TOP,
         DOWN
     };
+
+    static constexpr int startLevelIndex = 11;
     
     LevelRepository& levelRepository;
     Assets& assets;
-    int currentTileMapIndex = 11;
+    int currentTileMapIndex;
 
     Sprite background;
     Sprite grass;
+    SpriteGroup m_background;
     
     public:
     LevelMap(LevelRepository& levelRepository, Assets& assets); 
@@ -42,6 +45,7 @@ private:
     std::optional<Vector2> getGoalPosition();
     Vector2i getSize();
     int getCurrentLevelIndex() const {return currentTileMapIndex;}
+    int getStartLevelIndex() const {return startLevelIndex;}
 
     bool isGoalReached(Vector2 playerPosition) const;
     

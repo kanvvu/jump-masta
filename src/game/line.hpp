@@ -29,6 +29,8 @@ public:
 
     void update(float elapsedTime);
     void draw();
+    
+    void reset() {isLeftMouseButtonPressed = false; startLinePos = {0,0}; }
 
     void mouseButtonDown();
     std::optional<Vector2> mouseButtonUp();

@@ -10,7 +10,8 @@ LevelMap::LevelMap(LevelRepository& levelRepository, Assets& assets)
     background(assets.getBackground()),
     grass(assets.getGrass())
 {
-
+    currentTileMapIndex = startLevelIndex;
+    m_background = assets.getBackgroundGroup();
 }
 
 void LevelMap::changeLevel(int levelID)
@@ -29,7 +30,7 @@ void LevelMap::drawBackground()
 
 void LevelMap::draw()
 {
-    drawLevel(levelRepository.getLevel(currentTileMapIndex), assets);
+    drawLevel(levelRepository.getLevel(currentTileMapIndex), assets, m_background);
 }
 
 int LevelMap::getTileSize()
@@ -341,12 +342,11 @@ void LevelMap::resolveCollision(Player &player, CollisionSide collisionSide)
 //     }
 // }
 
-void drawLevel(const LevelData &level, Assets &assets, bool debugInfo)
+void drawLevel(const LevelData &level, Assets &assets, const SpriteGroup& background, bool debugInfo)
 {
     int widthCount = level.getWidth();
     int heightCount = level.getHeight();
     int tileSize = level.getTileSize(); 
-    SpriteGroup background = assets.getBackgroundGroup();
 
     for(int i=0; i<heightCount; i++) {
         for(int j=0; j<widthCount; j++) {
