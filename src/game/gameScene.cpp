@@ -90,10 +90,12 @@ void GameScene::processInput()
 
     if (IsMouseButtonDown(0)) {
         m_line.mouseButtonDown();
+        m_player.m_isAiming = true;
     }
 
     // std::cout<<m_player.onGround<<"\n";
     if (!IsMouseButtonDown(0)) {
+        m_player.m_isAiming = false;
         if (auto impulse = m_line.mouseButtonUp()) {
             if (m_player.onGround) {
                 m_player.m_velocity = *impulse; 
@@ -117,6 +119,7 @@ void GameScene::update(float deltaTime)
     m_tileMap.checkAndResolveCollision(m_player);
 
     if (m_tileMap.isGoalReached(m_player.m_position)) {
+        m_player.m_isAiming = false;
         m_victory = true;
         std::remove("save.txt");
         m_line.reset();

@@ -4,6 +4,12 @@
 #include "sprite.hpp"
 #include "app/common.hpp"
 
+struct PlayerAnimations {
+    Animation idle;
+    Animation aiming;
+    Animation jumping;
+    Animation falling;
+};
 
 enum class SpriteNames {
     PLAYER = 1,
@@ -26,7 +32,7 @@ private:
 
     Sprite player;
     SpriteGroup background;
-
+    PlayerAnimations playerAnimations;
     
 public:
     Assets();
@@ -44,6 +50,7 @@ public:
     Sprite getBackground() {return sprites.at(22*16 + 4);};
 
     const SpriteGroup& getBackgroundGroup() const {return background;};
+    const PlayerAnimations& getPlayerAnimations() const {return playerAnimations;};
 
     CellType getCellType(int spriteId);
 
@@ -52,4 +59,5 @@ public:
     Assets(const Assets&) = delete;
     Assets& operator=(const Assets&) = delete;
 };
+
 

@@ -14,9 +14,10 @@ void Sprite::draw(Vector2 position) const
     DrawTexturePro(*texture, sourceRectangle, {position.x, position.y, size.x, size.y}, origin, (float)rotation, WHITE);
 }
 
-void Sprite::draw(Vector2 position, Vector2 drawSize) const
+void Sprite::draw(Vector2 position, Vector2 drawSize, bool flipX) const
 {
-    DrawTexturePro(*texture, sourceRectangle, {position.x, position.y, drawSize.x, drawSize.y}, origin, (float)rotation, WHITE);
+    Rectangle drawSourceRectangle = {sourceRectangle.x, sourceRectangle.y, (flipX ? -sourceRectangle.width : sourceRectangle.width ), sourceRectangle.height};
+    DrawTexturePro(*texture, drawSourceRectangle, {position.x, position.y, drawSize.x, drawSize.y}, origin, (float)rotation, WHITE);
 }
 
 void SpriteGroup::draw(Vector2 position) const
@@ -54,4 +55,21 @@ void SpriteGroup::draw(Vector2 position, Vector2 size, Vector2 drawBounds) const
                 sprite.draw(newPosition, size);
         }
     }
+}
+
+void Animation::update(float dt)
+{
+    if (frames.empty()) return;
+
+    timer += dt;
+    if (timer >= frameDuration) {
+        timer -= frameDuration;
+        currentFrame = (currentFrame + 1) % frames.size(); 
+    }
+}
+
+void Animation::reset()
+{
+    timer = 0.0f;
+    currentFrame = 0;
 }

@@ -13,7 +13,8 @@ namespace PlayerConfig {
 enum class PlayerState {
     Idle,
     Jumping,
-    Falling
+    Falling,
+    Aiming
 };
 
 class Player : IUpdate
@@ -24,13 +25,16 @@ class Player : IUpdate
     Vector2 m_previousPosition;
     Vector2 m_velocity;
     Vector2 m_direction;
-    Sprite sprite;
+    PlayerAnimations m_playerAnimations;
     bool onGround = false;
     bool m_facingRight = true;
     bool m_hitWall = false;
+    bool m_isAiming = false;
+
+    PlayerState m_previousState;
     
-    Player(Sprite sprite);
-    Player(Vector2 position, Sprite sprite);
+    Player(PlayerAnimations playerAnimations);
+    Player(Vector2 position, PlayerAnimations playerAnimations);
     ~Player() = default;
 
     PlayerState getState() const;
@@ -39,5 +43,7 @@ class Player : IUpdate
     void update(float elapsedTime);
     
     void reset(Vector2 spawnPos = {0.0f, 0.0f});
+
+    Animation& getActiveAnimation();
 };
 

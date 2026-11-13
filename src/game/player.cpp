@@ -14,23 +14,27 @@
 // {
 // }
 
-Player::Player(Sprite sprite) : Player({0.0f, 0.0f}, sprite)
+Player::Player(PlayerAnimations playerAnimations) 
+: Player({0.0f, 0.0f}, playerAnimations)
 {
 }
 
-Player::Player(Vector2 position, Sprite sprite) : m_position(position),
-                                                  sprite(sprite),
-                                                  m_previousPosition(position),
-                                                  m_velocity({0, 0}),
-                                                  m_direction({0, 0})
+Player::Player(Vector2 position,PlayerAnimations playerAnimations)
+ :  m_position(position),
+    m_playerAnimations(playerAnimations),
+    m_previousPosition(position),
+    m_velocity({0, 0}),
+    m_direction({0, 0})
 
 {
+    m_previousState = getState();
 }
 
 void Player::draw(int tileSize)
 {
     // DrawRectangle(m_position.x*m_tileSize, m_position.y*m_tileSize, m_tileSize, m_tileSize, MAROON);
-    sprite.draw({m_position.x*tileSize, m_position.y*tileSize}, {64,64});
+    // sprite.draw({m_position.x*tileSize, m_position.y*tileSize}, {64,64}, !m_facingRight);
+    getActiveAnimation().getCurrentSprite().draw({m_position.x*tileSize, m_position.y*tileSize}, {64,64}, !m_facingRight);
     std::string msg = "" +  std::to_string(m_velocity.x) + ", " + std::to_string(m_velocity.y);
     DrawText(msg.c_str(), m_position.x*tileSize, m_position.y*tileSize-20, 18, BLACK);
 
@@ -63,16 +67,28 @@ void Player::update(float elapsedTime)
 
     if (m_velocity.x > 0.1f) m_facingRight = true;
     if (m_velocity.x < -0.1f) m_facingRight = false;
+
+    if(m_previousState != getState()) {
+        getActiveAnimation().reset();
+    }
+
+    getActiveAnimation().update(elapsedTime);
+
+    m_previousState = getState();
 }
 
 PlayerState Player::getState() const
 {
-    if (onGround)
-        return PlayerState::Idle;
-    else if (m_velocity.y < 0.0f)
-        return PlayerState::Jumping;
-    else
+    if (!onGround) {
+        if (m_velocity.y < 0.0f)
+            return PlayerState::Jumping;
         return PlayerState::Falling;
+    }
+
+    if (m_isAiming)
+        return PlayerState::Aiming;
+    
+    return PlayerState::Idle;
 }
 
 void Player::reset(Vector2 spawnPos)
@@ -84,4 +100,23 @@ void Player::reset(Vector2 spawnPos)
     m_facingRight = true;
     m_hitWall = false;
     onGround = false;
+    m_isAiming = false;
+    m_previousState = getState();
+}
+
+Animation &Player::getActiveAnimation()
+{
+    switch (getState())
+    {
+    case PlayerState::Aiming:
+        return m_playerAnimations.aiming; 
+    case PlayerState::Falling:
+        return m_playerAnimations.falling; 
+    case PlayerState::Idle:
+        return m_playerAnimations.idle; 
+    case PlayerState::Jumping:
+        return m_playerAnimations.jumping; 
+    }
+
+    return m_playerAnimations.idle;
 }

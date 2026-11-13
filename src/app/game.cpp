@@ -12,7 +12,7 @@ Game::Game(int windowWidth, int windowHeight, const char *windowTitle)
     m_levelRepository(m_levelFileLoader),
     m_assets(),
     m_levelEditor(std::make_unique<LevelEditor>(m_levelRepository, m_assets,[this]() {onSwitchToNewGame();}, [this]() {onSwitchToMenu();})),
-    m_gameScene(std::make_unique<GameScene>(windowWidth, windowHeight, Player(m_assets.getPlayer()), LevelMap(m_levelRepository, m_assets), m_gameSettings, [this] () {onSwitchToEditor();}, [this] () {onSwitchToMenu();})),
+    m_gameScene(std::make_unique<GameScene>(windowWidth, windowHeight, Player(m_assets.getPlayerAnimations()), LevelMap(m_levelRepository, m_assets), m_gameSettings, [this] () {onSwitchToEditor();}, [this] () {onSwitchToMenu();})),
     m_menuScene(std::make_unique<MenuScene>(windowWidth, windowHeight, m_gameSettings, [this]() {onSwitchToNewGame();}, [this]() {onSwitchToEditor();}, [this]() {onSwitchToExit();}, [this]() {onSwitchToLoadGame();}))
 {
     SetTargetFPS(60);

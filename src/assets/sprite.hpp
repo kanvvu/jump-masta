@@ -21,7 +21,7 @@ public:
 
     Vector2 getSize() const {return size;};
     void draw(Vector2 position) const;
-    void draw(Vector2 position, Vector2 size) const;
+    void draw(Vector2 position, Vector2 size, bool flipX = false) const;
 };
 
 struct SpriteGroup {
@@ -32,4 +32,16 @@ struct SpriteGroup {
     void draw(Vector2 position) const;
     void draw(Vector2 position, Vector2 size) const;
     void draw(Vector2 position, Vector2 size, Vector2 drawBounds) const;
+};
+
+struct Animation {
+    std::vector<Sprite> frames;
+    float frameDuration = 0.15f;
+    float timer = 0.0f;
+    size_t currentFrame = 0;
+
+    void update(float dt);
+    void reset();
+    size_t getCurrentFrame() const {return currentFrame;}
+    const Sprite& getCurrentSprite() const {return frames.at(currentFrame);}
 };

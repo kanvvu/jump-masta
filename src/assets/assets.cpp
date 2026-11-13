@@ -25,6 +25,14 @@ Assets::Assets() :
     for(const auto& i : backgroundIDs) {
         background.sprites.push_back(getSprite(i));
     }
+    for(int i=0; i<10; i++) {
+        playerAnimations.idle.frames.push_back(Sprite(&texture, {i*32.0f,0.0f,32.0f,32.0f}));
+    }
+    playerAnimations.aiming.frames.push_back(Sprite(&texture, {80.0f, 32.0f, 32.0f, 32.0f}));
+    playerAnimations.falling.frames.push_back(Sprite(&texture, {112.0f, 32.0f, 32.0f, 32.0f}));
+    playerAnimations.jumping.frames.push_back(Sprite(&texture, {0.0f, 32.0f, 32.0f, 32.0f}));
+
+    
 
     // sprites.push_back(Sprite(texture, {0,0,32,32})); // Player
     // sprites.push_back(Sprite(texture, {96,64,32,32})); // Grass
