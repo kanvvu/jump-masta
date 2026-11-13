@@ -41,14 +41,3 @@ void testGridResizeDataRetention() {
     assert(g.at(3,4) == 0);
     assert(g.at(1,2) == 69);
 }
-
-int main() {
-    testGridConstruction();
-    testGridBounds();
-    testGridMutation();
-    testGridResizeDataRetention();
-
-    std::cout<< "All tests passed!\n";
-
-    return 0;
-}
