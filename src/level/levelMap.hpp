@@ -29,7 +29,6 @@ private:
 
     Sprite background;
     Sprite grass;
-    SpriteGroup m_background;
     
     public:
     LevelMap(LevelRepository& levelRepository, Assets& assets); 

@@ -11,12 +11,11 @@ LevelMap::LevelMap(LevelRepository& levelRepository, Assets& assets)
     grass(assets.getGrass())
 {
     currentTileMapIndex = startLevelIndex;
-    m_background = assets.getBackgroundGroup();
 }
 
 void LevelMap::changeLevel(int levelID)
 {
-    if (levelID >= levelRepository.getLevelCount()) {
+    if (levelID < 0 || levelID >= levelRepository.getLevelCount()) {
         std::cout<<"ERROR [TileMap::changeLevel] levelID is "<<levelID<<" where max: "<<levelRepository.getLevelCount()<<"\n";
         return;
     }
@@ -30,7 +29,7 @@ void LevelMap::drawBackground()
 
 void LevelMap::draw()
 {
-    drawLevel(levelRepository.getLevel(currentTileMapIndex), assets, m_background);
+    drawLevel(levelRepository.getLevel(currentTileMapIndex), assets, assets.getBackgroundGroup());
 }
 
 int LevelMap::getTileSize()

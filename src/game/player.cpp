@@ -75,13 +75,13 @@ PlayerState Player::getState() const
         return PlayerState::Falling;
 }
 
-void Player::reset()
+void Player::reset(Vector2 spawnPos)
 {
     m_direction = Vector2Zero();
-    m_position = Vector2Zero();
-    m_previousPosition = Vector2Zero();
+    m_position = spawnPos;
+    m_previousPosition = spawnPos;
     m_velocity = Vector2Zero();
     m_facingRight = true;
     m_hitWall = false;
-
+    onGround = false;
 }

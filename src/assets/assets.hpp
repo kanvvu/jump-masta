@@ -16,6 +16,8 @@ enum class SpriteNames {
 class Assets
 {
 private:
+    static constexpr int collisonIDs[] = {182,183,184, 204, 205, 206, 226, 227, 228};
+
     Texture2D texture;
     int tileSize = 16;
 
@@ -23,6 +25,7 @@ private:
     std::unordered_map<int, Sprite> spritesMap;
 
     Sprite player;
+    SpriteGroup background;
 
     
 public:
@@ -39,7 +42,8 @@ public:
     Sprite getGrass() {return sprites.at(22*4 + 6);};
     Sprite getWall() {return sprites.at(2);};
     Sprite getBackground() {return sprites.at(22*16 + 4);};
-    SpriteGroup getBackgroundGroup();
+
+    const SpriteGroup& getBackgroundGroup() const {return background;};
 
     CellType getCellType(int spriteId);
 

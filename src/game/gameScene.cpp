@@ -10,14 +10,7 @@ GameScene::GameScene(int windowWidth, int windowHeight, Player player, LevelMap 
   m_onSwitchToEditor(onSwitchToEditor),
   m_onSwitchToMenu(onSwitchToMenu)
 {
-    camera.offset = calculateCameraCenterOffset({windowWidth, windowHeight}, m_tileMap.getSize(), m_tileMap.getTileSize());
-    camera.target.x = 0;         // rotation and zoom x origin (from offset above)
-    camera.target.y = 0;         // rotation and zoom y origin (from offset above)
-    camera.rotation = 0;        // rotation in deg
-    camera.zoom     = 1.0f;      // magnification, i.e fov or zoom
-
-    m_player.m_position = m_tileMap.getSpawnPosition();
-    m_player.m_previousPosition = m_player.m_position;
+    startNewGame();
 }
 
 void GameScene::saveCurrentState() const
@@ -54,22 +47,23 @@ void GameScene::loadFromSave(const SaveData &data)
     m_elapsedTime = data.elapsedTime;
     m_victory = false;
 
+    m_line.reset();
+
     camera.offset = calculateCameraCenterOffset({m_windowWidth, m_windowHeight}, m_tileMap.getSize(), m_tileMap.getTileSize());
 }
 
 void GameScene::startNewGame()
 {
+    m_tileMap.changeLevel(m_tileMap.getStartLevelIndex());
+
     camera.offset = calculateCameraCenterOffset({m_windowWidth, m_windowHeight}, m_tileMap.getSize(), m_tileMap.getTileSize());
     camera.target.x = 0;         // rotation and zoom x origin (from offset above)
     camera.target.y = 0;         // rotation and zoom y origin (from offset above)
     camera.rotation = 0;        // rotation in deg
     camera.zoom     = 1.0f;      // magnification, i.e fov or zoom
 
-    m_tileMap.changeLevel(m_tileMap.getStartLevelIndex());
 
-    m_player.reset();
-    m_player.m_position = m_tileMap.getSpawnPosition();
-    m_player.m_previousPosition = m_player.m_position;
+    m_player.reset(m_tileMap.getSpawnPosition());
 
     m_jumpCount = 0;
     m_elapsedTime = 0;
@@ -91,13 +85,7 @@ void GameScene::processInput()
     if (m_victory) return;
 
     if (IsKeyPressed(KEY_R)) {
-        m_player.reset();
-        m_tileMap.resetLevel();
-        m_player.m_position = m_tileMap.getSpawnPosition();
-        m_player.m_previousPosition = m_player.m_position;
-        m_jumpCount = 0;
-        m_elapsedTime = 0.0f;
-        m_line.reset();
+        startNewGame();
     }
 
     if (IsMouseButtonDown(0)) {

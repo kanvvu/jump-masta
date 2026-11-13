@@ -38,6 +38,6 @@ class Player : IUpdate
     void draw(int tileSize);
     void update(float elapsedTime);
     
-    void reset();
+    void reset(Vector2 spawnPos = {0.0f, 0.0f});
 };
 

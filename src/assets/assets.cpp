@@ -11,6 +11,21 @@ Assets::Assets() :
             sprites.push_back(Sprite(&texture, {(float)j*tileSize, (float)i*tileSize,(float) tileSize,(float) tileSize}));
         }
     }
+
+    std::vector<int> backgroundIDs = {
+        364, 365, 366, 367,
+        386, 387, 388, 389,
+        408, 409, 410, 411,
+        430, 431, 432, 433
+    };
+
+    
+    background.xCount = 4;
+    background.yCount = 4;
+    for(const auto& i : backgroundIDs) {
+        background.sprites.push_back(getSprite(i));
+    }
+
     // sprites.push_back(Sprite(texture, {0,0,32,32})); // Player
     // sprites.push_back(Sprite(texture, {96,64,32,32})); // Grass
     // sprites.push_back(Sprite(texture, {96,80,32,32})); // Wall
@@ -35,25 +50,6 @@ Sprite Assets::getSprite(int index)
 
 }
 
-SpriteGroup Assets::getBackgroundGroup()
-{
-    std::vector<int> backgroundIDs = {
-        364, 365, 366, 367,
-        386, 387, 388, 389,
-        408, 409, 410, 411,
-        430, 431, 432, 433
-    };
-
-    SpriteGroup spriteGroup;
-    spriteGroup.xCount = 4;
-    spriteGroup.yCount = 4;
-    for(const auto& i : backgroundIDs) {
-        spriteGroup.sprites.push_back(getSprite(i));
-    }
-
-    return spriteGroup;
-}
-
 CellType Assets::getCellType(int spriteId)
 {
 
@@ -62,7 +58,6 @@ CellType Assets::getCellType(int spriteId)
     if (spriteId == 48) return CellType::Goal;
     
     
-    std::vector<int> collisonIDs = {182,183,184, 204, 205, 206, 226, 227, 228};
     for (const auto& collsionID : collisonIDs) {
         if (spriteId == collsionID) {
             return CellType::Solid;
