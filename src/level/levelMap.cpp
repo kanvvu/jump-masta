@@ -236,7 +236,10 @@ bool LevelMap::isGoalReached(Vector2 playerPosition) const
            isCollision({playerPosition.x + 1.0f, playerPosition.y}, CellType::Goal) ||
            isCollision({playerPosition.x, playerPosition.y + 1.0f}, CellType::Goal) || 
            isCollision({playerPosition.x + 1.9f, playerPosition.y + 1.0f}, CellType::Goal) || 
-           isCollision({playerPosition.x + 1.9f, playerPosition.y}, CellType::Goal)) { 
+           isCollision({playerPosition.x + 1.9f, playerPosition.y}, CellType::Goal) ||  
+           isCollision({playerPosition.x, playerPosition.y + 1.9f}, CellType::Goal) ||  
+           isCollision({playerPosition.x + 1.0f, playerPosition.y + 1.9f}, CellType::Goal) ||  
+           isCollision({playerPosition.x + 1.9f, playerPosition.y + 1.9f}, CellType::Goal)) {
             // std::cout<<"POS: ("<<playerPosition.x<<" "<<playerPosition.y<<") ("<<(int) playerPosition.x<<" "<<(int) playerPosition.y<<") | ";
             // std::cout<<"POS: ("<<playerPosition.x+1.0f<<" "<<playerPosition.y+ 1.0f<<") ("<<(int) (playerPosition.x + 1.0f)<<" "<<(int) (playerPosition.y+1.0f)<<") \n";
             return true;

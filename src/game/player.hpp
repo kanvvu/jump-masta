@@ -33,8 +33,8 @@ class Player : IUpdate
 
     PlayerState m_previousState;
     
-    Player(PlayerAnimations playerAnimations);
-    Player(Vector2 position, PlayerAnimations playerAnimations);
+    Player(const PlayerAnimations& playerAnimations);
+    Player(Vector2 position, const PlayerAnimations& playerAnimations);
     ~Player() = default;
 
     PlayerState getState() const;

@@ -2,7 +2,7 @@
 #include <iostream>
 
 Assets::Assets() : 
- texture(LoadTexture("resources/map.png")), player(&texture,{0,0,32,32})
+ texture(LoadTexture("resources/map.png")) 
 {
     int width = texture.width / tileSize;
     int height = texture.height / tileSize;

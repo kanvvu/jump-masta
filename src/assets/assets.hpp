@@ -36,7 +36,6 @@ private:
     std::vector<Sprite> sprites;
     std::unordered_map<int, Sprite> spritesMap;
 
-    Sprite player;
     SpriteGroup background;
     PlayerAnimations playerAnimations;
 
@@ -51,8 +50,6 @@ public:
     int getTextureWidth() {return texture.width/tileSize;};
     int getTextureHeight() {return texture.height/tileSize;};
 
-    // Sprite getPlayer() {return sprites.at(11);};
-    Sprite getPlayer() {return player;};
     Sprite getGrass() {return sprites.at(22*4 + 6);};
     Sprite getWall() {return sprites.at(2);};
     Sprite getBackground() {return sprites.at(22*16 + 4);};

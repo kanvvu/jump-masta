@@ -14,18 +14,17 @@
 // {
 // }
 
-Player::Player(PlayerAnimations playerAnimations) 
+Player::Player(const PlayerAnimations& playerAnimations) 
 : Player({0.0f, 0.0f}, playerAnimations)
 {
 }
 
-Player::Player(Vector2 position,PlayerAnimations playerAnimations)
+Player::Player(Vector2 position,const PlayerAnimations& playerAnimations)
  :  m_position(position),
-    m_playerAnimations(playerAnimations),
     m_previousPosition(position),
     m_velocity({0, 0}),
-    m_direction({0, 0})
-
+    m_direction({0, 0}),
+    m_playerAnimations(playerAnimations)
 {
     m_previousState = getState();
 }
