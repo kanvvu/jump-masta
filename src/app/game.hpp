@@ -12,10 +12,21 @@
 struct RaylibContext {
     RaylibContext(int w, int h, const char* title) {
         InitWindow(w, h, title);
+
+        BeginDrawing();
+        ClearBackground(DARKGRAY);
+        DrawText("Loading...", w/2 - MeasureText("Loading...", 60)/2, h/2 - 60/2, 60, WHITE);
+        EndDrawing();
+
+        InitAudioDevice();
     }
     ~RaylibContext() {
+        CloseAudioDevice();
         CloseWindow();
     }
+    
+    RaylibContext(const RaylibContext&) = delete;
+    RaylibContext& operator=(const RaylibContext&) = delete;
 };
 
 class Game

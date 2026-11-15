@@ -1,12 +1,13 @@
 #include "gameScene.hpp"
 #include  <iostream>
 
-GameScene::GameScene(int windowWidth, int windowHeight, Player player, LevelMap tileMap, const GameSettings& gameSettings, std::function<void()> onSwitchToEditor, std::function<void()> onSwitchToMenu)
+GameScene::GameScene(int windowWidth, int windowHeight, Player player, LevelMap tileMap, const GameSettings& gameSettings, const PlayerSounds& playerSounds, std::function<void()> onSwitchToEditor, std::function<void()> onSwitchToMenu)
 : m_windowWidth(windowWidth),
   m_windowHeight(windowHeight),
   m_player(player),
   m_tileMap(tileMap),
   m_gameSettings(gameSettings),
+  m_playerSounds(playerSounds),
   m_onSwitchToEditor(onSwitchToEditor),
   m_onSwitchToMenu(onSwitchToMenu)
 {
@@ -35,6 +36,8 @@ void GameScene::saveCurrentState() const
 
 void GameScene::loadFromSave(const SaveData &data)
 {
+    m_suppressLandSound = false;
+
     m_tileMap.changeLevel(data.levelIndex);
 
     m_player.m_position = data.playerPosition;
@@ -54,6 +57,8 @@ void GameScene::loadFromSave(const SaveData &data)
 
 void GameScene::startNewGame()
 {
+    m_suppressLandSound = true;
+
     m_tileMap.changeLevel(m_tileMap.getStartLevelIndex());
 
     camera.offset = calculateCameraCenterOffset({m_windowWidth, m_windowHeight}, m_tileMap.getSize(), m_tileMap.getTileSize());
@@ -102,6 +107,7 @@ void GameScene::processInput()
                 m_player.onGround = false;
 
                 m_jumpCount++;
+                PlaySound(m_playerSounds.jump);
             }
         }
     }
@@ -116,7 +122,20 @@ void GameScene::update(float deltaTime)
     m_player.update(deltaTime);
     m_line.update(deltaTime);
 
+    bool wasOnGround = m_player.onGround;
+
     m_tileMap.checkAndResolveCollision(m_player);
+
+    if (!wasOnGround && m_player.onGround) {
+        if (m_suppressLandSound)
+            m_suppressLandSound = false;
+        else 
+            PlaySound(m_playerSounds.land);
+    }
+
+    if (m_player.m_hitWall) {
+        PlaySound(m_playerSounds.bump);
+    }
 
     if (m_tileMap.isGoalReached(m_player.m_position)) {
         m_player.m_isAiming = false;

@@ -29,8 +29,11 @@ private:
 
     const GameSettings& m_gameSettings;
 
+    const PlayerSounds& m_playerSounds;
+    bool m_suppressLandSound = false;
+
 public:
-    GameScene(int windowWidth, int windowHeight, Player player, LevelMap tileMap, const GameSettings& gameSettings, std::function<void()> onSwitchToEditor, std::function<void()> onSwitchToMenu);
+    GameScene(int windowWidth, int windowHeight, Player player, LevelMap tileMap, const GameSettings& gameSettings, const PlayerSounds& playerSounds, std::function<void()> onSwitchToEditor, std::function<void()> onSwitchToMenu);
 
     void saveCurrentState() const;
 

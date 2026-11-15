@@ -11,6 +11,12 @@ struct PlayerAnimations {
     Animation falling;
 };
 
+struct PlayerSounds {
+    Sound jump;
+    Sound land;
+    Sound bump;
+};
+
 enum class SpriteNames {
     PLAYER = 1,
     GRASS,
@@ -33,6 +39,8 @@ private:
     Sprite player;
     SpriteGroup background;
     PlayerAnimations playerAnimations;
+
+    PlayerSounds playerSounds;
     
 public:
     Assets();
@@ -51,6 +59,7 @@ public:
 
     const SpriteGroup& getBackgroundGroup() const {return background;};
     const PlayerAnimations& getPlayerAnimations() const {return playerAnimations;};
+    const PlayerSounds& getPlayerSounds() const {return playerSounds;};
 
     CellType getCellType(int spriteId);
 

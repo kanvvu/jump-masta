@@ -32,6 +32,9 @@ Assets::Assets() :
     playerAnimations.falling.frames.push_back(Sprite(&texture, {112.0f, 32.0f, 32.0f, 32.0f}));
     playerAnimations.jumping.frames.push_back(Sprite(&texture, {0.0f, 32.0f, 32.0f, 32.0f}));
 
+    playerSounds.bump = LoadSound("resources/bump.wav");
+    playerSounds.jump = LoadSound("resources/jump.wav");
+    playerSounds.land = LoadSound("resources/land.wav");
     
 
     // sprites.push_back(Sprite(texture, {0,0,32,32})); // Player
@@ -46,6 +49,9 @@ Assets::Assets() :
 Assets::~Assets()
 {
     UnloadTexture(texture);
+    UnloadSound(playerSounds.bump);
+    UnloadSound(playerSounds.jump);
+    UnloadSound(playerSounds.land);
 }
 
 Sprite Assets::getSprite(int index)

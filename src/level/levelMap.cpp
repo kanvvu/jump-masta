@@ -231,10 +231,18 @@ bool LevelMap::checkForNextLevel(Vector2& playerPosition)
 
 bool LevelMap::isGoalReached(Vector2 playerPosition) const
 {
-    return isCollision({playerPosition.x + 1.0f, playerPosition.y + 1.0f}, CellType::Goal) ||
+    if (isCollision({playerPosition.x + 1.0f, playerPosition.y + 1.0f}, CellType::Goal) ||
            isCollision({playerPosition.x, playerPosition.y}, CellType::Goal) ||
            isCollision({playerPosition.x + 1.0f, playerPosition.y}, CellType::Goal) ||
-           isCollision({playerPosition.x, playerPosition.y + 1.0f}, CellType::Goal);
+           isCollision({playerPosition.x, playerPosition.y + 1.0f}, CellType::Goal) || 
+           isCollision({playerPosition.x + 1.9f, playerPosition.y + 1.0f}, CellType::Goal) || 
+           isCollision({playerPosition.x + 1.9f, playerPosition.y}, CellType::Goal)) { 
+            // std::cout<<"POS: ("<<playerPosition.x<<" "<<playerPosition.y<<") ("<<(int) playerPosition.x<<" "<<(int) playerPosition.y<<") | ";
+            // std::cout<<"POS: ("<<playerPosition.x+1.0f<<" "<<playerPosition.y+ 1.0f<<") ("<<(int) (playerPosition.x + 1.0f)<<" "<<(int) (playerPosition.y+1.0f)<<") \n";
+            return true;
+           }
+
+    return false;
 
 }
 
@@ -289,6 +297,7 @@ void LevelMap::checkAndResolveCollision(Player &player)
             isCollision({nBP.x + 1.90f, nBP.y})) {
             nBP.y = (int) nBP.y + 1;
             player.m_velocity.y = -0.5*player.m_velocity.y;
+            player.m_hitWall = true;
         }
     }
     else { //down
