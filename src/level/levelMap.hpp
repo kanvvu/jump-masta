@@ -21,7 +21,7 @@ private:
         DOWN
     };
 
-    static constexpr int startLevelIndex = 11;
+    static constexpr int startLevelIndex = 0;
     
     LevelRepository& levelRepository;
     Assets& assets;

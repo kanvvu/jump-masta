@@ -63,20 +63,3 @@ Sprite Assets::getSprite(int index)
     return sprites.at(index);
 
 }
-
-CellType Assets::getCellType(int spriteId)
-{
-
-    
-    if (spriteId == 47) return CellType::Spawn;
-    if (spriteId == 48) return CellType::Goal;
-    
-    
-    for (const auto& collsionID : collisonIDs) {
-        if (spriteId == collsionID) {
-            return CellType::Solid;
-        }
-    } 
-
-    return CellType::Empty;
-}

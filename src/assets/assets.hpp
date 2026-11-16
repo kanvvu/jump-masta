@@ -25,10 +25,10 @@ enum class SpriteNames {
 };
 
 
+
 class Assets
 {
 private:
-    static constexpr int collisonIDs[] = {182,183,184, 204, 205, 206, 226, 227, 228};
 
     Texture2D texture;
     int tileSize = 16;
@@ -58,7 +58,6 @@ public:
     const PlayerAnimations& getPlayerAnimations() const {return playerAnimations;};
     const PlayerSounds& getPlayerSounds() const {return playerSounds;};
 
-    CellType getCellType(int spriteId);
 
     std::vector<int> getSpritesInArea(Rectangle area);
 

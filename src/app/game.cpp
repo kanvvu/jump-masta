@@ -19,8 +19,6 @@ Game::Game(int windowWidth, int windowHeight, const char *windowTitle)
     SetExitKey(KEY_NULL);
 
     m_currentScene = m_menuScene.get();
-
-    for(int i=0; i<m_levelRepository.getLevelCount(); i++) m_levelRepository.getLevel(i).rebuildCollision(m_assets);
 }
 
 void Game::onSwitchToNewGame()

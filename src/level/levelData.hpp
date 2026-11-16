@@ -3,16 +3,8 @@
 #include <vector>
 #include <string>
 #include "app/common.hpp"
-#include "assets/sprite.hpp"
 #include "core/grid.hpp"
 #include <map>
-
-class Assets;
-
-struct Tile {
-    int type;
-    Sprite sprite;
-};
 
 class LevelData {
 private:
@@ -50,8 +42,8 @@ public:
 
     CellType getTileCollision(int spriteId) const {return collision.at(spriteId);};
 
-    void set(int x, int y, int value, CellType cellType = CellType::Empty);
-    void set(int index, int value, CellType cellType = CellType::Empty);
+    void set(int x, int y, int value);
+    void set(int index, int value);
 
 
     Edge& getEdge(int index);
@@ -59,8 +51,6 @@ public:
     void setEdges(std::vector<Edge> edges);
 
     void changeLevelDimensions(int width, int height);
-
-    void rebuildCollision(Assets& assets);
 
     void setLink(const ExitKey& key, LevelId targetId);
     LevelId getLink(const ExitKey& key) const;

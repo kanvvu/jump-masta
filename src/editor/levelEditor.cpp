@@ -176,8 +176,7 @@ void LevelEditor::processInput()
                 int offsetY = 0;
                 for(int i=0; i<state.selectedTiles.size(); i++) {
                     int tileIndex = (yPos+offsetY)*state.currentLevel.getWidth() + (xPos+offsetX);
-                    CellType cellType = assets.getCellType(state.selectedTiles[i]);
-                    state.currentLevel.set(tileIndex, state.selectedTiles[i], cellType);
+                    state.currentLevel.set(tileIndex, state.selectedTiles[i]);
                     if (i+1 <state.selectedTiles.size() && state.selectedTiles[i+1] - state.selectedTiles[i] != 1) {
                         offsetX = -1;
                         offsetY++;
@@ -318,7 +317,7 @@ void LevelEditor::deleteSelectedLevel()
 
 void LevelEditor::createNewLevel()
 {
-    for(int i=0; i<state.currentLevel.getLevelSize(); i++) {state.currentLevel.set(i, 0);};
+    for(int i=0; i<state.currentLevel.getLevelSize(); i++) {state.currentLevel.set(i, -1);};
 
     saveLevel("level");
 

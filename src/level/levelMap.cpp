@@ -396,15 +396,15 @@ void drawLevel(const LevelData &level, Assets &assets, const SpriteGroup& backgr
 
             if (!debugInfo) continue;
 
-            char msg1[64];
-            snprintf(msg1, sizeof(msg1), "%i, %i", j, i);
-            char msg2[64];
-            snprintf(msg2, sizeof(msg2), "%i, %i", xPos, yPos);
-            if (cellType == CellType::Solid ) {
-                DrawLineEx({(float) xPos, (float) yPos}, {(float) (xPos + tileSize),  (float) yPos}, 1, BLACK);
-                DrawLineEx({(float) (xPos + tileSize), (float) yPos}, {(float) (xPos + tileSize), (float) (yPos + tileSize)}, 1, BLACK);
-                DrawText(msg1, xPos, yPos, 5, BLACK);
-            }
+            // char msg1[64];
+            // snprintf(msg1, sizeof(msg1), "%i, %i", j, i);
+            // char msg2[64];
+            // snprintf(msg2, sizeof(msg2), "%i, %i", xPos, yPos);
+            // if (cellType == CellType::Solid ) {
+            //     DrawLineEx({(float) xPos, (float) yPos}, {(float) (xPos + tileSize),  (float) yPos}, 1, BLACK);
+            //     DrawLineEx({(float) (xPos + tileSize), (float) yPos}, {(float) (xPos + tileSize), (float) (yPos + tileSize)}, 1, BLACK);
+            //     DrawText(msg1, xPos, yPos, 5, BLACK);
+            // }
             // DrawLineEx((Vector2) {xPos, yPos}, (Vector2) {xPos + tileSize, yPos}, 1, GRAY);
             // DrawLineEx((Vector2) {xPos, yPos}, (Vector2) {xPos, yPos + tileSize}, 1, GRAY);
             // DrawLineEx((Vector2) {xPos+tileSize, yPos}, (Vector2) {xPos + tileSize, yPos + tileSize}, 1, GRAY);

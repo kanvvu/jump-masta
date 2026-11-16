@@ -1,8 +1,6 @@
 #include "levelData.hpp"
 
 #include <iostream>
-#include <raylib.h>
-#include "assets/assets.hpp"
 
 LevelData::LevelData(int width, int height, std::string name, int tileSize)
  : name(name),
@@ -59,7 +57,7 @@ int LevelData::get(int index) const
     return level.at(index);
 }
 
-void LevelData::set(int x, int y, int value, CellType cellType)
+void LevelData::set(int x, int y, int value)
 {
     int index = y*getWidth() + x;
     if (index >= level.size() || index < 0 ) {
@@ -67,20 +65,20 @@ void LevelData::set(int x, int y, int value, CellType cellType)
         return;
     }
     level.at(index) = value;
-    collision.at(index) = cellType;
+    collision.at(index) = CellTypeInfo::getCellType(value);
 
     if(x == 0 || y == 0 || x == getWidth() - 1 || y == getHeight() - 1)
         createEdges();
 }
 
-void LevelData::set(int index, int value, CellType cellType)
+void LevelData::set(int index, int value)
 {
     if (index >= level.size() || index < 0 ) {
         std::cerr<<"ERROR [LevelData::set(int)] id : "<<index<<" >= "<<level.size()<<"\n";
         return;
     }
     level.at(index) = value;
-    collision.at(index) = cellType;
+    collision.at(index) = CellTypeInfo::getCellType(value);
 
     int x = index % getWidth();
     int y = index/getWidth();
@@ -226,17 +224,9 @@ void LevelData::createEdges()
 
 void LevelData::changeLevelDimensions(int newWidth, int newHeight)
 {
-    level.resize(newWidth, newHeight, 0);
+    level.resize(newWidth, newHeight, -1);
     collision.resize(newWidth, newHeight, CellType::Empty);
 
-    createEdges();
-}
-
-void LevelData::rebuildCollision(Assets& assets)
-{
-    for(int i=0; i<level.size(); i++) {
-        collision.at(i) = assets.getCellType(level.at(i));
-    }
     createEdges();
 }
 

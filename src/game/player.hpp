@@ -6,7 +6,7 @@
 
 namespace PlayerConfig {
     constexpr float GRAVITY = 45.0f;                // tiles/s^2
-    constexpr float GROUND_FRICTION = 0.80f;        // dacay base 1/60s
+    constexpr float GROUND_FRICTION = 0.50f;        // dacay base 1/60s
     constexpr float STOP_VELOCITY_THRESHOLD = 1.0f; // tiles/s
 }
 

@@ -78,3 +78,35 @@ inline Vector2 calculateCameraCenterOffset(Vector2i windowSize, Vector2i mapTile
         windowSize.y / 2.0f - (mapTileCount.y * tileSize) / 2.0f
     };
 }
+
+namespace CellTypeInfo {
+    inline constexpr int collisonIDs[] = {182, 183, 184,
+                                   204, 205, 206,
+                                   226, 227, 228, 229, 230, 231,
+                                   188, 189, 190, 191,
+                                   210, 211, 212, 213,
+                                   233, 234, 235,
+                                   94, 95, 96, 97, 98,
+                                   116, 117, 118, 119, 120,
+                                   138, 139, 140,
+                                   281, 282, 283, 284,
+                                   303, 304, 305, 306,
+                                   326, 327, 328,
+                                   105, 106, 107};
+    inline CellType getCellType(int spriteId)
+    {
+
+        
+        if (spriteId == 47) return CellType::Spawn;
+        if (spriteId == 48) return CellType::Goal;
+        
+        
+        for (const auto& collsionID : collisonIDs) {
+            if (spriteId == collsionID) {
+                return CellType::Solid;
+            }
+        } 
+
+        return CellType::Empty;
+    }
+}
