@@ -69,9 +69,11 @@ void MenuScene::draw() {
         if (GuiButton(buttonBounds,"INFO"))
             m_showInfo = true;
 
-        buttonBounds = {centerX, buttonBounds.y + offsetFromButton, buttonSize.x, buttonSize.y};
-        if (GuiButton(buttonBounds,"EXIT"))
-            m_onExit();
+        #ifndef __EMSCRIPTEN__
+            buttonBounds = {centerX, buttonBounds.y + offsetFromButton, buttonSize.x, buttonSize.y};
+            if (GuiButton(buttonBounds,"EXIT"))
+                m_onExit();
+        #endif
 
     }
     else if (m_showInfo) {

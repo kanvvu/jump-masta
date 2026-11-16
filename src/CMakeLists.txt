@@ -5,7 +5,7 @@ target_sources(${PROJECT_NAME} PRIVATE ${SOURCE_FILES} ${HEADER_FILES})
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
-option(DEV_MODE "Enable Developer Mode to save directly to src" ON)
+option(DEV_MODE "Enable Developer Mode to save directly to src" OFF)
 
 if(MSVC)
   target_compile_options(${PROJECT_NAME} PRIVATE /W4 /permissive-)

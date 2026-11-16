@@ -9,6 +9,7 @@
 #include "menu/menuScene.hpp"
 
 
+
 struct RaylibContext {
     RaylibContext(int w, int h, const char* title) {
         InitWindow(w, h, title);

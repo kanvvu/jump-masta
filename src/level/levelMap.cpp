@@ -119,7 +119,7 @@ bool LevelMap::checkForNextLevel(Vector2& playerPosition)
         const Edge& edge = levelData.getEdge(i);
 
         if (edge.assignedNextLevel == -1) continue;
-        std::cout<<playerPosition.y<<" "<<edge.start.y<<"\n";
+        // std::cout<<playerPosition.y<<" "<<edge.start.y<<"\n";
         int m_widthCount = levelRepository.getLevel(edge.assignedNextLevel).getWidth();
         int m_heightCount = levelRepository.getLevel(edge.assignedNextLevel).getHeight();
 
@@ -127,7 +127,7 @@ bool LevelMap::checkForNextLevel(Vector2& playerPosition)
         {
         case EdgeType::TOP:
             if (playerPosition.y + 0.5f < edge.start.y) {
-                std::cout<<"EY JOL\n";
+                // std::cout<<"EY JOL\n";
                 changeLevel(edge.assignedNextLevel);
                 playerPosition.y = m_heightCount - 1.0f;
                 return true;

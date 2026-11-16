@@ -4,6 +4,19 @@
 #include <string>
 #include "game/saveSystem.hpp"
 
+#ifdef __EMSCRIPTEN__
+    #include <emscripten/emscripten.h>
+#endif
+
+#ifdef __EMSCRIPTEN__
+    static void onFrame(void* game) {
+        auto* c = static_cast<Game*>(game);
+        c->proccessInput();
+        c->update();
+        c->draw();
+    }
+#endif
+
 Game::Game(int windowWidth, int windowHeight, const char *windowTitle)
   : m_raylibContext(windowWidth, windowHeight, windowTitle),
     // m_windowWidth(windowWidth),
@@ -57,12 +70,16 @@ void Game::onSwitchToMenu()
 
 void Game::start()
 {
-    while (!WindowShouldClose() && m_running)
-    {
-        proccessInput();
-        update();
-        draw();
-    }
+    #ifdef __EMSCRIPTEN__
+        emscripten_set_main_loop_arg(onFrame, this, 0, 1);
+    #else
+        while (!WindowShouldClose() && m_running)
+        {
+            proccessInput();
+            update();
+            draw();
+        }
+    #endif
 }
 
 void Game::proccessInput()

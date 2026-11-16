@@ -93,7 +93,7 @@ std::vector<LevelData> LevelFileLoader::loadLevels() const
             tokens = split(s, " ");
 
             if (!(tokens.size() == 2 || tokens.size() == 3)) {
-                std::cerr <<"[LevelFileLoader::loadLevels] " <<"Invalid map dimensions, should be 2 or 3, is " + tokens.size() << std::endl;
+                std::cerr <<"[LevelFileLoader::loadLevels] " <<"Invalid map dimensions, should be 2 or 3, is " << tokens.size() << std::endl;
                 return empty;
             } 
             int width = std::stoi(tokens[0]);
@@ -107,7 +107,7 @@ std::vector<LevelData> LevelFileLoader::loadLevels() const
                 return empty;
             }
             std::string levelName = s;
-            std::cout<<width<<" "<<height<<" "<<tileSize<<" "<<levelName<<std::endl;
+            // std::cout<<width<<" "<<height<<" "<<tileSize<<" "<<levelName<<std::endl;
         
             LevelData levelData(width, height, levelName, tileSize);
 

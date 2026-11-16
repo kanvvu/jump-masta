@@ -84,20 +84,20 @@ std::vector<EdgeDropDownRow> buildEdgeDropdownRows(const LevelData& level, const
 
 void LevelEditor::syncCurrentLevelUi()
 {
-    snprintf(widthTextBox.value, sizeof(widthTextBox.value), std::to_string(state.currentLevel.getWidth()).c_str());
-    snprintf(heightTextBox.value, sizeof(heightTextBox.value), std::to_string(state.currentLevel.getHeight()).c_str());
-    snprintf(nameTextBox.value, sizeof(nameTextBox.value), state.currentLevel.getName().c_str());
-    snprintf(tileSizeTextBox.value, sizeof(tileSizeTextBox.value), std::to_string(state.currentLevel.getTileSize()).c_str());
+    snprintf(widthTextBox.value, sizeof(widthTextBox.value), "%s", std::to_string(state.currentLevel.getWidth()).c_str());
+    snprintf(heightTextBox.value, sizeof(heightTextBox.value),"%s", std::to_string(state.currentLevel.getHeight()).c_str());
+    snprintf(nameTextBox.value, sizeof(nameTextBox.value), "%s",state.currentLevel.getName().c_str());
+    snprintf(tileSizeTextBox.value, sizeof(tileSizeTextBox.value),"%s", std::to_string(state.currentLevel.getTileSize()).c_str());
 
     std::vector<std::string> levelNames = getLevelNames();
     auto rows = buildEdgeDropdownRows(state.currentLevel, levelNames);
     edgeAssignmentDropDown.update(rows, [this](int edgeIndex, int selectedIndex) {
         if (edgeIndex >= 0 && edgeIndex < state.currentLevel.getEdgesSize()) {
-            std::cout<<"\tedge: "<<edgeIndex<<", index: "<<selectedIndex<<"\n";
+            // std::cout<<"\tedge: "<<edgeIndex<<", index: "<<selectedIndex<<"\n";
             const auto& edge = state.currentLevel.getEdge(edgeIndex);
             state.currentLevel.setLink(edge.getKey(), selectedIndex);
         } else {
-            std::cout<<"lol edgeAssignmentDropDown lol!!!\n";
+            // std::cout<<"lol edgeAssignmentDropDown lol!!!\n";
         }
     });
     levelListSelection.setTiles(levelNames);
@@ -326,7 +326,7 @@ void LevelEditor::createNewLevel()
 
 void LevelEditor::saveAllLevels()
 {
-    std::cout<<"savealll\n";
+    // std::cout<<"savealll\n";
     levelRepository.saveAll();
 }
 
@@ -397,7 +397,7 @@ void LevelEditor::drawEdges()
         else if (e.type == EdgeType::LEFT) str += "LEFT ";
         else  str += "RIGHT ";
         str += std::to_string(i) + " (" + std::to_string(e.tilesCount) + ")"; 
-        Vector2 textPos = {e.start.x*tileSize, e.start.y*tileSize};
+        Vector2 textPos = {(float) e.start.x*tileSize, (float) e.start.y*tileSize};
         int textWidth = MeasureText(str.c_str(), 20);
         if (e.type == EdgeType::TOP) {
             textPos.y -= 20; 
@@ -443,9 +443,9 @@ void LevelEditor::drawSprites()
 {
 
     int spriteSize = 32;
-    Vector2 position = {0,300 + 210 + 10 + 60 + 80 + edgeAssignmentDropDown.getCount()*35 + state.mouseWheel*20};
-    Vector2 startPosition = {0,300 + 210 + 10 + 60 + 80 + edgeAssignmentDropDown.getCount()*35};
-    Rectangle selectionArea = {startPosition.x, startPosition.y, assets.getTextureWidth()*spriteSize, assets.getTextureHeight()*spriteSize};
+    Vector2 position = {0.0f,300.0f + 210.0f + 10.0f + 60.0f + 80.0f + (float) edgeAssignmentDropDown.getCount()*35.0f + (float) state.mouseWheel*20.0f};
+    Vector2 startPosition = {0.0f,300.0f + 210.0f + 10.0f + 60.0f + 80.0f + (float) edgeAssignmentDropDown.getCount()*35.0f};
+    Rectangle selectionArea = {startPosition.x, startPosition.y,(float) assets.getTextureWidth()*spriteSize, (float) assets.getTextureHeight()*spriteSize};
 
     if (CheckCollisionPointRec(GetMousePosition(), selectionArea)) {
         state.mouseWheel += GetMouseWheelMove();
@@ -545,7 +545,7 @@ void LevelEditor::drawSprites()
     }
 
     for(int i=0; i<state.selectedTiles.size(); i++) {
-        Rectangle rect = {(state.selectedTiles[i] % assets.getTextureWidth()) * spriteSize, (state.selectedTiles[i] / assets.getTextureWidth()) * spriteSize, spriteSize, spriteSize};
+        Rectangle rect = {(float) (state.selectedTiles[i] % assets.getTextureWidth()) * spriteSize, (float) (state.selectedTiles[i] / assets.getTextureWidth()) * spriteSize,(float) spriteSize,(float) spriteSize};
         if (rect.y + startPosition.y + state.mouseWheel*20 >= selectionArea.y )
             DrawRectangleLinesEx({rect.x + startPosition.x, rect.y + startPosition.y + state.mouseWheel*20, rect.width, rect.height}, 2, GRAY);
     }

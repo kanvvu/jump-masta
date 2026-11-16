@@ -160,7 +160,7 @@ void GameScene::update(float deltaTime)
     }
 
     if (m_tileMap.checkForNextLevel(m_player.m_position)) { 
-        std::cout<<"NEXT LEVEL\n";
+        // std::cout<<"NEXT LEVEL\n";
         camera.offset = calculateCameraCenterOffset({m_windowWidth, m_windowHeight}, m_tileMap.getSize(), m_tileMap.getTileSize());
         // centerCamera(camera.offset, {m_windowWidth, m_windowHeight}, m_tileMap.getSize(), m_tileMap.getTileSize());
         saveCurrentState();
