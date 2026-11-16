@@ -1,0 +1,73 @@
+name: Build, Test and Deploy to github pages
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout
+      uses: actions/checkout@v7
+
+    - name: install-libs
+      run: |-
+        sudo apt-get update && sudo apt-get install -y libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libgl1-mesa-dev
+    
+    - name: build-and-test
+      run: |-
+        cmake -B build
+        cmake --build build
+        ctest --test-dir build --output-on-failure
+
+  build-web:
+    runs-on: ubuntu-latest 
+    steps:
+    - name: checkout
+      uses: actions/checkout@v7
+
+    - name: emscripten
+      uses: emscripten-core/setup-emsdk@v15
+    
+    - name: build
+      run: |-
+        emcmake cmake -B build-web -DPLATFORM=Web
+        cmake --build build-web --target jump-masta
+    
+    - name: rename
+      run: |-
+        mv build-web/jump-masta/jump-masta.html build-web/jump-masta/index.html
+    
+    - name: upload
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: build-web/jump-masta
+
+  deploy:
+    runs-on: ubuntu-latest 
+    environment:
+      name: github-pages
+      url: ${{steps.deployment.outputs.page_url}}
+
+    needs: [build-web, build-and-test]
+
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      
+    steps:
+    - name: deploy
+      id: deployment
+      uses: actions/deploy-pages@v4
