@@ -49,7 +49,6 @@ private:
     bool isGoalReached(Vector2 playerPosition) const;
     
     void checkAndResolveCollision(Player& player);
-    void resolveCollision(Player& player, CollisionSide collisionSide);
     bool checkForNextLevel(Vector2& playerPosition);
     void changeLevel(int levelID);
     void resetLevel() {changeLevel(currentTileMapIndex);};

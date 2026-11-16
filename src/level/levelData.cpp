@@ -127,7 +127,6 @@ void LevelData::setEdges(std::vector<Edge> _edges)
 
 void LevelData::createEdges()
 {
-    // edges.clear();
     std::vector<Edge> newEdges;
 
     int widthCount = getWidth();

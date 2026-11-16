@@ -100,7 +100,6 @@ void GameScene::processInput()
         m_player.m_isAiming = true;
     }
 
-    // std::cout<<m_player.onGround<<"\n";
     if (!IsMouseButtonDown(0)) {
         m_player.m_isAiming = false;
         if (auto impulse = m_line.mouseButtonUp()) {
@@ -127,7 +126,7 @@ void GameScene::update(float deltaTime)
     float maxY = (std::abs(m_player.m_velocity.y) + PlayerConfig::GRAVITY * deltaTime)*deltaTime;
     float maxDistance = std::max(maxX, maxY);
     const float MAX_STEP_TILES = 0.4f;
-    int steps = std::max(1, (int) std::ceil(maxDistance/MAX_STEP_TILES));
+    int steps = std::max(1, static_cast<int>(std::ceil(maxDistance/MAX_STEP_TILES)));
     float stepDt = deltaTime / steps;
 
     bool wasOnGround = m_player.onGround;
@@ -159,10 +158,8 @@ void GameScene::update(float deltaTime)
         return;
     }
 
-    if (m_tileMap.checkForNextLevel(m_player.m_position)) { 
-        // std::cout<<"NEXT LEVEL\n";
+    if (m_tileMap.checkForNextLevel(m_player.m_position)) {
         camera.offset = calculateCameraCenterOffset({m_windowWidth, m_windowHeight}, m_tileMap.getSize(), m_tileMap.getTileSize());
-        // centerCamera(camera.offset, {m_windowWidth, m_windowHeight}, m_tileMap.getSize(), m_tileMap.getTileSize());
         saveCurrentState();
     }
 }
@@ -199,12 +196,12 @@ void GameScene::draw()
 
         Vector2 backgroundSize{800, 310};
         Vector2 backgroundPosition{m_windowWidth / 2.0f - backgroundSize.x/ 2.0f, 300};
-        DrawRectangle((int) backgroundPosition.x,(int) backgroundPosition.y,(int) backgroundSize.x,(int) backgroundSize.y, {0, 0, 0, 162});
+        DrawRectangle(static_cast<int>(backgroundPosition.x), static_cast<int>(backgroundPosition.y), static_cast<int>(backgroundSize.x), static_cast<int>(backgroundSize.y), {0, 0, 0, 162});
 
         std::string text = "YOU WON!!!!";
         int fontSize = 100;
         int textWidth = MeasureText(text.c_str(), fontSize);
-        Vector2i textPosition { m_windowWidth / 2 - textWidth / 2,(int) backgroundPosition.y + 10};
+        Vector2i textPosition { m_windowWidth / 2 - textWidth / 2, static_cast<int>(backgroundPosition.y) + 10};
         DrawText(text.c_str(), textPosition.x,textPosition.y, fontSize, RAYWHITE);
 
         int textOffset = 50;

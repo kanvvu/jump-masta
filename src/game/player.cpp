@@ -4,16 +4,6 @@
 #include <algorithm>
 #include <string>
 
-
-// Player::Player() :
-//     m_tileSize(32),
-//     m_position({0, 0}),
-//     m_previousPosition({0,0}),
-//     m_velocity({0, 0}),
-//     m_direction({0, 0})
-// {
-// }
-
 Player::Player(const PlayerAnimations& playerAnimations) 
 : Player({0.0f, 0.0f}, playerAnimations)
 {
@@ -31,21 +21,7 @@ Player::Player(Vector2 position,const PlayerAnimations& playerAnimations)
 
 void Player::draw(int tileSize)
 {
-    // DrawRectangle(m_position.x*m_tileSize, m_position.y*m_tileSize, m_tileSize, m_tileSize, MAROON);
-    // sprite.draw({m_position.x*tileSize, m_position.y*tileSize}, {64,64}, !m_facingRight);
     getActiveAnimation().getCurrentSprite().draw({m_position.x*tileSize, m_position.y*tileSize}, {64,64}, !m_facingRight);
-    // std::string msg = "" +  std::to_string(m_velocity.x) + ", " + std::to_string(m_velocity.y);
-    // DrawText(msg.c_str(), m_position.x*tileSize, m_position.y*tileSize-20, 18, BLACK);
-
-    // DrawRectangleLines(m_position.x*tileSize, m_position.y*tileSize, 64, 64, BLUE);
-
-    // DrawRectangleLines((int)(m_position.x+1.5f)*tileSize, ((int)m_position.y+1.0f)*tileSize, 32, 32, RED);
-    // DrawRectangleLines((int)(m_position.x+1.5f)*tileSize, ((int)m_position.y)*tileSize, 32, 32, RED);
-    // DrawRectangleLines(((int)m_position.x)*tileSize, ((int)m_position.y+1.0f)*tileSize, 32, 32, RED);
-    // DrawRectangleLines(((int)m_position.x)*tileSize, ((int)m_position.y)*tileSize, 32, 32, RED);
-
-    // msg = "" +  std::to_string(m_position.x) + ", " + std::to_string(m_position.y);
-    // DrawText(msg.c_str(), m_position.x*tileSize, m_position.y*tileSize-40, 18, BLACK);
 }
 
 void Player::update(float elapsedTime)

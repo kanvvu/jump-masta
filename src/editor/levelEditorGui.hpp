@@ -29,7 +29,7 @@ public:
     int selectedIndex = -1;
     int hoveredIndex = -1;
 
-    int getTilesSize() {return tiles.size();};
+    size_t getTilesSize() {return tiles.size();};
     std::string getTile(int index);
 
     void setTiles(const std::vector<std::string>& tiles);
@@ -117,7 +117,7 @@ class TextLabelAndDropDownBoxList : public IDraw {
 
     void update(const std::vector<EdgeDropDownRow>& rows, RowChangedCallback onRowChanged = {});
 
-    int getCount() {return textLabels.size();};
+    size_t getCount() {return textLabels.size();};
 
     void draw();
 

@@ -11,7 +11,6 @@ public:
 
     std::ostringstream levelToStream(const LevelData& level) const;
 
-    // LevelData loadLevel(int levelID);
     void saveLevel(const LevelData& level) const;
     
     std::vector<LevelData> loadLevels() const;

@@ -11,13 +11,13 @@ Sprite::Sprite(const Texture2D* texture, Rectangle sourceRectangle, Vector2 size
 
 void Sprite::draw(Vector2 position) const
 {
-    DrawTexturePro(*texture, sourceRectangle, {position.x, position.y, size.x, size.y}, origin, (float)rotation, WHITE);
+    DrawTexturePro(*texture, sourceRectangle, {position.x, position.y, size.x, size.y}, origin, static_cast<float>(rotation), WHITE);
 }
 
 void Sprite::draw(Vector2 position, Vector2 drawSize, bool flipX) const
 {
     Rectangle drawSourceRectangle = {sourceRectangle.x, sourceRectangle.y, (flipX ? -sourceRectangle.width : sourceRectangle.width ), sourceRectangle.height};
-    DrawTexturePro(*texture, drawSourceRectangle, {position.x, position.y, drawSize.x, drawSize.y}, origin, (float)rotation, WHITE);
+    DrawTexturePro(*texture, drawSourceRectangle, {position.x, position.y, drawSize.x, drawSize.y}, origin, static_cast<float>(rotation), WHITE);
 }
 
 void SpriteGroup::draw(Vector2 position) const

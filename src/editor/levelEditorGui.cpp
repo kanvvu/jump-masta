@@ -17,7 +17,7 @@ void ListView::changeSelected(int index, int maxTilesCount)
     }
     
 
-    int maxScroll = tiles.size() - maxTilesCount;
+    int maxScroll = static_cast<int>(tiles.size()) - maxTilesCount;
     maxScroll = maxScroll < 0 ? 0 : maxScroll;
     
     if (scrollIndex > maxScroll) {
@@ -30,20 +30,8 @@ void ListView::changeSelected(int index, int maxTilesCount)
     }
     
     selectedIndex = index;
-    // std::cout<<"SELECTED: "<<index<<", SCROLL: "<<maxScroll<<", SCROLL INDEX: "<<scrollIndex<<std::endl;
-
-    // std::cout<<index<<" "<<scroll<<std::endl;
 }
 
-// void LevelEditorGui::rebuildDropDowns(std::vector<std::string> tileNames)
-// {
-//     dropDowns.clear();
-//     dropDownOptions = "";
-//     for(int i=0; i<tileNames.size(); i++) {
-//         dropDownOptions += tileNames.at(i);
-//         if (i + 1 != tileNames.size()) dropDownOptions += ";";
-//     }
-// }
 ListView::ListView() : bounds({0,0,0,0}), onChange([]{}), tiles({}) {};
 
 ListView::ListView(Rectangle bounds, std::vector<std::string> tiles, std::function<void()> onChange) : bounds(bounds), onChange(onChange), tiles(tiles)
@@ -60,12 +48,12 @@ std::string ListView::getTile(int index)
     return tiles[index];
 }
 
-void ListView::setTiles(const std::vector<std::string> &tiles)
+void ListView::setTiles(const std::vector<std::string> &newTiles)
 {
-    this->tiles = tiles;
+    this->tiles = newTiles;
 
     if (selectedIndex >= static_cast<int>(tiles.size())) {
-        selectedIndex = (tiles.empty() ? -1 : tiles.size()-1);
+        selectedIndex = (tiles.empty() ? -1 : static_cast<int>(tiles.size()) - 1);
     }
 }
 
@@ -76,7 +64,6 @@ void ListView::draw()
 
     if (GuiListViewEx(bounds, tilesCharPtr.data(), static_cast<int>(tilesCharPtr.size()), &scrollIndex, &selectedIndex, &hoveredIndex)) {
         onChange();
-        // std::cout<<"selected: "<<selectedIndex<<", scroll: "<<scrollIndex<<std::endl;
     }
 }
 
@@ -142,9 +129,9 @@ DropDownBox::DropDownBox(Rectangle bounds, std::vector<std::string> options, std
 {
 }
 
-void DropDownBox::setOnChange(std::function<void()> onChange)
+void DropDownBox::setOnChange(std::function<void()> newOnChange)
 {
-    this->onChange = onChange;
+    this->onChange = newOnChange;
 }
 
 void DropDownBox::draw()
@@ -158,7 +145,6 @@ void DropDownBox::draw()
     if (GuiDropdownBox(bounds, optionsString.c_str(), &selectedIndex, editMode)) {
         editMode = !editMode;
         onChange();
-        // e.assignedNextLevel = gui.dropDowns[i-1].dropdownActive;
     }
 }
 
@@ -180,7 +166,7 @@ TextLabel::TextLabel(Vector2 position, std::string text, int size, Color color)
 
 void TextLabel::draw()
 {
-    DrawText(text.c_str(), position.x, position.y, size, color);
+    DrawText(text.c_str(), static_cast<int>(position.x), static_cast<int>(position.y), size, color);
 }
 TextLabelAndDropDownBoxList::TextLabelAndDropDownBoxList() : position({0,0}) {};
 
@@ -208,12 +194,7 @@ void TextLabelAndDropDownBoxList::update(const std::vector<EdgeDropDownRow>& row
 
 
         dropdownboxes.back().setOnChange([this, i, onRowChanged, rows]() {
-            // std::cout<<i<<"\n";
-            // for(int j=0; j<dropdownboxes.size(); j++) {
-            //     std::cout<<j<<". "<<dropdownboxes.at(j).selectedIndex<<"\n";
-            // }
-            // std::cout<<"\n";
-            onRowChanged(rows.size() - i - 1, dropdownboxes.at(rows.size() - i - 1).selectedIndex);
+            onRowChanged(static_cast<int>(rows.size()) - i - 1, dropdownboxes.at(rows.size() - i - 1).selectedIndex);
         });
     }
 }

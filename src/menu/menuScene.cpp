@@ -25,7 +25,7 @@ void MenuScene::processInput() {
     }
 }
 
-void MenuScene::update(float dt) {
+void MenuScene::update([[maybe_unused]] float dt) {
 }
 
 void MenuScene::draw() {
@@ -45,7 +45,6 @@ void MenuScene::draw() {
     if (!m_showInfo && !m_showSettings) {
         float offsetFromTitle = 200.0f;
 
-        //how do i set a font size for GuiButton?
         Rectangle buttonBounds {centerX, titlePosition.y + offsetFromTitle, buttonSize.x, buttonSize.y};
         if (GuiButton(buttonBounds,"NEW GAME"))
             m_onPlay();
@@ -80,24 +79,24 @@ void MenuScene::draw() {
 
         Vector2 backgroundSize{400, 400};
         Vector2 backgroundPosition{m_windowWidth / 2.0f - backgroundSize.x/ 2.0f, m_windowHeight / 2.0f - backgroundSize.y/ 2.0f};
-        DrawRectangle((int) backgroundPosition.x,(int) backgroundPosition.y,(int) backgroundSize.x,(int) backgroundSize.y, WHITE);
+        DrawRectangle(static_cast<int>(backgroundPosition.x), static_cast<int>(backgroundPosition.y), static_cast<int>(backgroundSize.x), static_cast<int>(backgroundSize.y), WHITE);
         
         std::string infoTitle = "Controls:";
         int infoTitleFontSize = 30;
-        Vector2i textPosition {(int) backgroundPosition.x + 10,(int) backgroundPosition.y + 10};
+        Vector2i textPosition {static_cast<int>(backgroundPosition.x) + 10, static_cast<int>(backgroundPosition.y) + 10};
         DrawText(infoTitle.c_str(), textPosition.x, textPosition.y, infoTitleFontSize, BLACK);
 
         int textFontSize = 20;
         int textOffset = 40;
         int titleOffset = 60;
         int padding = 10;
-        textPosition = {(int) backgroundPosition.x + padding, textPosition.y + titleOffset};
+        textPosition = {static_cast<int>(backgroundPosition.x) + padding, textPosition.y + titleOffset};
         DrawText("Hold & Drag Left Mouse: Jump", textPosition.x, textPosition.y, textFontSize, BLACK);
 
-        textPosition = {(int) backgroundPosition.x + padding, textPosition.y + textOffset};
+        textPosition = {static_cast<int>(backgroundPosition.x) + padding, textPosition.y + textOffset};
         DrawText("R: Reset Level", textPosition.x, textPosition.y, textFontSize, BLACK);
 
-        textPosition = {(int) backgroundPosition.x + padding, textPosition.y + textOffset};
+        textPosition = {static_cast<int>(backgroundPosition.x) + padding, textPosition.y + textOffset};
         DrawText("ESC: Return to Menu", textPosition.x, textPosition.y, textFontSize, BLACK);
 
         Rectangle buttonBounds {backgroundPosition.x + padding, backgroundPosition.y + backgroundSize.y - buttonSize.y - 10,  buttonSize.x, buttonSize.y};
@@ -109,11 +108,11 @@ void MenuScene::draw() {
 
         Vector2 backgroundSize{400, 400};
         Vector2 backgroundPosition{m_windowWidth / 2.0f - backgroundSize.x/ 2.0f, m_windowHeight / 2.0f - backgroundSize.y/ 2.0f};
-        DrawRectangle((int) backgroundPosition.x,(int) backgroundPosition.y,(int) backgroundSize.x,(int) backgroundSize.y, WHITE);
+        DrawRectangle(static_cast<int>(backgroundPosition.x), static_cast<int>(backgroundPosition.y), static_cast<int>(backgroundSize.x), static_cast<int>(backgroundSize.y), WHITE);
         
         std::string settingsTitle = "Settings:";
         int infoTitleFontSize = 30;
-        Vector2i textPosition {(int) backgroundPosition.x + 10,(int) backgroundPosition.y + 10};
+        Vector2i textPosition {static_cast<int>(backgroundPosition.x) + 10, static_cast<int>(backgroundPosition.y) + 10};
         DrawText(settingsTitle.c_str(), textPosition.x, textPosition.y, infoTitleFontSize, BLACK);
 
         int textFontSize = 20;
@@ -123,20 +122,20 @@ void MenuScene::draw() {
 
         float toggleX = backgroundPosition.x + 300.0f;
 
-        textPosition = {(int) backgroundPosition.x + padding, textPosition.y + titleOffset};
+        textPosition = {static_cast<int>(backgroundPosition.x) + padding, textPosition.y + titleOffset};
         std::string text = "Show FPS: ";
         DrawText(text.c_str(), textPosition.x, textPosition.y, textFontSize, BLACK);
-        if (GuiToggleSlider({toggleX,(float) textPosition.y - textFontSize/4.0f, 90.0f, 30.0f }, "OFF;ON", &m_gameSettings.showFps)) { }
+        if (GuiToggleSlider({toggleX, static_cast<float>(textPosition.y) - textFontSize/4.0f, 90.0f, 30.0f }, "OFF;ON", &m_gameSettings.showFps)) { }
 
-        textPosition = {(int) backgroundPosition.x + padding, textPosition.y + textOffset};
+        textPosition = {static_cast<int>(backgroundPosition.x) + padding, textPosition.y + textOffset};
         text = "Show time: ";
         DrawText(text.c_str(), textPosition.x, textPosition.y, textFontSize, BLACK);
-        if (GuiToggleSlider({toggleX,(float) textPosition.y - textFontSize/4.0f, 90.0f, 30.0f }, "OFF;ON", &m_gameSettings.showTimer)) { }
+        if (GuiToggleSlider({toggleX, static_cast<float>(textPosition.y) - textFontSize/4.0f, 90.0f, 30.0f }, "OFF;ON", &m_gameSettings.showTimer)) { }
 
-        textPosition = {(int) backgroundPosition.x + padding, textPosition.y + textOffset};
+        textPosition = {static_cast<int>(backgroundPosition.x) + padding, textPosition.y + textOffset};
         text = "Show jump counter: ";
         DrawText(text.c_str(), textPosition.x, textPosition.y, textFontSize, BLACK);
-        if (GuiToggleSlider({toggleX,(float) textPosition.y - textFontSize/4.0f, 90.0f, 30.0f }, "OFF;ON", &m_gameSettings.showJumpCount)) { }
+        if (GuiToggleSlider({toggleX, static_cast<float>(textPosition.y) - textFontSize/4.0f, 90.0f, 30.0f }, "OFF;ON", &m_gameSettings.showJumpCount)) { }
 
         Rectangle buttonBounds {backgroundPosition.x + padding, backgroundPosition.y + backgroundSize.y - buttonSize.y - 10,  buttonSize.x, buttonSize.y};
         if (GuiButton(buttonBounds,"BACK"))

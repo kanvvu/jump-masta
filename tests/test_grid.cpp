@@ -1,7 +1,6 @@
 #include <iostream>
 #include <cassert>
 #include "core/grid.hpp"
-// #include "app/common.hpp"
 
 void testGridConstruction() {
     Grid<int> g(3,4,10);

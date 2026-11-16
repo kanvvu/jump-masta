@@ -8,8 +8,6 @@
 #include "third_party/raygui.h"
 #include "level/levelMap.hpp"
 
-// void drawLevel(const LevelData& level, Assets& assets);
-
 LevelEditor::LevelEditor(LevelRepository& levelRepository,Assets& assets, std::function<void()> onSwitchToGame, std::function<void()> onSwitchToMenu)
 : levelRepository(levelRepository),
   assets(assets),
@@ -18,8 +16,6 @@ LevelEditor::LevelEditor(LevelRepository& levelRepository,Assets& assets, std::f
 {
     state.currentLevel = LevelData(LevelEditorState::DefaultLevelWidth, LevelEditorState::DefaultLevelHeight);
 
-    // state.camera.offset.x = state.screenWidth/2 - (state.currentLevel.getWidth()*state.getTileSize())/2;   // coordinate x origin
-    // state.camera.offset.y = state.screenHeight/2 - (state.currentLevel.getHeight()*state.getTileSize())/2;   // coordinate y origin
     state.camera.offset = calculateCameraCenterOffset({state.screenWidth, state.screenHeight}, {state.currentLevel.getWidth(), state.currentLevel.getHeight()}, state.getTileSize());
     state.camera.target.x = 0;         // rotation and zoom x origin (from offset above)
     state.camera.target.y = 0;         // rotation and zoom y origin (from offset above)
@@ -93,11 +89,8 @@ void LevelEditor::syncCurrentLevelUi()
     auto rows = buildEdgeDropdownRows(state.currentLevel, levelNames);
     edgeAssignmentDropDown.update(rows, [this](int edgeIndex, int selectedIndex) {
         if (edgeIndex >= 0 && edgeIndex < state.currentLevel.getEdgesSize()) {
-            // std::cout<<"\tedge: "<<edgeIndex<<", index: "<<selectedIndex<<"\n";
             const auto& edge = state.currentLevel.getEdge(edgeIndex);
             state.currentLevel.setLink(edge.getKey(), selectedIndex);
-        } else {
-            // std::cout<<"lol edgeAssignmentDropDown lol!!!\n";
         }
     });
     levelListSelection.setTiles(levelNames);
@@ -114,12 +107,9 @@ void LevelEditor::saveLevel(std::string name) {
 void LevelEditor::loadLevel(int levelID) {
     LevelData levelData = levelRepository.getLevel(levelID);
 
-    // state.camera.offset.x = state.screenWidth/2 - (levelData.getWidth()*levelData.getTileSize())/2;   // coordinate x origin
-    // state.camera.offset.y = state.screenHeight/2 - (levelData.getHeight()*levelData.getTileSize())/2;   // coordinate y origin
     state.camera.offset = calculateCameraCenterOffset({state.screenWidth, state.screenHeight}, {state.currentLevel.getWidth(), state.currentLevel.getHeight()}, state.getTileSize());
 
     state.currentLevel = levelData;
-    // std::cout<<"LEVELS: "<<state.currentLevel.getLevelSize()<<", EDGES: "<<state.currentLevel.getEdgesSize()<<std::endl;
 
     syncCurrentLevelUi();
 }
@@ -159,8 +149,8 @@ void LevelEditor::processInput()
 
     if (IsMouseButtonDown(0)) {
         Vector2 mousePos = GetMousePosition();
-        int xPos = (mousePos.x - state.camera.offset.x)/state.getTileSize();
-        int yPos = (mousePos.y - state.camera.offset.y)/state.getTileSize();
+        int xPos = static_cast<int>((mousePos.x - state.camera.offset.x)/state.getTileSize());
+        int yPos = static_cast<int>((mousePos.y - state.camera.offset.y)/state.getTileSize());
 
         if (xPos >= 0 && xPos < state.currentLevel.getWidth() && yPos >=0 && yPos < state.currentLevel.getHeight()) {
             int tileIndex = yPos*state.currentLevel.getWidth() + xPos;
@@ -171,12 +161,11 @@ void LevelEditor::processInput()
             }
             
             if (state.mouseMode == 0) {
-                // state.currentLevel.set(tileIndex, state.selectedTile);
                 int offsetX = 0;
                 int offsetY = 0;
                 for(int i=0; i<state.selectedTiles.size(); i++) {
-                    int tileIndex = (yPos+offsetY)*state.currentLevel.getWidth() + (xPos+offsetX);
-                    state.currentLevel.set(tileIndex, state.selectedTiles[i]);
+                    int _tileIndex = (yPos+offsetY)*state.currentLevel.getWidth() + (xPos+offsetX);
+                    state.currentLevel.set(_tileIndex, state.selectedTiles[i]);
                     if (i+1 <state.selectedTiles.size() && state.selectedTiles[i+1] - state.selectedTiles[i] != 1) {
                         offsetX = -1;
                         offsetY++;
@@ -193,7 +182,7 @@ void LevelEditor::processInput()
     }
 }
 
-void LevelEditor::update(float deltaTime)
+void LevelEditor::update([[maybe_unused]] float deltaTime)
 {
 }
 
@@ -208,13 +197,11 @@ void LevelEditor::draw()
     
     Vector2 mousePos = GetMousePosition();
     if (state.mouseMode == 0 && mousePos.x - state.camera.offset.x >= 0 && mousePos.x - state.camera.offset.x < state.currentLevel.getWidth()*state.getTileSize() && mousePos.y - state.camera.offset.y >= 0 && mousePos.y - state.camera.offset.y < state.currentLevel.getHeight()*state.getTileSize()) { 
-        // DrawRectangle(floor((mousePos.x-state.camera.offset.x)/state.getTileSize())*state.getTileSize(), floor((mousePos.y-state.camera.offset.y)/state.getTileSize())*state.getTileSize(), state.getTileSize(), state.getTileSize(), LIGHTGRAY);
-        // assets.getSprite(state.selectedTile).draw({floor((mousePos.x-state.camera.offset.x)/state.getTileSize())*state.getTileSize(), floor((mousePos.y-state.camera.offset.y)/state.getTileSize())*state.getTileSize()}, {(float) state.getTileSize(),(float) state.getTileSize()});
         int offsetX = 0;
         int offsetY = 0;
         for(int i=0; i<state.selectedTiles.size(); i++) {
             Vector2 pos = {(floor((mousePos.x-state.camera.offset.x)/state.getTileSize()) + offsetX)*state.getTileSize(), (floor((mousePos.y-state.camera.offset.y)/state.getTileSize())+offsetY)*state.getTileSize()};
-            assets.getSprite(state.selectedTiles[i]).draw(pos, {(float) state.getTileSize(),(float) state.getTileSize()});
+            assets.getSprite(state.selectedTiles[i]).draw(pos, {static_cast<float>(state.getTileSize()), static_cast<float>(state.getTileSize())});
             if (i+1 <state.selectedTiles.size() && state.selectedTiles[i+1] - state.selectedTiles[i] != 1) {
                 offsetX = -1;
                 offsetY++;
@@ -292,7 +279,6 @@ void LevelEditor::loadSelectedLevel()
 void LevelEditor::deleteSelectedLevel()
 {
     bool isOk = true;
-    int levelCountBefore = levelRepository.getLevelCount();
     if (levelListSelection.selectedIndex >=0 && levelListSelection.selectedIndex < levelRepository.getLevelCount()) {
         levelRepository.deleteLevel(levelListSelection.selectedIndex);
     } else {
@@ -305,7 +291,7 @@ void LevelEditor::deleteSelectedLevel()
     int selected = levelListSelection.selectedIndex;
     
     if (selected >= levelListSelection.getTilesSize()) {
-        selected = levelListSelection.getTilesSize() - 1;
+        selected = static_cast<int>(levelListSelection.getTilesSize()) - 1;
     }
     
     levelListSelection.changeSelected(selected);
@@ -321,12 +307,11 @@ void LevelEditor::createNewLevel()
 
     saveLevel("level");
 
-    levelListSelection.changeSelected(levelListSelection.getTilesSize() - 1);
+    levelListSelection.changeSelected(static_cast<int>(levelListSelection.getTilesSize()) - 1);
 }
 
 void LevelEditor::saveAllLevels()
 {
-    // std::cout<<"savealll\n";
     levelRepository.saveAll();
 }
 
@@ -390,21 +375,21 @@ void LevelEditor::drawEdges()
         int tileSize = state.currentLevel.getTileSize();
         Color color = RED;
         if (e.assignedNextLevel != -1) color = GREEN;
-        DrawLineEx({(float)e.start.x*tileSize,(float) e.start.y*tileSize}, {(float)e.end.x*tileSize,(float) e.end.y*tileSize}, 4.0f, color);
+        DrawLineEx({static_cast<float>(e.start.x)*tileSize, static_cast<float>(e.start.y)*tileSize}, {static_cast<float>(e.end.x)*tileSize, static_cast<float>(e.end.y)*tileSize}, 4.0f, color);
         std::string str = "EDGE ";
         if (e.type == EdgeType::TOP) str += "TOP ";
         else if (e.type == EdgeType::DOWN) str += "DOWN ";
         else if (e.type == EdgeType::LEFT) str += "LEFT ";
         else  str += "RIGHT ";
         str += std::to_string(i) + " (" + std::to_string(e.tilesCount) + ")"; 
-        Vector2 textPos = {(float) e.start.x*tileSize, (float) e.start.y*tileSize};
+        Vector2 textPos = {static_cast<float>(e.start.x)*tileSize, static_cast<float>(e.start.y)*tileSize};
         int textWidth = MeasureText(str.c_str(), 20);
         if (e.type == EdgeType::TOP) {
             textPos.y -= 20; 
         } else if (e.type == EdgeType::LEFT) {
             textPos.x -= textWidth - 1;
         }
-        DrawText(str.c_str(), textPos.x, textPos.y, 20, BLACK);
+        DrawText(str.c_str(),static_cast<int>(textPos.x),static_cast<int>(textPos.y), 20, BLACK);
         i++;
     }
 }
@@ -434,7 +419,7 @@ Rectangle rectAbs(const Rectangle& rect) {
 }
 
 void drawRectLines(Rectangle rect, float thick, Color color ) {
-    if (rect.height < 3 && rect.height >= 0) DrawLine(rect.x, rect.y, rect.x + rect.width, rect.y + rect.height, RED);
+    if (rect.height < 3 && rect.height >= 0) DrawLine(static_cast<int>(rect.x), static_cast<int>(rect.y), static_cast<int>(rect.x + rect.width), static_cast<int>(rect.y + rect.height), RED);
 
     DrawRectangleLinesEx(rectAbs(rect), thick, color);
 }
@@ -443,17 +428,15 @@ void LevelEditor::drawSprites()
 {
 
     int spriteSize = 32;
-    Vector2 position = {0.0f,300.0f + 210.0f + 10.0f + 60.0f + 80.0f + (float) edgeAssignmentDropDown.getCount()*35.0f + (float) state.mouseWheel*20.0f};
-    Vector2 startPosition = {0.0f,300.0f + 210.0f + 10.0f + 60.0f + 80.0f + (float) edgeAssignmentDropDown.getCount()*35.0f};
-    Rectangle selectionArea = {startPosition.x, startPosition.y,(float) assets.getTextureWidth()*spriteSize, (float) assets.getTextureHeight()*spriteSize};
+    Vector2 position = {0.0f,300.0f + 210.0f + 10.0f + 60.0f + 80.0f + static_cast<float>(edgeAssignmentDropDown.getCount())*35.0f + static_cast<float>(state.mouseWheel)*20.0f};
+    Vector2 startPosition = {0.0f,300.0f + 210.0f + 10.0f + 60.0f + 80.0f + static_cast<float>(edgeAssignmentDropDown.getCount())*35.0f};
+    Rectangle selectionArea = {startPosition.x, startPosition.y, static_cast<float>(assets.getTextureWidth())*spriteSize, static_cast<float>(assets.getTextureHeight())*spriteSize};
 
     if (CheckCollisionPointRec(GetMousePosition(), selectionArea)) {
-        state.mouseWheel += GetMouseWheelMove();
+        state.mouseWheel += static_cast<int>(GetMouseWheelMove());
     }
-    bool isSelected = false;
-    Rectangle selected;
-    bool isHover = false;
-    Rectangle hover;
+    std::optional<Rectangle> selected;
+    std::optional<Rectangle> hover;
     int hoverNum = -1;
 
     for(int i=0; i<assets.getSpritesSize(); i++) {
@@ -468,15 +451,11 @@ void LevelEditor::drawSprites()
         if (position.y >= selectionArea.y) {
             if (i == state.selectedTile) {
                 int border = 3;
-                // DrawRectangle(position.x-border, position.y-border, spriteSize+2*border, spriteSize+2*border, BLACK);
-                selected = {position.x-border, position.y-border,(float) spriteSize+2*border,(float) spriteSize+2*border};
-                isSelected = true;
+                selected = {position.x-border, position.y-border, static_cast<float>(spriteSize + 2*border), static_cast<float>(spriteSize + 2*border)};
             }
-            if (CheckCollisionPointRec(GetMousePosition(), {position.x, position.y,(float) spriteSize,(float) spriteSize})) {
+            if (CheckCollisionPointRec(GetMousePosition(), {position.x, position.y, static_cast<float>(spriteSize), static_cast<float>(spriteSize)})) {
                 int border = 3;
-                // DrawRectangle(position.x-border, position.y-border, spriteSize+2*border, spriteSize+2*border, GRAY);
-                hover = {position.x-border, position.y-border, (float) spriteSize+2*border,(float) spriteSize+2*border};
-                isHover = true;
+                hover = {position.x-border, position.y-border, static_cast<float>(spriteSize + 2*border), static_cast<float>(spriteSize + 2*border)};
                 hoverNum = i;
 
                 if (IsMouseButtonDown(0)) {
@@ -484,7 +463,7 @@ void LevelEditor::drawSprites()
                 }
             }
         
-        sprite.draw(position, {(float) spriteSize,(float) spriteSize});
+        sprite.draw(position, {static_cast<float>(spriteSize), static_cast<float>(spriteSize)});
 
         }
 
@@ -492,35 +471,32 @@ void LevelEditor::drawSprites()
         
     }
 
-    if (isSelected)
-        DrawRectangleLinesEx(selected, 2, BLACK);
+    if (selected)
+        DrawRectangleLinesEx(*selected, 2, BLACK);
 
-    if (isHover) {
-        DrawRectangleLinesEx(hover, 2, GRAY);
-        DrawText(std::to_string(hoverNum).c_str(), hover.x+10, hover.y, 32, BLUE);
+    if (hover) {
+        DrawRectangleLinesEx(*hover, 2, GRAY);
+        DrawText(std::to_string(hoverNum).c_str(),static_cast<int>((*hover).x+10), static_cast<int>((*hover).y), 32, BLUE);
     }
 
     if (CheckCollisionPointRec(GetMousePosition(), selectionArea)) {
         if (IsMouseButtonDown(0) && state.isSelection == false) {
-            //first time;
             state.startSelection = GetMousePosition();
             state.isSelection = true;
         } 
         if (IsMouseButtonDown(0)) {
-            //being pressed
             state.endSelection = GetMousePosition();
             state.selectedTiles.clear();
             Vector2 startP = {state.startSelection.x, state.startSelection.y - startPosition.y - state.mouseWheel*20};
             Vector2 endP= {state.endSelection.x, state.endSelection.y - startPosition.y - state.mouseWheel*20};
-            // Rectangle absSelectedArea = rectAbs({state.startSelection.x, state.startSelection.y,state.endSelection.x - state.startSelection.x, state.endSelection.y - state.startSelection.y});
             Rectangle absSelectedArea = rectAbs({startP.x, startP.y, endP.x - startP.x, endP.y - startP.y});
 
 
-            int startX = absSelectedArea.x/32;
-            int startY = absSelectedArea.y/32;
+            int startX = static_cast<int>(absSelectedArea.x/32);
+            int startY = static_cast<int>(absSelectedArea.y/32);
 
-            int endX= (absSelectedArea.x+absSelectedArea.width)/32;
-            int endY= (absSelectedArea.y+absSelectedArea.height)/32;
+            int endX= static_cast<int>((absSelectedArea.x+absSelectedArea.width)/32);
+            int endY= static_cast<int>((absSelectedArea.y+absSelectedArea.height)/32);
 
             for(int y=startY; y<=endY; y++) {
                 for(int x=startX; x<=endX; x++) {
@@ -534,23 +510,17 @@ void LevelEditor::drawSprites()
 
 
 
-        Rectangle linesRect = {state.startSelection.x, state.startSelection.y,state.endSelection.x - state.startSelection.x, state.endSelection.y - state.startSelection.y};
-        // DrawRectangleLinesEx({state.startSelection.x, state.startSelection.y,state.endSelection.x - state.startSelection.x, state.endSelection.y - state.startSelection.y}, 3 , RED);
-        // drawRectLines(linesRect, 3, RED);
-        // DrawRectangle(state.startSelection.x, state.startSelection.y, 10, 10, RED); 
-        // DrawRectangle(startPosition.x, startPosition.y, 10, 10, RED);
-
     } else {
         state.isSelection = false;
     }
 
     for(int i=0; i<state.selectedTiles.size(); i++) {
-        Rectangle rect = {(float) (state.selectedTiles[i] % assets.getTextureWidth()) * spriteSize, (float) (state.selectedTiles[i] / assets.getTextureWidth()) * spriteSize,(float) spriteSize,(float) spriteSize};
+        Rectangle rect = {static_cast<float>(state.selectedTiles[i] % assets.getTextureWidth()) * spriteSize, static_cast<float>(state.selectedTiles[i] / assets.getTextureWidth()) * spriteSize, static_cast<float>(spriteSize), static_cast<float>(spriteSize)};
         if (rect.y + startPosition.y + state.mouseWheel*20 >= selectionArea.y )
             DrawRectangleLinesEx({rect.x + startPosition.x, rect.y + startPosition.y + state.mouseWheel*20, rect.width, rect.height}, 2, GRAY);
     }
 
-    DrawRectangleLines(selectionArea.x, selectionArea.y, selectionArea.width, selectionArea.height, BLACK);
+    DrawRectangleLines(static_cast<int>(selectionArea.x), static_cast<int>(selectionArea.y), static_cast<int>(selectionArea.width), static_cast<int>(selectionArea.height), BLACK);
     
 }
 

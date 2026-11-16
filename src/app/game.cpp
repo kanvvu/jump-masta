@@ -19,8 +19,6 @@
 
 Game::Game(int windowWidth, int windowHeight, const char *windowTitle)
   : m_raylibContext(windowWidth, windowHeight, windowTitle),
-    // m_windowWidth(windowWidth),
-    // m_windowHeight(windowHeight),
     m_windowTitle(windowTitle),
     m_levelRepository(m_levelFileLoader),
     m_assets(),

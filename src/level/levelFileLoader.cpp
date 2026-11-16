@@ -51,7 +51,6 @@ std::ostringstream LevelFileLoader::levelToStream(const LevelData &level) const
     data << level.getEdgesSize() << "\n";
     for(int i=0; i<level.getEdgesSize(); i++) {
         data << level.getEdge(i).assignedNextLevel;
-        // if (i+1 != edges.size()) data << "\n";
         data << "\n";
     }
     
@@ -84,7 +83,6 @@ std::vector<LevelData> LevelFileLoader::loadLevels() const
             return empty;
         }
 
-        int lineNumber = 1;
         std::string s;
 
         while (std::getline(file, s)) {
@@ -107,7 +105,6 @@ std::vector<LevelData> LevelFileLoader::loadLevels() const
                 return empty;
             }
             std::string levelName = s;
-            // std::cout<<width<<" "<<height<<" "<<tileSize<<" "<<levelName<<std::endl;
         
             LevelData levelData(width, height, levelName, tileSize);
 
@@ -128,20 +125,17 @@ std::vector<LevelData> LevelFileLoader::loadLevels() const
                     levelData.set(t, i, stoi(token));
                 }
             }
-            // levels.push_back(levelData);
 
             std::streampos originalPosition = file.tellg();
 
             if (!std::getline(file,s)) {
                 std::cerr <<"[LevelFileLoader::loadLevels] " << "No assigned levels info!\n";
-                // allEdges.push_back(std::vector<Edge>());
                 return empty;
             }
 
             tokens = split(s, " ");
             if (tokens.size() != 1) {
                 std::cerr <<"[LevelFileLoader::loadLevels] " << "No assigned levels info! (invalid dimensions, should be 1 is "<<tokens.size()<<" )\n";
-                // allEdges.push_back(std::vector<Edge>());
                 file.clear();
                 file.seekg(originalPosition);
             } else {
@@ -167,10 +161,8 @@ std::vector<LevelData> LevelFileLoader::loadLevels() const
                     edges.push_back(edge);
                 }
                 if (isOk) {
-                    // allEdges.push_back(edges);
                     levelData.setEdges(edges);
                 } else {
-                    // allEdges.push_back(std::vector<Edge>());
                     file.clear();
                     file.seekg(originalPosition);
                 }
