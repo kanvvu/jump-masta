@@ -1,5 +1,7 @@
 #include "gameScene.hpp"
 #include  <iostream>
+#include <cmath>
+#include <algorithm>
 
 GameScene::GameScene(int windowWidth, int windowHeight, Player player, LevelMap tileMap, const GameSettings& gameSettings, const PlayerSounds& playerSounds, std::function<void()> onSwitchToEditor, std::function<void()> onSwitchToMenu)
 : m_windowWidth(windowWidth),
@@ -117,14 +119,26 @@ void GameScene::update(float deltaTime)
 {
     if (m_victory) return;
 
+    if (deltaTime > 0.1f) deltaTime = 0.1f;
+
     m_elapsedTime += deltaTime;
 
-    m_player.update(deltaTime);
-    m_line.update(deltaTime);
+    float maxX = std::abs(m_player.m_velocity.x) * deltaTime;
+    float maxY = (std::abs(m_player.m_velocity.y) + PlayerConfig::GRAVITY * deltaTime)*deltaTime;
+    float maxDistance = std::max(maxX, maxY);
+    const float MAX_STEP_TILES = 0.4f;
+    int steps = std::max(1, (int) std::ceil(maxDistance/MAX_STEP_TILES));
+    float stepDt = deltaTime / steps;
 
     bool wasOnGround = m_player.onGround;
+    bool playerHitWall = false;
+    for(int i=0; i<steps; i++) {
+        m_player.update(stepDt);
+        m_tileMap.checkAndResolveCollision(m_player);
+        if (m_player.m_hitWall) playerHitWall = true;
+    }
 
-    m_tileMap.checkAndResolveCollision(m_player);
+    m_line.update(deltaTime);
 
     if (!wasOnGround && m_player.onGround) {
         if (m_suppressLandSound)
@@ -133,7 +147,7 @@ void GameScene::update(float deltaTime)
             PlaySound(m_playerSounds.land);
     }
 
-    if (m_player.m_hitWall) {
+    if (playerHitWall) {
         PlaySound(m_playerSounds.bump);
     }
 
